@@ -25,7 +25,7 @@ class Block:
             
         self.color = random.choice(WOOD_COLORS)
         self.rows = len(self.shape)
-        self.cols = len(self.shape[0])
+        self.cols = max(len(row) for row in self.shape)  # Encontra o comprimento máximo das linhas
         self.x = random.randint(0, GRID_WIDTH - self.cols)
         self.y = 0
         self.selected = False
@@ -40,7 +40,8 @@ class Block:
             
         for i in range(self.rows):
             for j in range(len(self.shape[i])):
-                if self.shape[i][j] != " ":
+                cell = self.shape[i][j]
+                if cell == "X":
                     rect = pygame.Rect(
                         BOARD_X + (x + j) * GRID_SIZE, 
                         BOARD_Y + (y + i) * GRID_SIZE, 
@@ -254,7 +255,7 @@ class Game:
             # Desenhar o bloco na posição adequada
             for row in range(block.rows):
                 for col in range(len(block.shape[row])):
-                    if block.shape[row][col] != " ":
+                    if col < len(block.shape[row]) and block.shape[row][col] == "X":
                         rect = pygame.Rect(
                             block_x + col * GRID_SIZE,
                             block_y + row * GRID_SIZE,
@@ -296,7 +297,7 @@ class Game:
             # Desenhar o bloco na posição do mouse com transparência
             for row in range(self.selected_block.rows):
                 for col in range(len(self.selected_block.shape[row])):
-                    if self.selected_block.shape[row][col] != " ":
+                    if col < len(self.selected_block.shape[row]) and self.selected_block.shape[row][col] == "X":
                         rect = pygame.Rect(
                             BOARD_X + (grid_x + col) * GRID_SIZE,
                             BOARD_Y + (grid_y + row) * GRID_SIZE,
@@ -355,7 +356,7 @@ class Game:
             
         for row in range(block.rows):
             for col in range(len(block.shape[row])):
-                if block.shape[row][col] != " ":
+                if col < len(block.shape[row]) and block.shape[row][col] == "X":
                     # Verificar se está dentro dos limites do tabuleiro
                     if y + row >= GRID_HEIGHT or x + col >= GRID_WIDTH:
                         return False
@@ -370,7 +371,7 @@ class Game:
         # Colocar o bloco no tabuleiro
         for row in range(block.rows):
             for col in range(len(block.shape[row])):
-                if block.shape[row][col] != " ":
+                if col < len(block.shape[row]) and block.shape[row][col] == "X":
                     # Verificar se há uma pedra verde na posição
                     if self.board_types[y + row][x + col] == 2:
                         # Coletou uma pedra verde
@@ -379,6 +380,7 @@ class Game:
                     
                     # Verificar se há uma pedra vermelha na posição
                     elif self.board_types[y + row][x + col] == 3:
+                        self.red_stones_collected += 1
                         self.score += 30  # Pontos extras por coletar pedra vermelha
                     
                     # Remover o tipo de bloco da grade de tipos
@@ -517,7 +519,7 @@ def main():
                             # Verificar se clicou em uma parte do bloco
                             if (0 <= row_clicked < block.rows and 
                                 0 <= col_clicked < len(block.shape[row_clicked]) and 
-                                block.shape[row_clicked][col_clicked] != " "):
+                                block.shape[row_clicked][col_clicked] == "X"):
                                 
                                 game.selected_block = block
                                 game.selected_block.offset_x = col_clicked
