@@ -14,8 +14,15 @@ pygame.display.set_caption("Wood Block - Puzzle Games")
 
 
 class Block:
-    def __init__(self):
-        self.shape = random.choice(SHAPES)
+    def __init__(self, shape_name=None):
+        if shape_name and shape_name in SHAPES:
+            # Usar um formato específico quando fornecido
+            self.shape_name = shape_name
+            self.shape = SHAPES[shape_name]
+        else:
+            self.shape_name = random.choice(list(SHAPES.keys()))
+            self.shape = SHAPES[self.shape_name]
+            
         self.color = random.choice(WOOD_COLORS)
         self.rows = len(self.shape)
         self.cols = len(self.shape[0])
@@ -55,11 +62,20 @@ class Block:
                             1
                         )
 
+class Level:
+    def __init__(self, level_num, green_blocks, red_blocks, grid, sequence):
+        self.level_num = level_num
+        self.grid = grid
+        self.green_blocks = green_blocks # para coletar
+        self.red_blocks = red_blocks   # para coletar 
+        self.sequence = sequence
+        self.current_block = None
+
+
 class Game:
     def __init__(self):
         self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
         self.board_types = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
-        self.available_blocks = [Block() for _ in range(3)]
         self.block_positions = [
             (SCREEN_WIDTH // 4 - GRID_SIZE * 2, SCREEN_HEIGHT - 150),
             (SCREEN_WIDTH // 2 - GRID_SIZE * 2, SCREEN_HEIGHT - 150),
@@ -68,43 +84,92 @@ class Game:
         self.selected_block = None
         self.score = 0
         self.green_stones_collected = 0
-        self.level = 0  # Iniciar no nível 0 (primeiro nível)
+        self.red_stones_collected = 0
+        self.green_stones_to_collect = 0
+        self.red_stones_to_collect = 0
+        self.current_level = None
+        self.level_num = 0
+        self.level = 0
+        self.sequence_index = 0  # Índice para acompanhar a sequência atual de blocos
         self.game_over = False
         self.game_won = False
         self.font = pygame.font.SysFont('Arial', 24)
         self.title_font = pygame.font.SysFont('Arial', 36, bold=True)
-        self.load_level(0)  # Carregar o primeiro nível
+        self.load_level(0)
     
+
     def load_level(self, level_index):
         if level_index < len(LEVEL):
             level_data = LEVEL[level_index]
             level_num = level_data[0]
-            level_grid = level_data[1]
+            green_blocks = level_data[1]
+            red_blocks = level_data[2]
+            block_sequence = level_data[3]
+            grid = level_data[4]
+            
+            # Criar objeto Level
+            self.current_level = Level(level_num, green_blocks, red_blocks, grid, block_sequence)
             
             # Reiniciar o tabuleiro
             self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
             self.board_types = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
             
-            # Carregar a configuração do nível
+            # Carregar a configuração do nível do grid
             for y in range(GRID_HEIGHT):
                 for x in range(GRID_WIDTH):
-                    cell_type = level_grid[y][x]
-                    self.board_types[y][x] = cell_type
-                    
-                    if cell_type == 1:  # Bloco de madeira normal
-                        self.board[y][x] = WOOD_MEDIUM
-                    elif cell_type == 2:  # Pedra verde (objetivo)
-                        self.board[y][x] = GREEN_POINT
-                    elif cell_type == 3:  # Pedra vermelha (pontos extras)
-                        self.board[y][x] = RED_POINT
+                    if y < len(grid) and x < len(grid[y]):
+                        cell_type = grid[y][x]
+                        self.board_types[y][x] = cell_type
+                        
+                        if cell_type == 1:  # Bloco de madeira normal
+                            self.board[y][x] = WOOD_MEDIUM
+                        elif cell_type == 2:  # Pedra verde (objetivo)
+                            self.board[y][x] = GREEN_POINT
+                        elif cell_type == 3:  # Pedra vermelha (pontos extras)
+                            self.board[y][x] = RED_POINT
             
-            self.level = int(level_num)
+            # Inicializar objetivos do nível
+            self.level_num = int(level_num)
             self.green_stones_collected = 0
-            self.available_blocks = [Block() for _ in range(3)]
+            self.red_stones_collected = 0
+            self.green_stones_to_collect = green_blocks
+            self.red_stones_to_collect = red_blocks
+            self.sequence_index = 0
+            
+            # Criar os primeiros blocos baseados na sequência
+            self.available_blocks = self.get_next_blocks_from_sequence()
         else:
             # Se não houver mais níveis, o jogador venceu o jogo
             self.game_won = True
     
+
+    def get_next_blocks_from_sequence(self):
+        if not self.current_level or not self.current_level.sequence:
+            print("Sem sequência definida, usando bloco aleatório")
+            return [Block(), None, None]  # Apenas um bloco
+        
+        blocks = [None, None, None]  # Inicializa com três posições vazias
+        
+        # Obter o próximo tipo de bloco da sequência
+        if self.sequence_index < len(self.current_level.sequence):
+            shape_name = self.current_level.sequence[self.sequence_index]
+            print(f"Próximo bloco da sequência: {shape_name}")
+            
+            # Verificar se o nome do bloco existe em SHAPES
+            if shape_name in SHAPES:
+                self.sequence_index = (self.sequence_index + 1) % len(self.current_level.sequence)
+                blocks[0] = Block(shape_name)  # Coloca apenas na primeira posição
+            else:
+                print(f"ERRO: Forma '{shape_name}' não encontrada em SHAPES!")
+                # Usar um bloco aleatório se o nome não existir
+                blocks[0] = Block()
+        else:
+            # Se a sequência acabou, criar um bloco aleatório
+            blocks[0] = Block()
+    
+        return blocks
+    
+
     def draw_board(self):
         # Desenhar fundo
         screen.fill(BACKGROUND_COLOR)
@@ -164,41 +229,56 @@ class Game:
                                 1
                             )
         
-        # Desenhar blocos disponíveis
-        for i, block in enumerate(self.available_blocks):
-            if block:
-                # Desenhar área de seleção
-                selection_rect = pygame.Rect(
-                    self.block_positions[i][0] - 10, 
-                    self.block_positions[i][1] - 10,
-                    block.cols * GRID_SIZE + 20,
-                    block.rows * GRID_SIZE + 20
-                )
-                pygame.draw.rect(screen, (240, 240, 240), selection_rect, border_radius=10)
-                pygame.draw.rect(screen, WOOD_DARK, selection_rect, 2, border_radius=10)
-                
-                # Desenhar o bloco na posição adequada
-                for row in range(block.rows):
-                    for col in range(len(block.shape[row])):
-                        if block.shape[row][col] != " ":
-                            rect = pygame.Rect(
-                                self.block_positions[i][0] + col * GRID_SIZE,
-                                self.block_positions[i][1] + row * GRID_SIZE,
-                                GRID_SIZE, GRID_SIZE
+                # No método draw_board, modificar a parte que desenha os blocos disponíveis
+        
+        # Desenhar blocos disponíveis (apenas o primeiro)
+        if self.available_blocks[0]:  # Verifica apenas o primeiro bloco
+            block = self.available_blocks[0]
+            # Centralizar o bloco na tela na parte inferior
+            block_x = SCREEN_WIDTH // 2 - (block.cols * GRID_SIZE) // 2
+            block_y = SCREEN_HEIGHT - 150
+            
+            # Atualizar a posição do bloco para desenho e interação
+            self.block_positions[0] = (block_x, block_y)
+            
+            # Desenhar área de seleção
+            selection_rect = pygame.Rect(
+                block_x - 10, 
+                block_y - 10,
+                block.cols * GRID_SIZE + 20,
+                block.rows * GRID_SIZE + 20
+            )
+            pygame.draw.rect(screen, (240, 240, 240), selection_rect, border_radius=10)
+            pygame.draw.rect(screen, WOOD_DARK, selection_rect, 2, border_radius=10)
+            
+            # Desenhar o bloco na posição adequada
+            for row in range(block.rows):
+                for col in range(len(block.shape[row])):
+                    if block.shape[row][col] != " ":
+                        rect = pygame.Rect(
+                            block_x + col * GRID_SIZE,
+                            block_y + row * GRID_SIZE,
+                            GRID_SIZE, GRID_SIZE
+                        )
+                        pygame.draw.rect(screen, block.color, rect)
+                        pygame.draw.rect(screen, (block.color[0] - 20, block.color[1] - 20, block.color[2] - 20), rect, 1)
+                        
+                        # Linhas de textura
+                        for line in range(1, 3):
+                            y_pos = rect.top + line * rect.height // 3
+                            pygame.draw.line(
+                                screen, 
+                                (block.color[0] - 10, block.color[1] - 10, block.color[2] - 10),
+                                (rect.left, y_pos),
+                                (rect.right, y_pos),
+                                1
                             )
-                            pygame.draw.rect(screen, block.color, rect)
-                            pygame.draw.rect(screen, (block.color[0] - 20, block.color[1] - 20, block.color[2] - 20), rect, 1)
-                            
-                            # Linhas de textura
-                            for line in range(1, 3):
-                                y_pos = rect.top + line * rect.height // 3
-                                pygame.draw.line(
-                                    screen, 
-                                    (block.color[0] - 10, block.color[1] - 10, block.color[2] - 10),
-                                    (rect.left, y_pos),
-                                    (rect.right, y_pos),
-                                    1
-                                )
+            
+            # Mostrar o nome do bloco abaixo dele
+            block_name_text = self.font.render(f"{block.shape_name}", True, WOOD_DARK)
+            screen.blit(block_name_text, 
+                        (SCREEN_WIDTH // 2 - block_name_text.get_width() // 2, 
+                         block_y + block.rows * GRID_SIZE + 10))
         
         # Desenhar bloco selecionado seguindo o mouse
         if self.selected_block:
@@ -235,8 +315,8 @@ class Game:
         level_text = self.font.render(f"Nível: {self.level}", True, WOOD_DARK)
         
         # Mostrar objetivo do nível
-        if self.level == 1:
-            objective_text = self.font.render(f"Objetivo: Colete 5 ou mais pedras verdes ({self.green_stones_collected}/5)", True, GREEN_POINT)
+        if self.level == 0:
+            objective_text = self.font.render(f"Pedras verdes coletadas: {self.green_stones_collected}/{self.green_stones_to_collect}", True, WOOD_DARK)
             screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
         
         screen.blit(score_text, (20, 20))
@@ -317,8 +397,8 @@ class Game:
             self.score += cleared * 10
         
         # Verificar se passou de nível (coletou 5 ou mais pedras verdes)
-        if self.level == 1 and self.green_stones_collected >= 5 and green_stones_before < 5:
-            self.load_level(self.level)  # Passar para o próximo nível (ou mostrar tela de vitória se não houver mais)
+        if (self.green_stones_collected >= self.green_stones_to_collect and self.red_stones_collected >= self.red_stones_to_collect):  
+            self.load_level(self.level_num)#ssar para o próximo nível (ou mostrar tela de vitória se não houver mais)
     
     def clear_rows(self):
         rows_cleared = 0
@@ -415,25 +495,24 @@ def main():
                 continue
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                               # No evento MOUSEBUTTONDOWN:
                 if event.button == 1:  # Botão esquerdo
                     mouse_x, mouse_y = event.pos
                     
-                    # Verificar se clicou em algum bloco disponível
-                    for i, block in enumerate(game.available_blocks):
-                        if not block:  # Pular se o bloco já foi usado
-                            continue
-                            
+                    # Verificar se clicou no bloco disponível (apenas o primeiro)
+                    if game.available_blocks[0]:  # Verifica apenas o primeiro bloco
+                        block = game.available_blocks[0]
                         block_rect = pygame.Rect(
-                            game.block_positions[i][0] - 10, 
-                            game.block_positions[i][1] - 10,
+                            game.block_positions[0][0] - 10, 
+                            game.block_positions[0][1] - 10,
                             block.cols * GRID_SIZE + 20,
                             block.rows * GRID_SIZE + 20
                         )
                         
                         if block_rect.collidepoint(mouse_x, mouse_y):
                             # Calcular offset do clique em relação ao bloco
-                            col_clicked = (mouse_x - game.block_positions[i][0]) // GRID_SIZE
-                            row_clicked = (mouse_y - game.block_positions[i][1]) // GRID_SIZE
+                            col_clicked = (mouse_x - game.block_positions[0][0]) // GRID_SIZE
+                            row_clicked = (mouse_y - game.block_positions[0][1]) // GRID_SIZE
                             
                             # Verificar se clicou em uma parte do bloco
                             if (0 <= row_clicked < block.rows and 
@@ -444,10 +523,9 @@ def main():
                                 game.selected_block.offset_x = col_clicked
                                 game.selected_block.offset_y = row_clicked
                                 dragging = True
-                                show_tutorial = False
-                                break
             
             elif event.type == pygame.MOUSEBUTTONUP:
+                                # No evento MOUSEBUTTONUP:
                 if event.button == 1 and dragging:  # Botão esquerdo
                     dragging = False
                     mouse_x, mouse_y = event.pos
@@ -464,20 +542,17 @@ def main():
                         
                         # Tentar colocar o bloco
                         if game.is_valid_position(game.selected_block, grid_x, grid_y):
-                            # Encontrar o índice do bloco selecionado
-                            for i, block in enumerate(game.available_blocks):
-                                if block is game.selected_block:
-                                    game.place_block(game.selected_block, grid_x, grid_y)
-                                    game.available_blocks[i] = None
-                                    break
-                                    
-                            # Verificar se todos os blocos foram usados
-                            if all(block is None for block in game.available_blocks):
-                                game.available_blocks = [Block() for _ in range(3)]
+                            game.place_block(game.selected_block, grid_x, grid_y)
+                            game.available_blocks[0] = None  # Marcar o bloco como usado
+                            
+                            # Verificar se o bloco foi usado para gerar novo bloco
+                            if game.available_blocks[0] is None:
+                                game.available_blocks = game.get_next_blocks_from_sequence()
                             
                             # Verificar se o jogador atingiu o objetivo do nível
-                            if game.level == 1 and game.green_stones_collected >= 5:
-                                game.game_won = True
+                            if (game.green_stones_collected >= game.green_stones_to_collect and 
+                                game.red_stones_collected >= game.red_stones_to_collect):
+                                game.load_level(game.level_num)
                             
                             # Verificar se o jogo acabou (sem movimentos possíveis)
                             elif game.check_game_over():

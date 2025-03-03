@@ -1,48 +1,35 @@
 # Fazer com que cada shape tenha uma descrição
-SHAPES = [
-    # I
-    [
+SHAPES = {
+    "I": [
         ["X", "X", "X", "X", "X"]
     ],
-    # O
-    [
+    "O": [
         ["XXX"],
         ["XXX"],
         ["XXX"]
     ],
-    # T (INVERTIDO)
-    [
+    "T_INVERTIDO": [
         [" X "],
         [" X "],
         ["XXX"]
     ],
-    # L
-    [
+    "L": [
         ["X  "],
         ["X  "],
         ["XXX"]
     ],
-    # J
-    [
+    "J": [
         ["  X"],
         ["  X"],
         ["XXX"]
     ],
-    # Z
-    [
+    "Z": [
         ["XX "],
         [" XX"]
     ],
-    [
-        ["X "],
-        [" X"]
-    ],
-    # S
-    [
+    "S": [
         ["X "],
         ["XX"],
         ["X "]
     ],
-
-
-]
+}
