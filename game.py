@@ -173,16 +173,16 @@ class Game:
     def draw_board(self):
         # Desenhar fundo
         screen.fill(BACKGROUND_COLOR)
-        
+
         # Desenhar título
         title = self.title_font.render(f"Wood Block Puzzle - Nível {self.level}", True, WOOD_DARK)
         screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 10))
-        
+
         # Desenhar a grade
         board_rect = pygame.Rect(BOARD_X, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
         pygame.draw.rect(screen, WHITE, board_rect)
         pygame.draw.rect(screen, WOOD_DARK, board_rect, 2)
-        
+
         for i in range(GRID_WIDTH + 1):
             pygame.draw.line(
                 screen, GRID_COLOR, 
@@ -197,7 +197,7 @@ class Game:
                 (BOARD_X + GRID_WIDTH * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
                 1
             )
-        
+
         # Desenhar os blocos colocados no tabuleiro
         for y in range(GRID_HEIGHT):
             for x in range(GRID_WIDTH):
@@ -209,7 +209,7 @@ class Game:
                         GRID_SIZE, GRID_SIZE
                     )
                     pygame.draw.rect(screen, color, rect)
-                    
+
                     # Adicionar borda
                     if color == GREEN_POINT:
                         pygame.draw.rect(screen, (0, 150, 0), rect, 2)
@@ -217,7 +217,7 @@ class Game:
                         pygame.draw.rect(screen, (150, 0, 0), rect, 2)
                     else:
                         pygame.draw.rect(screen, (color[0] - 20, color[1] - 20, color[2] - 20), rect, 1)
-                        
+
                         # Linhas de textura para blocos de madeira
                         for line in range(1, 3):
                             y_pos = rect.top + line * rect.height // 3
@@ -228,7 +228,7 @@ class Game:
                                 (rect.right, y_pos),
                                 1
                             )
-        
+
                 # No método draw_board, modificar a parte que desenha os blocos disponíveis
         
         # Desenhar blocos disponíveis (apenas o primeiro)
@@ -413,9 +413,8 @@ class Game:
                 for x in range(GRID_WIDTH):
                     if self.board_types[y][x] == 2:  # Se houver pedra verde
                         self.green_stones_collected += 1
-                        self.score += 50  # Pontos extras por coletar pedra verde
                     elif self.board_types[y][x] == 3:  # Se houver pedra vermelha
-                        self.score += 30  # Pontos extras por coletar pedra vermelha
+                        self.red_stones_collected += 1
                 
                 # Limpar a linha (remover os blocos)
                 for x in range(GRID_WIDTH):
@@ -439,10 +438,8 @@ class Game:
                 for y in range(GRID_HEIGHT):
                     if self.board_types[y][x] == 2:  # Se houver pedra verde
                         self.green_stones_collected += 1
-                        self.score += 50  # Pontos extras por coletar pedra verde
                     elif self.board_types[y][x] == 3:  # Se houver pedra vermelha
-                        self.score += 30  # Pontos extras por coletar pedra vermelha
-                
+                        self.red_stones_collected += 1                 
                 # Limpar a coluna (remover os blocos)
                 for y in range(GRID_HEIGHT):
                     self.board[y][x] = None
