@@ -72,7 +72,6 @@ class Level:
         self.sequence = sequence
         self.current_block = None
 
-
 class Game:
     def __init__(self):
         self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
@@ -237,7 +236,7 @@ class Game:
             block = self.available_blocks[0]
             # Centralizar o bloco na tela na parte inferior
             block_x = SCREEN_WIDTH // 2 - (block.cols * GRID_SIZE) // 2
-            block_y = SCREEN_HEIGHT - 150
+            block_y = SCREEN_HEIGHT - 200
             
             # Atualizar a posição do bloco para desenho e interação
             self.block_positions[0] = (block_x, block_y)
@@ -319,8 +318,10 @@ class Game:
         if self.level == 0:
             objective_text = self.font.render(f"Pedras verdes coletadas: {self.green_stones_collected}/{self.green_stones_to_collect}", True, WOOD_DARK)
             screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
+            objective_text = self.font.render(f"Pedras vermelhas coletadas: {self.red_stones_collected}/{self.red_stones_to_collect}", True, WOOD_DARK)
+            screen.blit(objective_text, (20, SCREEN_HEIGHT - 30))
         
-        screen.blit(score_text, (20, 20))
+        screen.blit(score_text, (10, 60))
         screen.blit(level_text, (SCREEN_WIDTH - 120, 20))
         
         # Exibir telas de game over ou vitória
@@ -349,6 +350,7 @@ class Game:
             screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
             screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2))
             screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+    
     
     def is_valid_position(self, block, x, y):
         if x < 0 or y < 0:
@@ -475,7 +477,7 @@ class Game:
         # Se nenhum bloco puder ser colocado, o jogo acabou
         return True
     
-    def reset(self):
+    def reset(self): # Reiniciar o jogo
         self.__init__()
 
 def main():
