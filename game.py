@@ -82,15 +82,13 @@ class Game:
             (3 * SCREEN_WIDTH // 4 - GRID_SIZE * 2, SCREEN_HEIGHT - 150)
         ]
         self.selected_block = None
-        self.score = 0
         self.green_stones_collected = 0
         self.red_stones_collected = 0
         self.green_stones_to_collect = 0
         self.red_stones_to_collect = 0
         self.current_level = None
         self.level_num = 0
-        self.level = 0
-        self.sequence_index = 0  # Índice para acompanhar a sequência atual de blocos
+        self.sequence_index = 0 
         self.game_over = False
         self.game_won = False
         self.font = pygame.font.SysFont('Arial', 24)
@@ -175,7 +173,7 @@ class Game:
         screen.fill(BACKGROUND_COLOR)
 
         # Desenhar título
-        title = self.title_font.render(f"Wood Block Puzzle - Nível {self.level}", True, WOOD_DARK)
+        title = self.title_font.render(f"Wood Block Puzzle - Nível {self.level_num}", True, WOOD_DARK)
         screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 10))
 
         # Desenhar a grade
@@ -310,20 +308,15 @@ class Game:
                         pygame.draw.rect(screen, color, rect, 0)
                         pygame.draw.rect(screen, (color[0] - 20, color[1] - 20, color[2] - 20), rect, 1)
         
-        # Informações do jogo
-        score_text = self.font.render(f"Pontuação: {self.score}", True, WOOD_DARK)
-        level_text = self.font.render(f"Nível: {self.level}", True, WOOD_DARK)
+
         
-        # Mostrar objetivo do nível
-        if self.level == 0:
-            objective_text = self.font.render(f"Pedras verdes coletadas: {self.green_stones_collected}/{self.green_stones_to_collect}", True, WOOD_DARK)
-            screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
-            objective_text = self.font.render(f"Pedras vermelhas coletadas: {self.red_stones_collected}/{self.red_stones_to_collect}", True, WOOD_DARK)
-            screen.blit(objective_text, (20, SCREEN_HEIGHT - 30))
+       
+        objective_text = self.font.render(f"Pedras verdes coletadas: {self.green_stones_collected}/{self.green_stones_to_collect}", True, WOOD_DARK)
+        screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
+        objective_text = self.font.render(f"Pedras vermelhas coletadas: {self.red_stones_collected}/{self.red_stones_to_collect}", True, WOOD_DARK)
+        screen.blit(objective_text, (20, SCREEN_HEIGHT - 30))
         
-        screen.blit(score_text, (10, 60))
-        screen.blit(level_text, (SCREEN_WIDTH - 120, 20))
-        
+
         # Exibir telas de game over ou vitória
         if self.game_over:
             game_over_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -331,11 +324,9 @@ class Game:
             screen.blit(game_over_surface, (0, 0))
             
             gameover_text = self.title_font.render("GAME OVER", True, WHITE)
-            score_text = self.font.render(f"Pontuação Final: {self.score}", True, WHITE)
             restart_text = self.font.render("Pressione R para reiniciar", True, WHITE)
             
             screen.blit(gameover_text, (SCREEN_WIDTH // 2 - gameover_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
-            screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2))
             screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
         
         elif self.game_won:
@@ -344,11 +335,9 @@ class Game:
             screen.blit(win_surface, (0, 0))
             
             win_text = self.title_font.render("PARABÉNS! VOCÊ VENCEU!", True, WHITE)
-            score_text = self.font.render(f"Pontuação Final: {self.score}", True, WHITE)
             restart_text = self.font.render("Pressione R para jogar novamente", True, WHITE)
             
             screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
-            screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2))
             screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
     
     
@@ -369,6 +358,7 @@ class Game:
     
     def place_block(self, block, x, y):
         green_stones_before = self.green_stones_collected
+        red_stones_before = self.red_stones_collected
         
         # Colocar o bloco no tabuleiro
         for row in range(block.rows):
@@ -378,12 +368,10 @@ class Game:
                     if self.board_types[y + row][x + col] == 2:
                         # Coletou uma pedra verde
                         self.green_stones_collected += 1
-                        self.score += 50  # Pontos extras por coletar pedra verde
                     
                     # Verificar se há uma pedra vermelha na posição
                     elif self.board_types[y + row][x + col] == 3:
                         self.red_stones_collected += 1
-                        self.score += 30  # Pontos extras por coletar pedra vermelha
                     
                     # Remover o tipo de bloco da grade de tipos
                     self.board_types[y + row][x + col] = 0
@@ -394,16 +382,7 @@ class Game:
         # Verificar e limpar linhas/colunas completas
         rows_cleared = self.clear_rows()
         cols_cleared = self.clear_cols()
-        
-        # Calcular pontuação
-        cleared = rows_cleared + cols_cleared
-        if cleared > 0:
-            self.score += cleared * 10
-        
-        # Verificar se passou de nível (coletou 5 ou mais pedras verdes)
-        if (self.green_stones_collected >= self.green_stones_to_collect and self.red_stones_collected >= self.red_stones_to_collect):  
-            self.load_level(self.level_num)#ssar para o próximo nível (ou mostrar tela de vitória se não houver mais)
-    
+
     def clear_rows(self):
         rows_cleared = 0
         for y in range(GRID_HEIGHT):
@@ -526,7 +505,7 @@ def main():
                                 dragging = True
             
             elif event.type == pygame.MOUSEBUTTONUP:
-                                # No evento MOUSEBUTTONUP:
+                # No evento MOUSEBUTTONUP:
                 if event.button == 1 and dragging:  # Botão esquerdo
                     dragging = False
                     mouse_x, mouse_y = event.pos
@@ -545,20 +524,19 @@ def main():
                         if game.is_valid_position(game.selected_block, grid_x, grid_y):
                             game.place_block(game.selected_block, grid_x, grid_y)
                             game.available_blocks[0] = None  # Marcar o bloco como usado
-                            
-                            # Verificar se o bloco foi usado para gerar novo bloco
-                            if game.available_blocks[0] is None:
-                                game.available_blocks = game.get_next_blocks_from_sequence()
-                            
+
                             # Verificar se o jogador atingiu o objetivo do nível
                             if (game.green_stones_collected >= game.green_stones_to_collect and 
                                 game.red_stones_collected >= game.red_stones_to_collect):
-                                game.load_level(game.level_num)
-                            
+                                game.load_level(game.level_num + 1)  # Avançar para o próximo nível
+                            # Verificar se o bloco foi usado para gerar novo bloco
+                            elif game.available_blocks[0] is None:
+                                game.available_blocks = game.get_next_blocks_from_sequence()
+
                             # Verificar se o jogo acabou (sem movimentos possíveis)
-                            elif game.check_game_over():
-                                game.game_over = True
-                    
+                        if game.check_game_over():
+                            game.game_over = True
+
                     game.selected_block = None
         
         # Atualizar o jogo
