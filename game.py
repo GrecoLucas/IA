@@ -2,7 +2,7 @@ import random
 import pygame
 import sys
 from shapes import SHAPES
-from levels import LEVEL
+from levels import LEVEL_MAP, LEVELS
 from constants import *
 
 # Inicializar o Pygame
@@ -96,50 +96,63 @@ class Game:
         self.load_level(0)
     
 
-    def load_level(self, level_index):
-        if level_index < len(LEVEL):
-            level_data = LEVEL[level_index]
-            level_num = level_data[0]
-            green_blocks = level_data[1]
-            red_blocks = level_data[2]
-            block_sequence = level_data[3]
-            grid = level_data[4]
-            
+    def load_level(self, level_num):
+        # Verifica se o nível existe no mapeamento
+        if level_num in LEVEL_MAP:
+            level_data = LEVEL_MAP[level_num]
+
             # Criar objeto Level
-            self.current_level = Level(level_num, green_blocks, red_blocks, grid, block_sequence)
-            
+            self.current_level = Level(
+                level_num=level_data.level_num,
+                green_blocks=level_data.green_goal,
+                red_blocks=level_data.red_goal, 
+                grid=level_data.grid,
+                sequence=level_data.sequence
+            )
+
             # Reiniciar o tabuleiro
             self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
             self.board_types = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
-            
+
             # Carregar a configuração do nível do grid
             for y in range(GRID_HEIGHT):
                 for x in range(GRID_WIDTH):
-                    if y < len(grid) and x < len(grid[y]):
-                        cell_type = grid[y][x]
+                    if y < len(level_data.grid) and x < len(level_data.grid[y]):
+                        cell_type = level_data.grid[y][x]
                         self.board_types[y][x] = cell_type
-                        
+
                         if cell_type == 1:  # Bloco de madeira normal
                             self.board[y][x] = WOOD_MEDIUM
                         elif cell_type == 2:  # Pedra verde (objetivo)
                             self.board[y][x] = GREEN_POINT
                         elif cell_type == 3:  # Pedra vermelha (pontos extras)
                             self.board[y][x] = RED_POINT
-            
+
             # Inicializar objetivos do nível
-            self.level_num = int(level_num)
+            self.level_num = level_data.level_num
             self.green_stones_collected = 0
             self.red_stones_collected = 0
-            self.green_stones_to_collect = green_blocks
-            self.red_stones_to_collect = red_blocks
+            self.green_stones_to_collect = level_data.green_goal
+            self.red_stones_to_collect = level_data.red_goal
             self.sequence_index = 0
-            
+
             # Criar os primeiros blocos baseados na sequência
             self.available_blocks = self.get_next_blocks_from_sequence()
         else:
-            # Se não houver mais níveis, o jogador venceu o jogo
-            self.game_won = True
-    
+            # Se o nível não existe, verificar se terminamos todos os níveis
+            max_level = max(level.level_num for level in LEVELS)
+            if level_num > max_level:
+                # Se sim, declarar vitória
+                self.game_won = True
+            else:
+                # Se não, tente carregar o nível 0 (tutorial)
+                if level_num != 0:
+                    print(f"Nível {level_num} não encontrado. Carregando nível 0.")
+                    self.load_level(0)
+                else:
+                    # Se mesmo o nível 0 não existe, temos um problema
+                    print("Erro: Nenhum nível definido no jogo.")
+                    self.game_over = True
 
     def get_next_blocks_from_sequence(self):
         if not self.current_level or not self.current_level.sequence:
@@ -357,8 +370,6 @@ class Game:
         return True
     
     def place_block(self, block, x, y):
-        green_stones_before = self.green_stones_collected
-        red_stones_before = self.red_stones_collected
         
         # Colocar o bloco no tabuleiro
         for row in range(block.rows):
@@ -526,13 +537,21 @@ def main():
                             game.available_blocks[0] = None  # Marcar o bloco como usado
 
                             # Verificar se o jogador atingiu o objetivo do nível
-                            if (game.green_stones_collected >= game.green_stones_to_collect and 
-                                game.red_stones_collected >= game.red_stones_to_collect):
-                                game.load_level(game.level_num + 1)  # Avançar para o próximo nível
-                            # Verificar se o bloco foi usado para gerar novo bloco
-                            elif game.available_blocks[0] is None:
-                                game.available_blocks = game.get_next_blocks_from_sequence()
-
+                        if (game.green_stones_collected >= game.green_stones_to_collect and 
+                            game.red_stones_collected >= game.red_stones_to_collect):
+                            
+                            # Encontrar o próximo nível
+                            next_levels = [level.level_num for level in LEVELS if level.level_num > game.level_num]
+                            if next_levels:
+                                next_level = min(next_levels)
+                                game.load_level(next_level)
+                            else:
+                                # Se não houver mais níveis, declarar vitória
+                                game.game_won = True
+                                                    # Verificar se o bloco foi usado para gerar novo bloco
+                        elif game.available_blocks[0] is None:
+                            game.available_blocks = game.get_next_blocks_from_sequence()
+                        
                             # Verificar se o jogo acabou (sem movimentos possíveis)
                         if game.check_game_over():
                             game.game_over = True
