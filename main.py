@@ -14,7 +14,7 @@ def main():
     
     # Set up the display
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Wood Block - Puzzle Games")
+    pygame.display.set_caption("Wood Block")
     
     # Menu
     menu_model = Menu()

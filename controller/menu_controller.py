@@ -27,8 +27,8 @@ class MenuController:
         clock = pygame.time.Clock()
         
         while self.menu.get_state() == MenuState.ACTIVE:
+            dt = clock.tick(60)  # Delta time em milissegundos
             self.handle_events()
-            self.menu_view.draw(self.menu)
-            clock.tick(60)
+            self.menu_view.draw(self.menu, dt)
         
         return self.menu.get_state(), self.menu.get_player_type()

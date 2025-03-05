@@ -1,25 +1,66 @@
 import pygame
 from constants import *
 from model.menu import PlayerType
+from PIL import Image, ImageSequence
+import os
+import time
 
 class MenuView:
     def __init__(self, screen):
         self.screen = screen
         self.font = pygame.font.SysFont('Arial', 28)
         self.title_font = pygame.font.SysFont('Arial', 36, bold=True)
-        self.background_image = None
-        # Tente carregar uma imagem de fundo, se disponível
-        try:
-            self.background_image = pygame.image.load('resources/menu_background.jpg')
-            self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        except:
-            print("Menu background image not found, using solid color")
+        self.background_frames = []
+        self.current_frame = 0
+        self.frame_time = 0
+        self.frame_duration = 20
+
+        # Carrega os frames do GIF
+        self.load_gif_frames('resources/giphy.gif')
     
-    def draw(self, menu):
+    def load_gif_frames(self, gif_path):
+        """Carrega todos os frames do GIF em uma lista de imagens Pygame"""
+        try:
+            # Abrir o GIF com PIL
+            gif = Image.open(gif_path)
+            
+            # Para cada frame no GIF
+            for frame_index in range(0, gif.n_frames):
+                gif.seek(frame_index)  # Ir para o frame específico
+                
+                # Converter o frame para formato compatível com Pygame
+                frame_surface = pygame.image.fromstring(
+                    gif.convert('RGBA').tobytes(), gif.size, 'RGBA')
+                
+                # Redimensionar para tamanho da tela
+                frame_surface = pygame.transform.scale(frame_surface, (SCREEN_WIDTH, SCREEN_HEIGHT))
+                
+                # Adicionar à lista de frames
+                self.background_frames.append(frame_surface)
+            
+            print(f"GIF carregado com {len(self.background_frames)} frames")
+            
+        except Exception as e:
+            print(f"Erro ao carregar GIF: {e}")
+            self.background_frames = []
+    
+    def update_animation(self, dt):
+        """Atualiza o frame atual da animação baseado no tempo decorrido"""
+        if not self.background_frames:
+            return
+            
+        self.frame_time += dt
+        if self.frame_time >= self.frame_duration:
+            self.current_frame = (self.current_frame + 1) % len(self.background_frames)
+            self.frame_time = 0
+
+    def draw(self, menu, dt):
         """Desenha o menu na tela"""
+        self.update_animation(dt)
+        
         # Desenhar fundo
-        if self.background_image:
-            self.screen.blit(self.background_image, (0, 0))
+        if self.background_frames:
+            self.screen.blit(self.background_frames[self.current_frame], (0, 0))
         else:
             self.screen.fill(BACKGROUND_COLOR)
         
@@ -35,7 +76,6 @@ class MenuView:
         menu_y = 200
         for i, item in enumerate(menu.items):
             color = WOOD_DARK
-            bg_color = None
             
             # Destacar o item selecionado
             if item.selected:

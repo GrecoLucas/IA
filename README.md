@@ -1,7 +1,6 @@
-# Projeto de IA
-## Wood Block Puzzle
+# Projeto de IA - Wood Block Puzzle
 
-Um jogo de puzzle de blocos de madeira, onde você deve encaixar peças no tabuleiro.
+Um jogo de puzzle de blocos de madeira, onde você deve encaixar peças no tabuleiro para completar linhas e colunas.
 
 ## Como jogar
 - Arraste e solte os blocos de madeira no tabuleiro
@@ -9,74 +8,66 @@ Um jogo de puzzle de blocos de madeira, onde você deve encaixar peças no tabul
 - Complete linhas ou colunas inteiras para removê-las e ganhar pontos
 - O jogo termina quando nenhum bloco disponível puder ser colocado no tabuleiro
 
-
 ## Instalação e execução
+```bash
+# Instalar dependências
+sudo apt install python3-pygame  # para instalar a biblioteca principal
+pip install Pillow               # para suporte a animações GIF no menu
+
+# Executar o jogo
+python3 main.py
 ```
-    sudo apt install python3-pygame #para instalar a depencia principal
-    python3 game.py # correr o jogo
-```
 
-## Estrutura do Codigo
+## Estrutura do Código (MVC)
 
-### `constants.py`
-Define as constantes globais do jogo:
-- Dimensões da tela e do tabuleiro
-- Tamanho da grade
-- Esquema de cores (madeira, pedras e elementos da interface)
-- Configurações visuais
+### Model
+#### Block
+Define a classe Block que representa os blocos do jogo:
+- **Atributos**: forma, cor, dimensões, posição e offset para arrastar
+- **Métodos**: funcionalidades para obter as células ocupadas pelo bloco
 
-### `shapes.py`
-Define os diferentes blocos que o jogador pode usar:
-- Cada bloco é representado por uma matriz 2D usando "X" para partes sólidas e espaços vazios
-- Blocos incluem formas como L, J, T invertido, linhas horizontais/verticais e blocos de canto
-- Cada forma tem um nome único utilizado para identificação na sequência de jogo
-
-
-### `levels.py`
-Contém a configuração dos níveis do jogo:
-- Cada nível especifica:
-  - Número de pedras verdes e vermelhas necessárias para avançar
-  - Sequência de blocos que serão disponibilizados ao jogador
-  - Layout inicial do tabuleiro (blocos fixos, pedras coloridas e espaços vazios)
-- O código de célula segue a convenção: 0=vazio, 1=madeira, 2=pedra verde, 3=pedra vermelha
-
-
-
-### `game.py`
-Implementa a lógica principal e a interface do jogo, organizado em três classes principais:
-
-#### Classe `Block`
-Responsável pela representação e renderização dos blocos:
-- **Atributos:** forma, cor, dimensões, posição e offset para arrastar
-- **Métodos:**
-  - `__init__(shape_name)`: Inicializa um bloco, opcionalmente com forma específica
-  - `draw(x, y)`: Renderiza o bloco na tela com efeitos visuais de textura
-
-#### Classe `Level`
+#### Level
 Encapsula as informações específicas de cada nível:
-- **Atributos:** número do nível, objetivos (pedras a coletar), grade inicial, sequência de blocos
+- **Atributos**: número do nível, objetivos (pedras a coletar), grade inicial, sequência de blocos
+- **Métodos**: gerenciamento da sequência de blocos e verificação de conclusão de objetivos
 
-#### Classe `Game`
-Gerencia a lógica central do jogo e a interface:
-- **Atributos:**
-  - Estado do tabuleiro e tipos de células
-  - Blocos disponíveis e selecionados
-  - Pontuação e progresso
-  - Estado do jogo (em andamento, ganho, perdido)
-- **Métodos principais:**
-  - `load_level(level_index)`: Carrega o layout e objetivos do nível especificado
-  - `get_next_blocks_from_sequence()`: Fornece o próximo bloco da sequência predefinida
-  - `draw_board()`: Renderiza o tabuleiro, blocos, interface e informações do jogo
-  - `is_valid_position(block, x, y)`: Verifica se um bloco pode ser colocado em determinada posição
-  - `place_block(block, x, y)`: Posiciona um bloco no tabuleiro e processa suas consequências
-  - `clear_rows()` e `clear_cols()`: Detectam e removem linhas/colunas completas
-  - `check_game_over()`: Verifica se ainda existem movimentos válidos
-  - `reset()`: Reinicia o jogo para seu estado inicial
+#### Menu
+Gerencia o estado do menu e as escolhas do jogador:
+- Definição de tipos de jogador (humano/bot) e estados do menu
+- Opções selecionáveis e ações correspondentes
 
+#### Game
+Implementa a lógica principal do jogo e gerencia o estado atual.
 
-#### Função `main()`
-Inicializa o jogo e implementa o loop principal:
-- Processa eventos de entrada (mouse, teclado)
-- Gerencia o ciclo de arrastar e soltar blocos
-- Atualiza o estado do jogo e a renderização
-- Mantém o controle do tempo de quadro (FPS)
+### View
+#### Block_view
+Renderização visual dos blocos no tabuleiro.
+
+#### Game_view
+Interface principal do jogo e renderização do tabuleiro.
+
+#### Menu_view
+Renderização dos elementos de menu e feedbacks visuais.
+
+#### Level_view
+Visualização de informações específicas do nível atual.
+
+### Controller
+#### Game_controller
+Controle das interações do usuário durante o jogo.
+
+#### Menu_controller
+Gerenciamento das interações do usuário nos menus.
+
+### Auxiliar
+#### Constants
+Definições de constantes utilizadas no jogo.
+
+#### Shapes
+Definições das formas dos blocos disponíveis.
+
+#### Levels
+Configurações dos diferentes níveis do jogo.
+
+#### Main
+Ponto de entrada da aplicação que inicializa e coordena os componentes.
