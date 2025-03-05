@@ -91,11 +91,8 @@ LEVELS = [
     )
 ]
 
-# Dicionário para acesso rápido por número de nível
 LEVEL_MAP = {level.level_num: level for level in LEVELS}
 
-# Para manter compatibilidade com o código existente que espera a estrutura de tupla
-# Se você não puder modificar outros arquivos, mantenha isso:
 LEVEL = [
     (level.level_num, level.green_goal, level.red_goal, level.sequence, level.grid)
     for level in LEVELS

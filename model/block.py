@@ -5,7 +5,7 @@ from constants import *
 class Block:
     def __init__(self, shape_name=None):
         if shape_name and shape_name in SHAPES:
-            # Usar um formato específico quando fornecido
+            # Use a specific shape when provided
             self.shape_name = shape_name
             self.shape = SHAPES[shape_name]
         else:
@@ -14,7 +14,7 @@ class Block:
             
         self.color = random.choice(WOOD_COLORS)
         self.rows = len(self.shape)
-        self.cols = max(len(row) for row in self.shape)  # Encontra o comprimento máximo das linhas
+        self.cols = max(len(row) for row in self.shape)  # Find max length of rows
         self.x = random.randint(0, GRID_WIDTH - self.cols)
         self.y = 0
         self.selected = False
@@ -22,7 +22,7 @@ class Block:
         self.offset_y = 0
     
     def get_cells(self):
-        """Retorna as células ocupadas pelo bloco"""
+        """Returns the cells occupied by the block"""
         cells = []
         for row in range(self.rows):
             for col in range(len(self.shape[row])):
