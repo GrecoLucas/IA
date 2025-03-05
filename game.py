@@ -1,9 +1,11 @@
 import random
 import pygame
 import sys
+from model.block import Block
 from shapes import SHAPES
 from levels import LEVEL_MAP, LEVELS
 from constants import *
+from view.block_view import BlockView
 
 # Inicializar o Pygame
 pygame.init()
@@ -12,56 +14,6 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Wood Block - Puzzle Games")
 
-
-class Block:
-    def __init__(self, shape_name=None):
-        if shape_name and shape_name in SHAPES:
-            # Usar um formato específico quando fornecido
-            self.shape_name = shape_name
-            self.shape = SHAPES[shape_name]
-        else:
-            self.shape_name = random.choice(list(SHAPES.keys()))
-            self.shape = SHAPES[self.shape_name]
-            
-        self.color = random.choice(WOOD_COLORS)
-        self.rows = len(self.shape)
-        self.cols = max(len(row) for row in self.shape)  # Encontra o comprimento máximo das linhas
-        self.x = random.randint(0, GRID_WIDTH - self.cols)
-        self.y = 0
-        self.selected = False
-        self.offset_x = 0
-        self.offset_y = 0
-    
-    def draw(self, x=None, y=None):
-        if x is None:
-            x = self.x
-        if y is None:
-            y = self.y
-            
-        for i in range(self.rows):
-            for j in range(len(self.shape[i])):
-                cell = self.shape[i][j]
-                if cell == "X":
-                    rect = pygame.Rect(
-                        BOARD_X + (x + j) * GRID_SIZE, 
-                        BOARD_Y + (y + i) * GRID_SIZE, 
-                        GRID_SIZE, GRID_SIZE
-                    )
-                    
-                    # Desenhar o bloco de madeira com textura
-                    pygame.draw.rect(screen, self.color, rect)
-                    pygame.draw.rect(screen, (self.color[0] - 20, self.color[1] - 20, self.color[2] - 20), rect, 1)
-                    
-                    # Adicionar linhas de "madeira" para textura
-                    for line in range(1, 3):
-                        y_pos = rect.top + line * rect.height // 3
-                        pygame.draw.line(
-                            screen, 
-                            (self.color[0] - 10, self.color[1] - 10, self.color[2] - 10),
-                            (rect.left, y_pos),
-                            (rect.right, y_pos),
-                            1
-                        )
 
 class Level:
     def __init__(self, level_num, green_blocks, red_blocks, grid, sequence):
@@ -194,6 +146,7 @@ class Game:
         pygame.draw.rect(screen, WHITE, board_rect)
         pygame.draw.rect(screen, WOOD_DARK, board_rect, 2)
 
+        # Draw grid lines
         for i in range(GRID_WIDTH + 1):
             pygame.draw.line(
                 screen, GRID_COLOR, 
@@ -219,31 +172,20 @@ class Game:
                         BOARD_Y + y * GRID_SIZE, 
                         GRID_SIZE, GRID_SIZE
                     )
-                    pygame.draw.rect(screen, color, rect)
-
-                    # Adicionar borda
+                    
+                    # Adicionar borda especial para pedras verdes e vermelhas
                     if color == GREEN_POINT:
+                        pygame.draw.rect(screen, color, rect)
                         pygame.draw.rect(screen, (0, 150, 0), rect, 2)
                     elif color == RED_POINT:
+                        pygame.draw.rect(screen, color, rect)
                         pygame.draw.rect(screen, (150, 0, 0), rect, 2)
                     else:
-                        pygame.draw.rect(screen, (color[0] - 20, color[1] - 20, color[2] - 20), rect, 1)
+                        # Use o BlockView para desenhar blocos de madeira
+                        BlockView.draw_wood_block(screen, color, rect)
 
-                        # Linhas de textura para blocos de madeira
-                        for line in range(1, 3):
-                            y_pos = rect.top + line * rect.height // 3
-                            pygame.draw.line(
-                                screen, 
-                                (color[0] - 10, color[1] - 10, color[2] - 10),
-                                (rect.left, y_pos),
-                                (rect.right, y_pos),
-                                1
-                            )
-
-                # No método draw_board, modificar a parte que desenha os blocos disponíveis
-        
         # Desenhar blocos disponíveis (apenas o primeiro)
-        if self.available_blocks[0]:  # Verifica apenas o primeiro bloco
+        if self.available_blocks[0]:  
             block = self.available_blocks[0]
             # Centralizar o bloco na tela na parte inferior
             block_x = SCREEN_WIDTH // 2 - (block.cols * GRID_SIZE) // 2
@@ -252,44 +194,8 @@ class Game:
             # Atualizar a posição do bloco para desenho e interação
             self.block_positions[0] = (block_x, block_y)
             
-            # Desenhar área de seleção
-            selection_rect = pygame.Rect(
-                block_x - 10, 
-                block_y - 10,
-                block.cols * GRID_SIZE + 20,
-                block.rows * GRID_SIZE + 20
-            )
-            pygame.draw.rect(screen, (240, 240, 240), selection_rect, border_radius=10)
-            pygame.draw.rect(screen, WOOD_DARK, selection_rect, 2, border_radius=10)
-            
-            # Desenhar o bloco na posição adequada
-            for row in range(block.rows):
-                for col in range(len(block.shape[row])):
-                    if col < len(block.shape[row]) and block.shape[row][col] == "X":
-                        rect = pygame.Rect(
-                            block_x + col * GRID_SIZE,
-                            block_y + row * GRID_SIZE,
-                            GRID_SIZE, GRID_SIZE
-                        )
-                        pygame.draw.rect(screen, block.color, rect)
-                        pygame.draw.rect(screen, (block.color[0] - 20, block.color[1] - 20, block.color[2] - 20), rect, 1)
-                        
-                        # Linhas de textura
-                        for line in range(1, 3):
-                            y_pos = rect.top + line * rect.height // 3
-                            pygame.draw.line(
-                                screen, 
-                                (block.color[0] - 10, block.color[1] - 10, block.color[2] - 10),
-                                (rect.left, y_pos),
-                                (rect.right, y_pos),
-                                1
-                            )
-            
-            # Mostrar o nome do bloco abaixo dele
-            block_name_text = self.font.render(f"{block.shape_name}", True, WOOD_DARK)
-            screen.blit(block_name_text, 
-                        (SCREEN_WIDTH // 2 - block_name_text.get_width() // 2, 
-                         block_y + block.rows * GRID_SIZE + 10))
+            # Usar o BlockView para desenhar o bloco
+            BlockView.draw_available_block(screen, block, (block_x, block_y), self.font)
         
         # Desenhar bloco selecionado seguindo o mouse
         if self.selected_block:
@@ -304,32 +210,22 @@ class Game:
             # Verificar se a posição é válida
             valid_position = self.is_valid_position(self.selected_block, grid_x, grid_y)
             
-            # Desenhar o bloco na posição do mouse com transparência
-            for row in range(self.selected_block.rows):
-                for col in range(len(self.selected_block.shape[row])):
-                    if col < len(self.selected_block.shape[row]) and self.selected_block.shape[row][col] == "X":
-                        rect = pygame.Rect(
-                            BOARD_X + (grid_x + col) * GRID_SIZE,
-                            BOARD_Y + (grid_y + row) * GRID_SIZE,
-                            GRID_SIZE, GRID_SIZE
-                        )
-                        if valid_position:
-                            color = self.selected_block.color
-                        else:
-                            color = (255, 100, 100)  # Vermelho para posição inválida
-                            
-                        pygame.draw.rect(screen, color, rect, 0)
-                        pygame.draw.rect(screen, (color[0] - 20, color[1] - 20, color[2] - 20), rect, 1)
+            # Usar o BlockView para desenhar o bloco na posição do mouse
+            BlockView.draw_block(screen, self.selected_block, grid_x, grid_y, valid_position)
         
-
-        
-       
-        objective_text = self.font.render(f"Pedras verdes coletadas: {self.green_stones_collected}/{self.green_stones_to_collect}", True, WOOD_DARK)
+        # Desenhar objetivos
+        objective_text = self.font.render(
+            f"Pedras verdes coletadas: {self.green_stones_collected}/{self.green_stones_to_collect}", 
+            True, WOOD_DARK
+        )
         screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
-        objective_text = self.font.render(f"Pedras vermelhas coletadas: {self.red_stones_collected}/{self.red_stones_to_collect}", True, WOOD_DARK)
+        
+        objective_text = self.font.render(
+            f"Pedras vermelhas coletadas: {self.red_stones_collected}/{self.red_stones_to_collect}", 
+            True, WOOD_DARK
+        )
         screen.blit(objective_text, (20, SCREEN_HEIGHT - 30))
         
-
         # Exibir telas de game over ou vitória
         if self.game_over:
             game_over_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
