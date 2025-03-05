@@ -35,7 +35,7 @@ class BlockView:
                     color = block.color if valid_position else (255, 100, 100)
                     
                     BlockView.draw_wood_block(screen, color, rect)
-    
+
     @staticmethod
     def draw_available_block(screen, block, position, font):
         """Draw a block in the selection area at the bottom of the screen"""

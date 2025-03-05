@@ -16,7 +16,7 @@ class MenuView:
         self.frame_duration = 20
 
         # Carrega os frames do GIF
-        self.load_gif_frames('resources/giphy.gif')
+        self.load_gif_frames('resources/menu.gif')
     
     def load_gif_frames(self, gif_path):
         """Carrega todos os frames do GIF em uma lista de imagens Pygame"""
