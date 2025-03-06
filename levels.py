@@ -142,6 +142,24 @@ LEVELS = [
             [1, 1, 0, 0, 0, 0, 2, 2]
         ]
     ),
+        LevelData(
+        level_num=6,
+        green_goal=10,
+        red_goal=4,
+        name="DIOGÃO",
+        sequence=["D", "I", "O", "G", 
+                 "O", "right_down_corner", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO" ],
+        grid=[
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [2, 2, 2, 0, 0, 0, 0, 0],
+            [2, 0, 0, 2, 0, 0, 0, 0],
+            [2, 0, 0, 0, 2, 0, 0, 0],
+            [2, 0, 0, 0, 3, 0, 0, 0],
+            [2, 0, 0, 3, 0, 0, 0, 0],
+            [2, 3, 3, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    ),
 ]
 
 LEVEL_MAP = {level.level_num: level for level in LEVELS}
