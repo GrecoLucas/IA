@@ -40,7 +40,8 @@ def main():
     else:  # Jogador humano
         controller = GameController(game, view)
     
-    # Game loop
+    if (menu_state == MenuState.GAME_START_INF):
+        game.load_level(-1)
     clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():

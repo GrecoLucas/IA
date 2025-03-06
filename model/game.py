@@ -68,8 +68,6 @@ class Game:
             # Create the first blocks from the sequence
             self.available_blocks = self.get_next_blocks_from_sequence()
             
-            # Reset the move counter when loading a new level
-            self.number_of_moves = 0
         else:
             # If level doesn't exist, check if we finished all levels
             max_level = max(level.level_num for level in LEVELS)
@@ -220,11 +218,14 @@ class Game:
         return True
         
     def check_level_complete(self):
-        # Level is complete if all required stones are collected
+        if self.level_num == -1:
+            return False
         return (self.green_stones_collected >= self.green_stones_to_collect and 
                 self.red_stones_collected >= self.red_stones_to_collect)
     
     def get_next_level(self):
+        if self.level_num == -1:
+            return None
         next_levels = [level.level_num for level in LEVELS if level.level_num > self.level_num]
         if next_levels:
             return min(next_levels)
@@ -276,4 +277,9 @@ class Game:
         self.player_type = type
 
     def reset(self):
-        self.__init__()
+        if self.level_num == -1:
+            self.load_level(-1)
+        else:
+            self.load_level(0)
+        self.game_over = False
+        

@@ -7,6 +7,7 @@ class PlayerType(Enum):
 class MenuState(Enum):
     ACTIVE = 1
     GAME_START = 2
+    GAME_START_INF = 4
     EXIT = 3
 
 class MenuItem:
@@ -33,6 +34,7 @@ class Menu:
             MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
             MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
             MenuItem("Iniciar Jogo", self.start_game, None),
+            MenuItem("Infinit Mode", self.start_game_infinit, None),
             MenuItem("Sair", self.exit_game, None)
         ]
         # Define o primeiro item como selecionado inicialmente
@@ -53,6 +55,10 @@ class Menu:
         self.state = MenuState.GAME_START
         return True  # Fechar o menu e iniciar o jogo
     
+    def start_game_infinit(self):
+        self.state = MenuState.GAME_START_INF
+        return True
+
     def exit_game(self):
         """Sai do jogo"""
         self.state = MenuState.EXIT

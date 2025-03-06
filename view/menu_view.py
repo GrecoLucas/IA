@@ -71,6 +71,7 @@ class MenuView:
         # Desenhar subtítulo
         subtitle = self.font.render("Menu Principal", True, WOOD_DARK)
         self.screen.blit(subtitle, (SCREEN_WIDTH // 2 - subtitle.get_width() // 2, 130))
+
         
         # Desenhar itens do menu
         menu_y = 200
