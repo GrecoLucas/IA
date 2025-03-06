@@ -30,6 +30,7 @@ def main():
 
     # Create MVC components
     game = Game()
+    game.set_player_type(player_type)
     view = GameView(screen)
     
     # Escolher o tipo de controlador baseado na escolha do jogador

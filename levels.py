@@ -20,7 +20,7 @@ LEVELS = [
         level_num=0,
         green_goal=2,
         red_goal=0,
-        name="Noob",
+        name="0 Noob",
         sequence=["L", "J", "I", "J"],
         grid=[
             [0, 1, 0, 0, 0, 0, 0, 1],
@@ -38,7 +38,7 @@ LEVELS = [
         level_num=1,
         green_goal=5,
         red_goal=0,
-        name="Beginner",
+        name="1 Beginner",
         sequence=["left_down_corner", "right_down_corner", "left_up_corner", 
                  "right_up_corner", "I", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO"],
         grid=[
@@ -57,7 +57,7 @@ LEVELS = [
         level_num=2,
         green_goal=3,
         red_goal=3,
-        name="Advanced",
+        name="2 Advanced",
         sequence=["S", "Z", "T", "T_INVERTIDO", "single",
                  "right_up_corner", "left_up_corner", "I", "T_INVERTIDO"],
         grid=[
@@ -76,7 +76,7 @@ LEVELS = [
         level_num=3,
         green_goal=5,
         red_goal=3,
-        name="Better",
+        name="3 Better",
         sequence=["O", "Z", "|-", "right_up_corner", "single", "single", 
                  "L", "J", "L", "J", "I", "T_INVERTIDO"],
         grid=[
@@ -94,7 +94,7 @@ LEVELS = [
         level_num=4,
         green_goal=2,  
         red_goal=1,    
-        name="Good",
+        name="4 Good",
         sequence=[ "I", "O", "L", "I_H", "single",  "single",  "L", "J"  ],
         grid=[
             [0, 0, 0, 0, 0, 0, 0, 0],
@@ -111,7 +111,7 @@ LEVELS = [
         level_num=5,
         green_goal=5,
         red_goal=2,
-        name="Pro",
+        name="5 Pro",
         sequence=["left_down_corner", "right_down_corner", "left_up_corner", 
                  "right_up_corner", "I", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO"],
         grid=[

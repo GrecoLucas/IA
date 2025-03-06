@@ -12,8 +12,7 @@ class GameController:
         # Handle restart with R key
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
-                self.game.reset()
-        
+                self.game.reset()        
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
@@ -60,29 +59,23 @@ class GameController:
     def handle_mouse_up(self, pos):
         self.dragging = False
         mouse_x, mouse_y = pos
-        
         # Check if released on the board
         if (BOARD_X <= mouse_x <= BOARD_X + GRID_SIZE * GRID_WIDTH and
             BOARD_Y <= mouse_y <= BOARD_Y + GRID_SIZE * GRID_HEIGHT):
-            
             grid_x = (mouse_x - BOARD_X) // GRID_SIZE
             grid_y = (mouse_y - BOARD_Y) // GRID_SIZE
-            
             # Adjust for block offset
             grid_x -= self.game.selected_block.offset_x
             grid_y -= self.game.selected_block.offset_y
-            
             # Try to place the block
             if self.game.is_valid_position(self.game.selected_block, grid_x, grid_y):
                 animation_needed = self.game.place_block(self.game.selected_block, grid_x, grid_y)
                 self.game.available_blocks[0] = None  # Mark block as used
-                
                 # Visual effect when clearing rows/columns
                 if animation_needed:
                     self.view.render(self.game)
                     pygame.display.flip()
                     pygame.time.delay(self.animation_delay)
-                
                 # Check if level is complete
                 if self.game.check_level_complete():
                     next_level = self.game.get_next_level()
@@ -90,15 +83,16 @@ class GameController:
                         self.game.load_level(next_level)
                     else:
                         self.game.game_won = True
-                
+                        # Salvar estatísticas quando o jogo for ganho
+                        self.game.save_game_stats()
                 # Generate new blocks if needed
                 elif self.game.available_blocks[0] is None:
                     self.game.available_blocks = self.game.get_next_blocks_from_sequence()
-        
         self.game.selected_block = None
-    
+
     def update(self):
         # Check game over condition
         if not self.game.game_over and not self.game.game_won:
             if self.game.check_game_over():
                 self.game.game_over = True
+                self.game.save_game_stats()

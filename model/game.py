@@ -21,6 +21,8 @@ class Game:
         self.game_over = False
         self.game_won = False
         self.available_blocks = [None]
+        self.number_of_moves = 0
+        self.player_type = None
         self.load_level(0)
     
     def load_level(self, level_num):
@@ -65,6 +67,9 @@ class Game:
             
             # Create the first blocks from the sequence
             self.available_blocks = self.get_next_blocks_from_sequence()
+            
+            # Reset the move counter when loading a new level
+            self.number_of_moves = 0
         else:
             # If level doesn't exist, check if we finished all levels
             max_level = max(level.level_num for level in LEVELS)
@@ -117,6 +122,9 @@ class Game:
     
     def place_block(self, block, x, y):
         has_cleared = False
+        
+        # Increment the move counter when a block is placed
+        self.number_of_moves += 1
         
         # Place block on the board
         for cell in block.get_cells():
@@ -212,6 +220,7 @@ class Game:
         return True
         
     def check_level_complete(self):
+        # Level is complete if all required stones are collected
         return (self.green_stones_collected >= self.green_stones_to_collect and 
                 self.red_stones_collected >= self.red_stones_to_collect)
     
@@ -221,5 +230,50 @@ class Game:
             return min(next_levels)
         return None
     
+    def get_score(self):
+        return self.number_of_moves
+    
+    def save_game_stats(self):
+        import csv
+        import os
+        from datetime import datetime
+        
+        # Nome do arquivo de histórico
+        csv_filename = "game_history.csv"
+        file_exists = os.path.isfile(csv_filename)
+        
+        # Data e hora atual
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        player_type = "Bot" if self.player_type and self.player_type.name == "BOT" else "Humano"
+        # Dados para salvar
+        data = {
+            'player_type' : player_type,
+            'timestamp': current_time,
+            'level': self.level_num,
+            'moves': self.number_of_moves,
+            'level_complete': self.check_level_complete()
+        }
+        
+        # Campos do CSV
+        fieldnames = ['player_type','timestamp', 'level', 'moves', 'level_complete']
+        
+        try:
+            with open(csv_filename, 'a', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                
+                # Escrever cabeçalho apenas se o arquivo for novo
+                if not file_exists:
+                    writer.writeheader()
+                
+                writer.writerow(data)
+                print(f"Game stats saved to {csv_filename}")
+                
+        except Exception as e:
+            print(f"Error saving game stats: {e}")
+
+    def set_player_type(self, type):
+        self.player_type = type
+
     def reset(self):
         self.__init__()
