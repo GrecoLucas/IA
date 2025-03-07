@@ -72,18 +72,18 @@ LEVELS = [
     
     LevelData(
         level_num=2,
-        green_goal=3,
-        red_goal=3,
+        green_goal=2,
+        red_goal=2,
         name="2 Advanced",
         sequence=["S", "Z", "T", "T_INVERTIDO", "single",
                  "right_up_corner", "left_up_corner", "I", "T_INVERTIDO"],
         grid=[
             [2, 0, 0, 0, 0, 0, 1, 1],
             [0, 2, 0, 0, 0, 1, 1, 0],
-            [0, 0, 2, 0, 1, 1, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 0, 3, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 1, 0, 0, 0, 3, 0],
             [1, 1, 0, 0, 0, 0, 0, 3]
         ]
@@ -94,7 +94,7 @@ LEVELS = [
         green_goal=5,
         red_goal=3,
         name="3 Better",
-        sequence=["O", "Z", "|-", "right_up_corner", "single", "single", 
+        sequence=["Z", "|-", "right_up_corner", "single", "single", 
                  "L", "J", "L", "J", "I", "T_INVERTIDO"],
         grid=[
             [2, 2, 2, 2, 2, 0, 0, 0],
@@ -112,7 +112,7 @@ LEVELS = [
         green_goal=2,  
         red_goal=0,    
         name="4 Good",
-        sequence=[ "I", "O", "L", "I_H", "single",  "single",  "L", "J"  ],
+        sequence=[ "I", "L", "I_H", "single",  "single",  "L", "J"  ],
         grid=[
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
