@@ -8,8 +8,14 @@ class Game:
     def __init__(self):
         self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
         self.board_types = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+        block_panel_height = 210
+        block_width = GRID_SIZE * 4  
+        spacing = (SCREEN_WIDTH - (3 * block_width)) // 4  
+        
         self.block_positions = [
-            (SCREEN_WIDTH // 2 - GRID_SIZE * 2, SCREEN_HEIGHT - 150)
+            (spacing, SCREEN_HEIGHT - block_panel_height),
+            (spacing * 2 + block_width, SCREEN_HEIGHT - block_panel_height),
+            (spacing * 3 + block_width * 2, SCREEN_HEIGHT - block_panel_height)
         ]
         self.selected_block = None
         self.green_stones_collected = 0
@@ -20,9 +26,9 @@ class Game:
         self.level_num = 0
         self.game_over = False
         self.game_won = False
-        self.available_blocks = [None]
+        self.available_blocks = [None, None, None]
         self.number_of_moves = 0
-        self.player_type = None
+        self.total_moves = 0
         self.load_level(0)
     
     def load_level(self, level_num):
@@ -68,6 +74,8 @@ class Game:
             # Create the first blocks from the sequence
             self.available_blocks = self.get_next_blocks_from_sequence()
             
+            # Reset the move counter when loading a new level
+            self.number_of_moves = 0
         else:
             # If level doesn't exist, check if we finished all levels
             max_level = max(level.level_num for level in LEVELS)
@@ -84,21 +92,24 @@ class Game:
 
     def get_next_blocks_from_sequence(self):
         if not self.current_level or not self.current_level.sequence:
-            print("No sequence defined, using random block")
-            return [Block()]  # Just one block
+            print("No sequence defined, using random blocks")
+            return [Block() for _ in range(3)]  # 3 random blocks
         
-        blocks = [None]  # Initialize with one position
+        blocks = [None, None, None]  # Initialize with three positions
         
-        shape_name = self.current_level.get_next_block_name()
-        print(f"Next block from sequence: {shape_name}")
-   
-        # Check if block name exists in SHAPES
-        if shape_name and shape_name in SHAPES:
-            blocks[0] = Block(shape_name)
-        else:
-            print(f"ERROR: Shape '{shape_name}' not found in SHAPES!")
-            # Use a random block if name doesn't exist
-            blocks[0] = Block()
+        # Get next 3 blocks from sequence
+        for i in range(3):
+            shape_name = self.current_level.get_next_block_name()
+            print(f"Next block from sequence: {shape_name}")
+       
+            # Check if block name exists in SHAPES
+            if shape_name and shape_name in SHAPES:
+                blocks[i] = Block(shape_name)
+            else:
+                if shape_name:
+                    print(f"ERROR: Shape '{shape_name}' not found in SHAPES!")
+                # Use a random block if name doesn't exist
+                blocks[i] = Block()
 
         return blocks
     
@@ -123,6 +134,7 @@ class Game:
         
         # Increment the move counter when a block is placed
         self.number_of_moves += 1
+        self.total_moves += 1
         
         # Place block on the board
         for cell in block.get_cells():
@@ -198,6 +210,7 @@ class Game:
     
     def check_game_over(self):
         # Check if any available block can be placed on the board
+        can_place_any = False
         for block in self.available_blocks:
             if not block:  # Skip if block was used
                 continue
@@ -207,33 +220,30 @@ class Game:
                 for x in range(GRID_WIDTH):
                     if self.is_valid_position(block, x, y):
                         can_place = True
+                        can_place_any = True
                         break
                 if can_place:
                     break
-            
-            if can_place:
-                return False  # At least one block can be placed
         
         # If no blocks can be placed, game is over
-        return True
+        return not can_place_any
+    
+    def all_blocks_used(self):
+        # Check if all available blocks have been used
+        return all(block is None for block in self.available_blocks)
         
     def check_level_complete(self):
-        if self.level_num == -1:
-            return False
+        # Level is complete if all required stones are collected
         return (self.green_stones_collected >= self.green_stones_to_collect and 
                 self.red_stones_collected >= self.red_stones_to_collect)
     
     def get_next_level(self):
-        if self.level_num == -1:
-            return None
         next_levels = [level.level_num for level in LEVELS if level.level_num > self.level_num]
         if next_levels:
             return min(next_levels)
         return None
     
-    def get_score(self):
-        return self.number_of_moves
-    
+
     def save_game_stats(self):
         import csv
         import os
@@ -246,18 +256,20 @@ class Game:
         # Data e hora atual
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        player_type = "Bot" if self.player_type and self.player_type.name == "BOT" else "Humano"
         # Dados para salvar
         data = {
-            'player_type' : player_type,
             'timestamp': current_time,
             'level': self.level_num,
             'moves': self.number_of_moves,
+            'green_collected': self.green_stones_collected,
+            'red_collected': self.red_stones_collected,
+            'total_moves': self.total_moves,
             'level_complete': self.check_level_complete()
         }
         
         # Campos do CSV
-        fieldnames = ['player_type','timestamp', 'level', 'moves', 'level_complete']
+        fieldnames = ['timestamp', 'level', 'moves', 'green_collected', 
+                     'red_collected', 'total_moves', 'level_complete']
         
         try:
             with open(csv_filename, 'a', newline='') as csvfile:
@@ -273,13 +285,8 @@ class Game:
         except Exception as e:
             print(f"Error saving game stats: {e}")
 
-    def set_player_type(self, type):
-        self.player_type = type
+    def set_player_type(self, player_type):
+        self.player_type = player_type
 
     def reset(self):
-        if self.level_num == -1:
-            self.load_level(-1)
-        else:
-            self.load_level(0)
-        self.game_over = False
-        
+        self.__init__()

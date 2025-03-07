@@ -38,18 +38,7 @@ class BlockView:
 
     @staticmethod
     def draw_available_block(screen, block, position, font):
-        """Draw a block in the selection area at the bottom of the screen"""
         x, y = position
-        
-        # Draw selection background
-        selection_rect = pygame.Rect(
-            x - 10, 
-            y - 10,
-            block.cols * GRID_SIZE + 20,
-            block.rows * GRID_SIZE + 20
-        )
-        pygame.draw.rect(screen, (240, 240, 240), selection_rect, border_radius=10)
-        pygame.draw.rect(screen, WOOD_DARK, selection_rect, 2, border_radius=10)
         
         # Draw the block
         for row in range(block.rows):
@@ -62,9 +51,3 @@ class BlockView:
                     )
                     BlockView.draw_wood_block(screen, block.color, rect)
         
-        # Draw block name
-        if font:
-            block_name_text = font.render(f"{block.shape_name}", True, WOOD_DARK)
-            screen.blit(block_name_text, 
-                (x + (block.cols * GRID_SIZE) // 2 - block_name_text.get_width() // 2, 
-                y + block.rows * GRID_SIZE + 10))

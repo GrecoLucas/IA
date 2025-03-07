@@ -80,17 +80,15 @@ class GameView:
                         BlockView.draw_wood_block(self.screen, color, rect)
     
     def draw_available_blocks(self, game):
-        if game.available_blocks[0]:  
-            block = game.available_blocks[0]
-            # Center block at the bottom of screen
-            block_x = SCREEN_WIDTH // 2 - (block.cols * GRID_SIZE) // 2
-            block_y = SCREEN_HEIGHT - 200
-            
-            # Update block position for drawing and interaction
-            game.block_positions[0] = (block_x, block_y)
-            
-            # Draw the block
-            BlockView.draw_available_block(self.screen, block, (block_x, block_y), self.font)
+        # Draw all three available blocks
+        for i in range(3):
+            if game.available_blocks[i]:  
+                block = game.available_blocks[i]
+                # Get position from block_positions
+                block_x, block_y = game.block_positions[i]
+                
+                # Draw the block
+                BlockView.draw_available_block(self.screen, block, (block_x, block_y), self.font)
     
     def draw_selected_block(self, game):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -112,13 +110,19 @@ class GameView:
             f"Pedras verdes coletadas: {game.green_stones_collected}/{game.green_stones_to_collect}", 
             True, WOOD_DARK
         )
-        self.screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
+        self.screen.blit(objective_text, (20, SCREEN_HEIGHT - 70))
         
         objective_text = self.font.render(
             f"Pedras vermelhas coletadas: {game.red_stones_collected}/{game.red_stones_to_collect}", 
             True, WOOD_DARK
         )
-        self.screen.blit(objective_text, (20, SCREEN_HEIGHT - 30))
+        self.screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
+        
+        moves_text = self.font.render(
+            f"Movimentos: {game.number_of_moves}", 
+            True, WOOD_DARK
+        )
+        self.screen.blit(moves_text, (20, SCREEN_HEIGHT - 30))
     
     def draw_game_over(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
