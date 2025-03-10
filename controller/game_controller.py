@@ -1,13 +1,16 @@
 import pygame
-from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+from constants import BOT_MOVE_DELAY, BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
 class GameController:
-    def __init__(self, game, view):
+    def __init__(self, game, view, bot=None):
         self.game = game
         self.view = view
+        self.bot = bot
         self.dragging = False
         self.selected_block_index = -1  # Track which block was selected
         self.animation_delay = 100  # ms
+        self.bot_move_delay = BOT_MOVE_DELAY 
+        self.last_bot_move_time = 0  
     
     def handle_event(self, event):
         # Handle restart with R key
@@ -18,14 +21,15 @@ class GameController:
         if self.game.game_over or self.game.game_won:
             return
         
-        # Handle mouse events
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
-                self.handle_mouse_down(event.pos)
-                
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1 and self.dragging:  # Left mouse button release
-                self.handle_mouse_up(event.pos)
+        # Handle mouse events (only for human player)
+        if self.bot is None:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    self.handle_mouse_down(event.pos)
+                    
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1 and self.dragging:  # Left mouse button release
+                    self.handle_mouse_up(event.pos)
     
     def handle_mouse_down(self, pos):
         mouse_x, mouse_y = pos
@@ -113,3 +117,14 @@ class GameController:
             if self.game.check_game_over():
                 self.game.game_over = True
                 self.game.save_game_stats()
+                
+            # If this is a bot player, make a move after the delay
+            if self.bot and pygame.time.get_ticks() - self.last_bot_move_time > self.bot_move_delay:
+                # Let the bot make a move
+                move_made = self.bot.play()
+                if move_made:
+                    # Reset timer for next move
+                    self.last_bot_move_time = pygame.time.get_ticks()
+                    # Render after each bot move
+                    self.view.render(self.game)
+                    pygame.display.flip()

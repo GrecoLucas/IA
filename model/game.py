@@ -29,6 +29,8 @@ class Game:
         self.available_blocks = [None, None, None]
         self.number_of_moves = 0
         self.total_moves = 0
+        self.player_type = None
+
         self.load_level(0)
     
     def load_level(self, level_num):
@@ -243,7 +245,6 @@ class Game:
             return min(next_levels)
         return None
     
-
     def save_game_stats(self):
         import csv
         import os
@@ -290,3 +291,27 @@ class Game:
 
     def reset(self):
         self.__init__()
+
+    def make_move(self, block_index, x, y):
+        block = self.available_blocks[block_index]
+        if self.is_valid_position(block, x, y):
+            self.place_block(block, x, y)
+            self.available_blocks[block_index] = None
+            return True
+        return False
+
+    def get_game_state(self):
+        return {
+            'board': self.board,
+            'board_types': self.board_types,
+            'available_blocks': self.available_blocks,
+            'green_stones_collected': self.green_stones_collected,
+            'red_stones_collected': self.red_stones_collected,
+            'green_stones_to_collect': self.green_stones_to_collect,
+            'red_stones_to_collect': self.red_stones_to_collect,
+            'level_num': self.level_num,
+            'number_of_moves': self.number_of_moves,
+            'total_moves': self.total_moves,
+            'game_over': self.game_over,
+            'game_won': self.game_won
+        }

@@ -17,23 +17,6 @@ class LevelData:
 # Definição de níveis como objetos LevelData
 LEVELS = [
     LevelData(
-        level_num=-1,
-        green_goal=0,
-        red_goal=0,
-        name="Infinite",
-        sequence=[],
-        grid=[
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    ),
-    LevelData(
         level_num=0,
         green_goal=2,
         red_goal=0,

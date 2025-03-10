@@ -34,7 +34,6 @@ class Menu:
             MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
             MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
             MenuItem("Iniciar Jogo", self.start_game, None),
-            MenuItem("Infinit Mode", self.start_game_infinit, None),
             MenuItem("Sair", self.exit_game, None)
         ]
         # Define o primeiro item como selecionado inicialmente

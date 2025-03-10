@@ -7,6 +7,7 @@ from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from view.menu_view import MenuView
 from model.menu import Menu, MenuState, PlayerType  # Adicionando a importação de MenuState e PlayerType
 from controller.menu_controller import MenuController
+from model.bot import Bot  # Import the Bot class
 
 def main():
     # Initialize Pygame
@@ -35,13 +36,13 @@ def main():
     
     # Escolher o tipo de controlador baseado na escolha do jogador
     if player_type == PlayerType.BOT:
-        print("Not implemented yet")
-        sys.exit()
+        bot = Bot(game)
+        controller = GameController(game, view, bot)
     else:  # Jogador humano
         controller = GameController(game, view)
     
-    if (menu_state == MenuState.GAME_START_INF):
-        game.load_level(-1)
+    game.load_level(0)  # Carregar o primeiro nível se não for infinito
+
     clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():
@@ -49,16 +50,16 @@ def main():
                 pygame.quit()
                 sys.exit()
             
-            # Pass events to the controller
             controller.handle_event(event)
         
-        # Update game state
         controller.update()
-        
-        # Render game
+
+            
+        # Render the game
         view.render(game)
-        
         pygame.display.flip()
+        
+        # Control the frame rate
         clock.tick(60)
 
 if __name__ == "__main__":
