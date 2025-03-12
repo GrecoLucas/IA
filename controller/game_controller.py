@@ -8,7 +8,6 @@ class GameController:
         self.bot = bot
         self.dragging = False
         self.selected_block_index = -1  # Track which block was selected
-        self.animation_delay = 100  # ms
         self.bot_move_delay = BOT_MOVE_DELAY 
         self.last_bot_move_time = 0  
     
@@ -89,7 +88,7 @@ class GameController:
                 if animation_needed:
                     self.view.render(self.game)
                     pygame.display.flip()
-                    pygame.time.delay(self.animation_delay)
+
                 
                 # Check if level is complete
                 if self.game.check_level_complete():
@@ -112,7 +111,6 @@ class GameController:
         self.selected_block_index = -1
 
     def update(self):
-        # Check game over condition
         if not self.game.game_over and not self.game.game_won:
             if self.game.check_game_over():
                 self.game.game_over = True

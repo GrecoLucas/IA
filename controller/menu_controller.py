@@ -7,7 +7,6 @@ class MenuController:
         self.menu_view = menu_view
     
     def handle_events(self):
-        """Processa eventos de entrada do usuário"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -16,18 +15,17 @@ class MenuController:
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    self.menu.move_selection(-1)  # Move seleção para cima
+                    self.menu.move_selection(-1)  
                 elif event.key == pygame.K_DOWN:
-                    self.menu.move_selection(1)   # Move seleção para baixo
+                    self.menu.move_selection(1)   
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
-                    self.menu.select_current()    # Seleciona o item atual
+                    self.menu.select_current() 
     
     def run_menu(self):
-        """Executa o loop do menu até que uma ação encerre o menu"""
         clock = pygame.time.Clock()
         
         while self.menu.get_state() == MenuState.ACTIVE:
-            dt = clock.tick(60)  # Delta time em milissegundos
+            dt = clock.tick(60)  
             self.handle_events()
             self.menu_view.draw(self.menu, dt)
         

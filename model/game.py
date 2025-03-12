@@ -102,7 +102,6 @@ class Game:
         # Get next 3 blocks from sequence
         for i in range(3):
             shape_name = self.current_level.get_next_block_name()
-            print(f"Next block from sequence: {shape_name}")
        
             # Check if block name exists in SHAPES
             if shape_name and shape_name in SHAPES:
@@ -299,19 +298,3 @@ class Game:
             self.available_blocks[block_index] = None
             return True
         return False
-
-    def get_game_state(self):
-        return {
-            'board': self.board,
-            'board_types': self.board_types,
-            'available_blocks': self.available_blocks,
-            'green_stones_collected': self.green_stones_collected,
-            'red_stones_collected': self.red_stones_collected,
-            'green_stones_to_collect': self.green_stones_to_collect,
-            'red_stones_to_collect': self.red_stones_to_collect,
-            'level_num': self.level_num,
-            'number_of_moves': self.number_of_moves,
-            'total_moves': self.total_moves,
-            'game_over': self.game_over,
-            'game_won': self.game_won
-        }
