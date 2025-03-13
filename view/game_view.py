@@ -151,3 +151,49 @@ class GameView:
         
         self.screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+    def show_rules(self):
+        """Exibe as regras do jogo e aguarda input do usuário para voltar ao menu"""
+        running = True
+
+        while running:
+            # Limpar tela e desenhar fundo escuro semitransparente
+            self.screen.fill(BACKGROUND_COLOR)
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))
+            self.screen.blit(overlay, (0, 0))
+
+            # Título
+            rules_title = self.title_font.render("COMO JOGAR", True, WHITE)
+            self.screen.blit(rules_title, (SCREEN_WIDTH // 2 - rules_title.get_width() // 2, 50))
+
+            # Lista de regras
+            rules = [
+                "1. Mova os blocos para o tabuleiro",
+                "2. Combine uma linha ou coluna para coletar pedras verdes e vermelhas ",
+                "e limpar a respectiva linha ou coluna",
+                "4. Complete os objetivos do nível para avançar",
+                "5. Se não for possível posicionar mais blocos, o jogo termina",
+                "6. Tente completar o jogo com o menor número possível de movimentos"
+            ]
+
+            # Desenhar cada regra
+            y_offset = 150
+            for rule in rules:
+                rule_text = self.font.render(rule, True, WHITE)
+                self.screen.blit(rule_text, (SCREEN_WIDTH // 2 - rule_text.get_width() // 2, y_offset))
+                y_offset += 40
+
+            # Instruções para voltar
+            back_text = self.font.render("Pressione ESC ou ENTER para voltar ao menu", True, WHITE)
+            self.screen.blit(back_text, (SCREEN_WIDTH // 2 - back_text.get_width() // 2, SCREEN_HEIGHT - 100))
+
+            # Atualizar tela
+            pygame.display.flip()
+
+            # Tratar eventos
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE or event.key == pygame.K_RETURN:
+                        running = False  # Sair do loop e retornar

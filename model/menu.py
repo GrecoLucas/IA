@@ -9,6 +9,7 @@ class MenuState(Enum):
     GAME_START = 2
     GAME_START_INF = 4
     EXIT = 3
+    RULES = 5
 
 class MenuItem:
     def __init__(self, text, action=None, value=None):
@@ -34,6 +35,7 @@ class Menu:
             MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
             MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
             MenuItem("Iniciar Jogo", self.start_game, None),
+            MenuItem("Como Jogar", self.start_rules, None),
             MenuItem("Sair", self.exit_game, None)
         ]
         # Define o primeiro item como selecionado inicialmente
@@ -95,3 +97,7 @@ class Menu:
     def get_selected_index(self):
         """Retorna o índice do item selecionado"""
         return self.selected_index
+    
+    def start_rules(self):
+        self.state = MenuState.RULES
+        return True

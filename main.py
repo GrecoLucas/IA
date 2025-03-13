@@ -17,46 +17,59 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Wood Block")
     
-    # Menu
-    menu_model = Menu()
-    menu_view = MenuView(screen)
-    menu_controller = MenuController(menu_model, menu_view)
-    
-    menu_state, player_type = menu_controller.run_menu()
-
-    # Verificar o resultado do menu
-    if menu_state == MenuState.EXIT:
-        pygame.quit()
-        sys.exit()
-
-    # Create MVC components
-    game = Game()
-    game.set_player_type(player_type)
-    view = GameView(screen)
-
-    # Escolher o tipo de controlador baseado na escolha do jogador
-    if player_type == PlayerType.BOT:
-        bot = Bot(game)
-        controller = GameController(game, view, bot)
-    else:  
-        controller = GameController(game, view)
-    
-    game.load_level(0)  # Carregar o primeiro nível
-    clock = pygame.time.Clock()
+    # Loop principal do programa
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            
-            controller.handle_event(event)
-
-        view.render(game)
-        pygame.display.flip()
+        # Menu
+        menu_model = Menu()
+        menu_view = MenuView(screen)
+        menu_controller = MenuController(menu_model, menu_view)
         
-        controller.update()
+        menu_state, player_type = menu_controller.run_menu()
 
-        clock.tick(60)
+        # Verificar o resultado do menu
+        if menu_state == MenuState.EXIT:
+            pygame.quit()
+            sys.exit()
+            
+        # Create MVC components
+        game = Game()
+        game.set_player_type(player_type)
+        view = GameView(screen)
+
+        # Se selecionou ver as regras, exibe e volta ao menu principal
+        if menu_state == MenuState.RULES:
+            view.show_rules()
+            continue  # Volta ao início do loop para mostrar o menu novamente
+            
+        # Escolher o tipo de controlador baseado na escolha do jogador
+        if player_type == PlayerType.BOT:
+            bot = Bot(game)
+            controller = GameController(game, view, bot)
+        else:  
+            controller = GameController(game, view)
+        
+        # Carregar o primeiro nível
+        game.load_level(0)
+        
+        # Loop do jogo
+        clock = pygame.time.Clock()
+        game_running = True
+        while game_running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    game_running = False  # Sair do jogo e voltar ao menu
+                
+                controller.handle_event(event)
+
+            view.render(game)
+            pygame.display.flip()
+            
+            controller.update()
+
+            clock.tick(60)
 
 if __name__ == "__main__":
     main()
