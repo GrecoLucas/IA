@@ -29,6 +29,8 @@ class Game:
         self.available_blocks = [None, None, None]
         self.number_of_moves = 0
         self.total_moves = 0
+        self.player_type = None
+
         self.load_level(0)
     
     def load_level(self, level_num):
@@ -100,7 +102,6 @@ class Game:
         # Get next 3 blocks from sequence
         for i in range(3):
             shape_name = self.current_level.get_next_block_name()
-            print(f"Next block from sequence: {shape_name}")
        
             # Check if block name exists in SHAPES
             if shape_name and shape_name in SHAPES:
@@ -243,7 +244,6 @@ class Game:
             return min(next_levels)
         return None
     
-
     def save_game_stats(self):
         import csv
         import os
@@ -290,3 +290,11 @@ class Game:
 
     def reset(self):
         self.__init__()
+
+    def make_move(self, block_index, x, y):
+        block = self.available_blocks[block_index]
+        if self.is_valid_position(block, x, y):
+            self.place_block(block, x, y)
+            self.available_blocks[block_index] = None
+            return True
+        return False

@@ -2,80 +2,65 @@ import pygame
 from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 import random
 class BotController:
-    def __init__(self, game):
-        self.game = game
-        #self.view = view
-        #self.dragging = False
-        #self.selected_block_index = -1  # Track which block was selected
-        self.animation_delay = 100  # ms
-    
-    def get_possible_positions_block(self, block):
-        valid = False
-        tries = 100
-        while not valid and tries > 0:
-            x = random.randint(0,GRID_WIDTH-1)
-            y = random.randint(0,GRID_HEIGHT-1)
-            #grid_x = (x - BOARD_X) // GRID_SIZE
-            #grid_y = (y - BOARD_Y) // GRID_SIZE
-            valid = self.game.is_valid_position(block, x, y)
-            tries -= 1
-        if not valid:
-            return False # no valid positions for selected block
-        else:
-            print(f"positions: x:{x}, y:{y}")
-            return (x,y)
+    def __init__(self, bot):
+        self.bot = bot
 
-
-    def choose_random_block(self):
-        blocks = [b for b in self.game.available_blocks]
-        if not blocks:
-            print("no blocks obtained in choose_random_block")
-            #self.game.over= True
-            # IMPLEMENTAR GAME OVER PARA SITUAÇÃO IMPOSSIVEL FICAR SEM BLOCOS
-            return False
-        else:
-            avail = [0,1,2] # BLOCK INDEXES
-            while len(avail) > 0:
-                i = random.randint(0, len(avail)-1)  # Choose a random index from avail list
-                selected_index = avail.pop(i)
-                candidate_block = blocks[selected_index]
-                if candidate_block is None:
-                    continue
-                pos = self.get_possible_positions_block(candidate_block)
-                if pos:   #  Posição encontrada para fazer uma jogada
-                    x,y = pos
-                    #print(f"x: {x} || y:{y}")
-                    #placement_pos = (x,y)
-                    return (candidate_block, selected_index, x, y) #(candidate_block, placement_pos)
-            return False
-
+    def execute_move(self):
+        if self.bot.game.make_move(self.bot.selected_block_index, self.bot.target_x, self.bot.target_y):
+                self.bot.game.selected_block = None
+                
+                if self.bot.game.check_level_complete():
+                    next_level = self.bot.game.get_next_level()
+                    if next_level is not None:
+                        self.bot.game.load_level(next_level)
+                    else:
+                        self.bot.game.game_won = True
+                elif self.bot.game.all_blocks_used():
+                    self.bot.game.available_blocks = self.bot.game.get_next_blocks_from_sequence()
+ 
+        self.bot.state = "deciding"
+        move_made = True
+            
+        return move_made  # Retorna se uma atualização visual é necessária
                         
 
+    def play_random(self):
+        
+        if self.bot.state == "deciding":
+            move = self.bot.choose_random_block()
+            if move:
+                self.bot.game.selected_block, self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = move
+                self.bot.state = "executing"
+                
+            else:
+                self.bot.game.game_over = True
+
+        elif self.bot.state == "executing":
+            return self.execute_move()        
+        
+        
+
+    def play_optimal(self):
+       
+        if self.bot.state == "deciding":
+            best_move = self.bot.find_best_move()
+            if best_move:
+                self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
+                # UTIL PARA INFORMAÇÃO
+                self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                self.bot.state = "executing"
+            else:
+                self.bot.game.game_over = True
+                
+        elif self.bot.state == "executing":
+            return self.execute_move()
+        
     def play(self):
-        move = self.choose_random_block()
-        if move:
-            print(f"pos:{move}")
-            #block,x, y = pos
-            #(block, ) = move
-            #x,y = pos
-            #print(f"pos_x: {x}, pos_y: {y}")
-            #block=self.game.available_blocks[0]
-            return move
-        else:
-            print("choose_random_move returned False")
-            return False
-        """
-        block=self.game.available_blocks[0]
-        pos = self.get_possible_positions_block(block)
-        animation_needed = False
-        if pos:   #  Posição encontrada para fazer uma jogada
-            x,y = pos
-            print(f"x:{x}, y:{y}")
-            return (block, pos)
-            #return (block, 0)
-            self.game.selected_block = block
-            animation_needed = self.game.place_block(self.game.selected_block, x, y)
-        else:
-            print("fail")
-        return animation_needed"
-        """
+        match self.bot.algorithm:
+            case "random":
+                self.play_random() # Estado "deciding"
+                self.play_random() # Estdo "executing"
+            case "optimal":
+                self.play_optimal()
+                self.play_optimal()
+

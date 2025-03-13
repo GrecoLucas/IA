@@ -1,58 +1,24 @@
 import pygame
-#from model.menu import PlayerType 
-from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
-
+from constants import  BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+from controller.bot_controller import BotController
 class GameController:
-    def __init__(self, game, view, bot=False):
+    def __init__(self, game, view, bot=None):
         self.game = game
         self.view = view
-        self.dragging = False
-        self.selected_block_index = -1  # Track which block was selected
-        self.animation_delay = 100  # ms
         self.bot = bot
+        self.dragging = False
+        self.selected_block_index = -1  # Indica qual o bloco selecionado
+        self.animation_delay = 100  # ms
     
     def handle_bot_press_play(self, event):
         print("bot playing!")
-        res = self.bot.play()
-        if not res:
-            print("play returned False")
-            return
-        block, idx, x, y = res
-        #x,y = pos
-        self.game.selected_block = block
-        self.selected_block_index = idx
-        animation_needed = self.game.place_block(self.game.selected_block, x, y)
-        self.game.available_blocks[self.selected_block_index] = None
-        if animation_needed:
-                # Visual effect when clearing rows/columns
-                if animation_needed:
-                    self.view.render(self.game)
-                    pygame.display.flip()
-                    pygame.time.delay(self.animation_delay)
-                
-        # Check if level is complete
-        if self.game.check_level_complete():
-            next_level = self.game.get_next_level()
-            if next_level is not None:
-                self.game.load_level(next_level)
-            else:
-                self.game.game_won = True
-                self.game.save_game_stats()
-        # Generate new blocks only if all 3 have been used
-        elif self.game.all_blocks_used():
-            self.game.available_blocks = self.game.get_next_blocks_from_sequence()
-                
-        # Check for game over after placing a block
-        if not self.game.game_over and not self.game.game_won and self.game.check_game_over():
-            self.game.game_over = True
-            self.game.save_game_stats()
-        
-                
-        
-        self.game.selected_block = None
-        self.selected_block_index = -1
-        return
+        move_made = self.bot.play()
+        if move_made:
+            # Render após cada movimento do bot
+            self.view.render(self.game)
+            pygame.display.flip()
 
+        
     def handle_bot(self,event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
@@ -69,10 +35,9 @@ class GameController:
         
 
     def handle_event(self, event):
-        if self.bot: #self.game.player_type == PlayerType.BOT:
-            #print("Hi")
+        if self.bot: 
             self.handle_bot(event)
-            #return
+            
         # Handle restart with R key
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
@@ -82,14 +47,15 @@ class GameController:
         if self.game.game_over or self.game.game_won:
             return
         
-        # Handle mouse events
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
-                self.handle_mouse_down(event.pos)
-                
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1 and self.dragging:  # Left mouse button release
-                self.handle_mouse_up(event.pos)
+        # Handle mouse events (only for human player)
+        if self.bot is None:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    self.handle_mouse_down(event.pos)
+                    
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1 and self.dragging:  # Left mouse button release
+                    self.handle_mouse_up(event.pos)
     
     def handle_mouse_down(self, pos):
         mouse_x, mouse_y = pos
@@ -149,7 +115,7 @@ class GameController:
                 if animation_needed:
                     self.view.render(self.game)
                     pygame.display.flip()
-                    pygame.time.delay(self.animation_delay)
+
                 
                 # Check if level is complete
                 if self.game.check_level_complete():
@@ -172,8 +138,8 @@ class GameController:
         self.selected_block_index = -1
 
     def update(self):
-        # Check game over condition
         if not self.game.game_over and not self.game.game_won:
             if self.game.check_game_over():
                 self.game.game_over = True
                 self.game.save_game_stats()
+            

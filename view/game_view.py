@@ -106,17 +106,19 @@ class GameView:
         BlockView.draw_block(self.screen, game.selected_block, grid_x, grid_y, valid_position)
     
     def draw_objectives(self, game):
+        pygame.draw.rect(self.screen, GREEN_POINT, (20, SCREEN_HEIGHT - 80, 30, 30))
         objective_text = self.font.render(
-            f"Pedras verdes coletadas: {game.green_stones_collected}/{game.green_stones_to_collect}", 
+            f": {game.green_stones_collected}/{game.green_stones_to_collect}",
             True, WOOD_DARK
         )
-        self.screen.blit(objective_text, (10, SCREEN_HEIGHT - 50))
+        self.screen.blit(objective_text, (55, SCREEN_HEIGHT - 76))
         
+        pygame.draw.rect(self.screen, RED_POINT, (20, SCREEN_HEIGHT - 40, 30, 30))
         objective_text = self.font.render(
-            f"Pedras vermelhas coletadas: {game.red_stones_collected}/{game.red_stones_to_collect}", 
+            f": {game.red_stones_collected}/{game.red_stones_to_collect}",
             True, WOOD_DARK
         )
-        self.screen.blit(objective_text, (10, SCREEN_HEIGHT - 30))
+        self.screen.blit(objective_text, (55, SCREEN_HEIGHT - 36))
         
         moves_text = self.font.render(
             f"Movimentos: {game.number_of_moves}", 
@@ -129,7 +131,7 @@ class GameView:
             True, WOOD_DARK
         )
         self.screen.blit(total_moves_text, (399, SCREEN_HEIGHT - 50))
-    
+            
     def draw_game_over(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))

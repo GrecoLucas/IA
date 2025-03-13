@@ -4,7 +4,6 @@
 # 2 blocos verdes (objetivos a coletar)
 # 3 blocos vermelhos (pontos extras)
 
-
 class LevelData:
     def __init__(self, level_num, green_goal, red_goal, sequence, grid, name=None):
         self.level_num = level_num  # Número do nível
@@ -16,23 +15,6 @@ class LevelData:
 
 # Definição de níveis como objetos LevelData
 LEVELS = [
-    LevelData(
-        level_num=-1,
-        green_goal=0,
-        red_goal=0,
-        name="Infinite",
-        sequence=[],
-        grid=[
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0], 
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    ),
     LevelData(
         level_num=0,
         green_goal=2,
@@ -142,8 +124,42 @@ LEVELS = [
             [1, 1, 0, 0, 0, 0, 2, 2]
         ]
     ),
-        LevelData(
+    LevelData(
         level_num=6,
+        green_goal=5,
+        red_goal=5,
+        name="lucao",
+        sequence=["D", "I", "O", "G", "O", "right_down_corner", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO" ],
+        grid=[
+            [0, 0, 0, 0, 3, 0, 0, 0],
+            [2, 0, 0, 0, 3, 0, 0, 0],
+            [2, 0, 0, 0, 3, 0, 0, 0],
+            [2, 0, 0, 0, 0, 0, 0, 0],
+            [2, 0, 0, 0, 3, 0, 0, 0],
+            [2, 0, 0, 3, 0, 0, 1, 1],
+            [2, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    ),
+        LevelData(
+        level_num=7,
+        green_goal=2,
+        red_goal=4,
+        name="alvaro",
+        sequence=["left_down_corner", "right_down_corner", "left_up_corner", "right_up_corner", "I", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO"],
+        grid=[
+            [0, 0, 0, 0, 3, 0, 0, 0],
+            [2, 0, 0, 0, 3, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1],
+            [0, 1, 0, 3, 0, 0, 0, 1],
+            [0, 0, 0, 3, 0, 0, 0, 1],
+            [2, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    ),
+        LevelData(
+        level_num=8,
         green_goal=10,
         red_goal=4,
         name="DIOGÃO",
