@@ -3,6 +3,7 @@ import sys
 from model.game import Game
 from view.game_view import GameView
 from controller.game_controller import GameController
+from controller.bot_controller import BotController
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from view.menu_view import MenuView
 from model.menu import Menu, MenuState, PlayerType  # Adicionando a importação de MenuState e PlayerType
@@ -35,8 +36,12 @@ def main():
     
     # Escolher o tipo de controlador baseado na escolha do jogador
     if player_type == PlayerType.BOT:
-        print("Not implemented yet")
-        sys.exit()
+        bot = BotController(game)
+        print("Bootcontroller")
+        controller = GameController(game, view, bot)
+        print("Desespero")
+        #print("Not implemented yet")
+        #sys.exit()
     else:  # Jogador humano
         controller = GameController(game, view)
     

@@ -1,19 +1,83 @@
 import pygame
+#from model.menu import PlayerType 
 from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 
 class GameController:
-    def __init__(self, game, view):
+    def __init__(self, game, view, bot=False):
         self.game = game
         self.view = view
         self.dragging = False
         self.selected_block_index = -1  # Track which block was selected
         self.animation_delay = 100  # ms
+        self.bot = bot
     
+    def handle_bot_press_play(self, event):
+        print("bot playing!")
+        res = self.bot.play()
+        if not res:
+            print("play returned False")
+            return
+        block, idx, x, y = res
+        #x,y = pos
+        self.game.selected_block = block
+        self.selected_block_index = idx
+        animation_needed = self.game.place_block(self.game.selected_block, x, y)
+        self.game.available_blocks[self.selected_block_index] = None
+        if animation_needed:
+                # Visual effect when clearing rows/columns
+                if animation_needed:
+                    self.view.render(self.game)
+                    pygame.display.flip()
+                    pygame.time.delay(self.animation_delay)
+                
+        # Check if level is complete
+        if self.game.check_level_complete():
+            next_level = self.game.get_next_level()
+            if next_level is not None:
+                self.game.load_level(next_level)
+            else:
+                self.game.game_won = True
+                self.game.save_game_stats()
+        # Generate new blocks only if all 3 have been used
+        elif self.game.all_blocks_used():
+            self.game.available_blocks = self.game.get_next_blocks_from_sequence()
+                
+        # Check for game over after placing a block
+        if not self.game.game_over and not self.game.game_won and self.game.check_game_over():
+            self.game.game_over = True
+            self.game.save_game_stats()
+        
+                
+        
+        self.game.selected_block = None
+        self.selected_block_index = -1
+        return
+
+    def handle_bot(self,event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
+                self.game.reset()       
+            if event.key == pygame.K_p:
+                self.handle_bot_press_play(event)
+ 
+        # Skip other events if game is over
+        if self.game.game_over or self.game.game_won:
+            return
+        
+        
+        
+        
+
     def handle_event(self, event):
+        if self.bot: #self.game.player_type == PlayerType.BOT:
+            #print("Hi")
+            self.handle_bot(event)
+            #return
         # Handle restart with R key
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
                 self.game.reset()        
+            
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
