@@ -9,6 +9,7 @@ class MenuState(Enum):
     GAME_START = 2
     GAME_START_INF = 4
     EXIT = 3
+    CHOOSE_BOT = 5
 
 class MenuItem:
     def __init__(self, text, action=None, value=None):
@@ -27,6 +28,7 @@ class Menu:
         self.player_type = PlayerType.HUMAN
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
+        self.bot_type = None
     
     def initialize_menu_items(self):
         """Define opções de menu padrão"""
@@ -34,7 +36,9 @@ class Menu:
             MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
             MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
             MenuItem("Iniciar Jogo", self.start_game, None),
-            MenuItem("Sair", self.exit_game, None)
+            MenuItem("Sair", self.exit_game, None),
+            MenuItem("Bot Random", self.set_bot_algorithm_random, "random"),
+            MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, "optimal"),
         ]
         # Define o primeiro item como selecionado inicialmente
         self.items[0].selected = True
@@ -47,11 +51,24 @@ class Menu:
     def set_player_bot(self):
         """Define o tipo de jogador como bot"""
         self.player_type = PlayerType.BOT
+        self.state = MenuState.CHOOSE_BOT
         return False  # Não fechar o menu após esta ação
+    
+    def set_bot_algorithm_random(self):
+        """Define i tipo de algoritmo do bot"""
+        self.bot_type = "random"
+        
+        return False
+    
+    def set_bot_algorithm_optimal(self):
+        """Define i tipo de algoritmo do bot"""
+        self.bot_type = "optimal"
+        return False
     
     def start_game(self):
         """Inicia o jogo com as configurações definidas"""
         self.state = MenuState.GAME_START
+        
         return True  # Fechar o menu e iniciar o jogo
     
     def start_game_infinit(self):
@@ -87,6 +104,10 @@ class Menu:
     def get_player_type(self):
         """Retorna o tipo de jogador selecionado"""
         return self.player_type
+    
+    def get_bot_type(self):
+        """Retorna o tipo de bot selecionado"""
+        return self.bot_type
     
     def get_state(self):
         """Retorna o estado atual do menu"""

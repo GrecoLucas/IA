@@ -23,8 +23,8 @@ def main():
     menu_view = MenuView(screen)
     menu_controller = MenuController(menu_model, menu_view)
     
-    menu_state, player_type = menu_controller.run_menu()
-
+    menu_state, player_type, bot_type = menu_controller.run_menu()
+    print(f"bot:{bot_type}")
     # Verificar o resultado do menu
     if menu_state == MenuState.EXIT:
         pygame.quit()
@@ -37,7 +37,7 @@ def main():
 
     # Escolher o tipo de controlador baseado na escolha do jogador
     if player_type == PlayerType.BOT:
-        algorithm = "optimal"  #"random" 
+        algorithm = bot_type # "optimal"  #"random" 
         bot = Bot(game, algorithm)
         bot_controller = BotController(bot)
         controller = GameController(game, view, bot_controller)

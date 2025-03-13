@@ -27,6 +27,11 @@ class MenuController:
         while self.menu.get_state() == MenuState.ACTIVE:
             dt = clock.tick(60)  
             self.handle_events()
-            self.menu_view.draw(self.menu, dt)
+            self.menu_view.draw(self.menu, dt, 0, 4)
+
+        while self.menu.get_state() == MenuState.CHOOSE_BOT:
+            dt = clock.tick(60)  
+            self.handle_events()
+            self.menu_view.draw(self.menu, dt, 2)
         
-        return self.menu.get_state(), self.menu.get_player_type()
+        return self.menu.get_state(), self.menu.get_player_type(), self.menu.get_bot_type()                           

@@ -54,7 +54,7 @@ class MenuView:
             self.current_frame = (self.current_frame + 1) % len(self.background_frames)
             self.frame_time = 0
 
-    def draw(self, menu, dt):
+    def draw(self, menu, dt, start_index=0, stop_index=None ):
         """Desenha o menu na tela"""
         self.update_animation(dt)
         
@@ -75,7 +75,7 @@ class MenuView:
         
         # Desenhar itens do menu
         menu_y = 200
-        for i, item in enumerate(menu.items):
+        for i, item in enumerate(menu.items[start_index:stop_index], start=start_index):
             color = WOOD_DARK
             
             # Destacar o item selecionado
@@ -94,7 +94,7 @@ class MenuView:
             text = self.font.render(item.text, True, color)
             
             # Marcar opção ativa de tipo de jogador
-            if i < 2:  # Opções de jogador
+            if i < 2 and start_index == 0:  # Opções de jogador
                 if (i == 0 and menu.get_player_type() == PlayerType.HUMAN) or \
                    (i == 1 and menu.get_player_type() == PlayerType.BOT):
                     # Desenhar um marcador de seleção
