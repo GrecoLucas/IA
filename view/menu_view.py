@@ -56,6 +56,15 @@ class MenuView:
         if self.frames and self.current_frame < len(self.frames):
             self.screen.blit(self.frames[self.current_frame], (0, 0))  
 
+        if menu.state == MenuState.RULES:
+            self.draw_rules()
+        else:
+            self.draw_menu_items(menu, selected_bot_name)
+
+        pygame.display.flip()
+        
+    def draw_menu_items(self, menu, selected_bot_name=None):
+        """Draw the main menu items"""
         title = self.title_font.render("Wood Block Puzzle", True, WOOD_DARK)
         self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 80))
 
@@ -88,4 +97,42 @@ class MenuView:
             bot_name_text = self.font.render(f"Bot: {selected_bot_name}", True, WOOD_DARK)
             self.screen.blit(bot_name_text, (50, 50))
 
-        pygame.display.flip()
+    def draw_rules(self):
+        """Draw the rules screen."""
+        
+        # Title
+        title = self.title_font.render("Regras do Jogo", True, WOOD_DARK)
+        self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 20))
+        
+        # Rules text - multi-line
+        rules_texts = [
+            "• Arraste e solte blocos de madeira no tabuleiro.",
+            "• Os blocos se conectam na grade quando soltos.",
+            "• Complete linhas horizontais ou verticais para removê-las.",
+            "• Para passar de fase é necessário pegar as peças ",
+            "verdes ou vermelhas indicadas no canto inferior esquerdo.",
+            "• Se não houver mais espaço no tabuleiro, o jogo acaba.",
+            "• Tente chegar no ultimo nivel com o menor ",
+            "numero de movimentos possíveis."
+        ]
+        
+        y_position = 100
+        for rule in rules_texts:
+            text = self.font.render(rule, True, WOOD_DARK)
+            self.screen.blit(text, (80, y_position))
+            y_position += 45
+        
+        # Back button - highlighted rectangle
+        back_text = self.font.render("Voltar ao Menu", True, WOOD_DARK)
+        back_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 100, 200, 50)
+        pygame.draw.rect(self.screen, (240, 240, 220), back_rect, border_radius=5)
+        pygame.draw.rect(self.screen, WOOD_MEDIUM, back_rect, 2, border_radius=5)
+        
+        # Center the text on the button
+        text_x = back_rect.centerx - back_text.get_width() // 2
+        text_y = back_rect.centery - back_text.get_height() // 2
+        self.screen.blit(back_text, (text_x, text_y))
+        
+        # Navigation hint
+        hint = self.font.render("Clique para voltar ou pressione ESC", True, WOOD_MEDIUM)
+        self.screen.blit(hint, (SCREEN_WIDTH // 2 - hint.get_width() // 2, SCREEN_HEIGHT - 40))

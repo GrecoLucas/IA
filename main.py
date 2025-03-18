@@ -18,24 +18,25 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Wood Block")
 
-    # Menu
+    # Set up menu system
     menu_model = Menu()
     menu_view = MenuView(screen)
     menu_controller = MenuController(menu_model, menu_view)
-
+    
+    # Run menu until game starts or exit is selected
     menu_state, player_type, bot_type = menu_controller.run_menu()
 
-    # Verificar o resultado do menu
+    # Handle menu result
     if menu_state == MenuState.EXIT:
         pygame.quit()
         sys.exit()
 
-    # Create MVC components
+    # Create MVC components for the game
     game = Game()
     game.set_player_type(player_type)
     view = GameView(screen)
 
-    # Escolher o tipo de controlador baseado na escolha do jogador
+    # Choose controller based on player type
     if player_type == PlayerType.BOT:
         algorithm = bot_type
         bot = Bot(game, algorithm)

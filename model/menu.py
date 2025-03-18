@@ -10,6 +10,7 @@ class MenuState(Enum):
     GAME_START_INF = 4
     EXIT = 3
     CHOOSE_ALGORITHM = 6
+    RULES = 7
 
 class MenuItem:
     def __init__(self, text, action=None, value=None):
@@ -36,6 +37,7 @@ class Menu:
                 MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
                 MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
                 MenuItem("Iniciar Jogo", self.start_game, None),
+                MenuItem("Como Jogar", self.rules, None),
                 MenuItem("Sair", self.exit_game, None),
             ]
         elif self.state == MenuState.CHOOSE_ALGORITHM:
@@ -77,6 +79,9 @@ class Menu:
         self.initialize_menu_items()
         return False
 
+    def rules(self):
+        self.state = MenuState.RULES
+        return
 
     def start_game(self):
         self.state = MenuState.GAME_START
