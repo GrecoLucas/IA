@@ -6,25 +6,25 @@ from controller.game_controller import GameController
 from controller.bot_controller import BotController
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from view.menu_view import MenuView
-from model.menu import Menu, MenuState, PlayerType 
+from model.menu import Menu, MenuState, PlayerType
 from controller.menu_controller import MenuController
-from model.bot import Bot  
+from model.bot import Bot
 
 def main():
     # Initialize Pygame
     pygame.init()
-    
+
     # Set up the display
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Wood Block")
-    
+
     # Menu
     menu_model = Menu()
     menu_view = MenuView(screen)
     menu_controller = MenuController(menu_model, menu_view)
-    
+
     menu_state, player_type, bot_type = menu_controller.run_menu()
-    print(f"bot:{bot_type}")
+
     # Verificar o resultado do menu
     if menu_state == MenuState.EXIT:
         pygame.quit()
@@ -37,26 +37,28 @@ def main():
 
     # Escolher o tipo de controlador baseado na escolha do jogador
     if player_type == PlayerType.BOT:
-        algorithm = bot_type # "optimal"  #"random" 
+        algorithm = bot_type
         bot = Bot(game, algorithm)
         bot_controller = BotController(bot)
         controller = GameController(game, view, bot_controller)
-    else:  
+    else:
         controller = GameController(game, view)
-    
-    game.load_level(0)  # Carregar o primeiro nível
+
+    game.load_level(0)
     clock = pygame.time.Clock()
     while True:
+        # Process all events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             
+            # Only pass actual events to the controller
             controller.handle_event(event)
 
         view.render(game)
         pygame.display.flip()
-        
+
         controller.update()
 
         clock.tick(60)

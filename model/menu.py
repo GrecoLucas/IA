@@ -9,7 +9,7 @@ class MenuState(Enum):
     GAME_START = 2
     GAME_START_INF = 4
     EXIT = 3
-    CHOOSE_BOT = 5
+    CHOOSE_ALGORITHM = 6
 
 class MenuItem:
     def __init__(self, text, action=None, value=None):
@@ -17,102 +17,112 @@ class MenuItem:
         self.action = action
         self.value = value
         self.selected = False
-    
+
     def get_value(self):
         return self.value
 
 class Menu:
     def __init__(self):
-        self.items = []
         self.selected_index = 0
         self.player_type = PlayerType.HUMAN
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
         self.bot_type = None
-    
+
     def initialize_menu_items(self):
-        """Define opções de menu padrão"""
-        self.items = [
-            MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
-            MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
-            MenuItem("Iniciar Jogo", self.start_game, None),
-            MenuItem("Sair", self.exit_game, None),
-            MenuItem("Bot Random", self.set_bot_algorithm_random, "random"),
-            MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, "optimal"),
-        ]
-        # Define o primeiro item como selecionado inicialmente
-        self.items[0].selected = True
-    
+        """Define as opções do menu com base no estado atual."""
+        if self.state == MenuState.ACTIVE:
+            self.items = [
+                MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
+                MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
+                MenuItem("Iniciar Jogo", self.start_game, None),
+                MenuItem("Sair", self.exit_game, None),
+            ]
+        elif self.state == MenuState.CHOOSE_ALGORITHM:
+            self.items = [
+                MenuItem("Bot Random", self.set_bot_algorithm_random, "random"),
+                MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, "optimal"),
+                MenuItem("Gonçalo é o maior", self.set_bot_algorithm_random, None),
+                MenuItem("Voltar", self.back_to_main_menu, None), 
+            ]
+        self.selected_index = 0  
+        if self.items: 
+            self.items[0].selected = True
+
     def set_player_human(self):
-        """Define o tipo de jogador como humano"""
         self.player_type = PlayerType.HUMAN
-        return False  # Não fechar o menu após esta ação
-    
+        return False
+
     def set_player_bot(self):
-        """Define o tipo de jogador como bot"""
         self.player_type = PlayerType.BOT
-        self.state = MenuState.CHOOSE_BOT
-        return False  # Não fechar o menu após esta ação
-    
+        self.state = MenuState.CHOOSE_ALGORITHM
+        self.initialize_menu_items() 
+        return False
+
     def set_bot_algorithm_random(self):
-        """Define i tipo de algoritmo do bot"""
         self.bot_type = "random"
-        
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items() 
         return False
-    
+
     def set_bot_algorithm_optimal(self):
-        """Define i tipo de algoritmo do bot"""
         self.bot_type = "optimal"
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items() 
         return False
-    
+
+    def back_to_main_menu(self):
+        """Retorna ao menu principal."""
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items()
+        return False
+
+
     def start_game(self):
-        """Inicia o jogo com as configurações definidas"""
         self.state = MenuState.GAME_START
-        
-        return True  # Fechar o menu e iniciar o jogo
-    
+        return True
+
     def start_game_infinit(self):
         self.state = MenuState.GAME_START_INF
         return True
 
     def exit_game(self):
-        """Sai do jogo"""
         self.state = MenuState.EXIT
-        return True  # Fechar o menu e sair
-    
+        return True
+
     def move_selection(self, direction):
-        """Move a seleção para cima ou para baixo"""
-        # Desselecionar o item atual
+        if not self.items: 
+            return
+
         self.items[self.selected_index].selected = False
-        
-        # Mover a seleção
         if direction > 0:
             self.selected_index = (self.selected_index + 1) % len(self.items)
         else:
             self.selected_index = (self.selected_index - 1) % len(self.items)
-        
-        # Selecionar o novo item
         self.items[self.selected_index].selected = True
-    
+
     def select_current(self):
-        """Executa a ação do item selecionado"""
+        if not self.items: # Evita erros
+            return False
         current_item = self.items[self.selected_index]
         if current_item.action:
             return current_item.action()
         return False
-    
+
     def get_player_type(self):
-        """Retorna o tipo de jogador selecionado"""
         return self.player_type
-    
+
     def get_bot_type(self):
-        """Retorna o tipo de bot selecionado"""
         return self.bot_type
-    
+
     def get_state(self):
-        """Retorna o estado atual do menu"""
         return self.state
-    
+
     def get_selected_index(self):
-        """Retorna o índice do item selecionado"""
         return self.selected_index
+
+    def get_bot_name(self):
+        """Retorna o nome do bot selecionado ou 'None'."""
+        if self.bot_type:
+            return self.bot_type
+        return None
