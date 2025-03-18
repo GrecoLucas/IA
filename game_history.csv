@@ -96,3 +96,8 @@ timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-03-12 14:17:24,8,11,8,3,98,False
 >>>>>>> 6b3a84e48c2ca0767d0f1ac9a47d4fc56cae37ac
 2025-03-13 15:27:17,1,6,0,0,11,False
+2025-03-18 11:47:47,0,4,0,0,4,False
+2025-03-18 11:52:24,8,5,2,3,93,False
+2025-03-18 12:03:00,8,4,2,3,93,False
+2025-03-18 12:03:14,0,5,0,0,5,False
+2025-03-18 12:03:16,0,5,0,0,5,False
