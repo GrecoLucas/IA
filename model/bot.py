@@ -5,7 +5,6 @@ from constants import MAX_SIMULATION_DEPTH, MAX_TRIES
 class Bot:
     def __init__(self, game, algorithm):
         self.game = game
-        #self.last_move_time = 0
         self.selected_block_index = None
         self.target_x = None
         self.target_y = None
