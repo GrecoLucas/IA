@@ -1,5 +1,4 @@
 from constants import *
-#import time  # Import time module for delay
 import copy
 import random
 from constants import MAX_SIMULATION_DEPTH, MAX_TRIES
@@ -13,8 +12,81 @@ class Bot:
         self.state = "deciding"
         self.algorithm =  algorithm
 
-    
-    
+
+    def find_best_greedy(self):
+        possible_moves = []
+        
+        # Coletar todos os movimentos possíveis
+        for block_index, block in enumerate(self.game.available_blocks):
+            if block is None:
+                continue
+            for y in range(GRID_HEIGHT):
+                for x in range(GRID_WIDTH):
+                    if self.game.is_valid_position(block, x, y):
+                        possible_moves.append((block_index, x, y))
+        
+        if not possible_moves:
+            return None
+        
+        # Dicionário para armazenar a pontuação de cada movimento
+        move_scores = {}
+        
+        # Avaliar cada movimento possível
+        for move in possible_moves:
+            block_index, x, y = move
+            
+            # Criar uma cópia do estado atual do jogo
+            game_copy = copy.deepcopy(self.game)
+            
+            # Fazer o movimento inicial
+            block = game_copy.available_blocks[block_index]
+            
+            # Armazenar estado antes do movimento para comparação
+            green_before = game_copy.green_stones_collected
+            red_before = game_copy.red_stones_collected
+            level_before = game_copy.level_num
+            
+            # Executar o movimento
+            game_copy.place_block(block, x, y)
+            game_copy.available_blocks[block_index] = None
+            
+            # Calcular pontos ganhos com este movimento
+            green_gained = game_copy.green_stones_collected - green_before
+            red_gained = game_copy.red_stones_collected - red_before
+            level_advanced = game_copy.level_num > level_before
+            
+            # Inicializar a pontuação para este movimento
+            simulation_score = 0
+            
+            # Pontos por pedras coletadas
+            simulation_score += green_gained * 50
+            simulation_score += red_gained * 50
+            
+            # Pontos por avanço de nível
+            if level_advanced:
+                simulation_score += 500
+            
+            # Bônus para movimentos que completam objetivos do nível
+            if game_copy.green_stones_collected >= game_copy.green_stones_to_collect and \
+               game_copy.red_stones_collected >= game_copy.red_stones_to_collect:
+                simulation_score += 300
+            
+            # Se estamos perto de coletar todas as pedras, dê um bônus extra
+            green_percent = game_copy.green_stones_collected / max(1, game_copy.green_stones_to_collect)
+            red_percent = game_copy.red_stones_collected / max(1, game_copy.red_stones_to_collect)
+            simulation_score += (green_percent + red_percent) * 100
+            
+            # Armazenar a pontuação para este movimento
+            move_scores[move] = simulation_score
+        
+        # Retornar o movimento com a melhor pontuação
+        if not move_scores:
+            return random.choice(possible_moves) if possible_moves else None
+        
+        best_move = max(move_scores.items(), key=lambda x: x[1])[0]
+        return best_move
+
+
     def find_best_move(self):
         possible_moves = []
     

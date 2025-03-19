@@ -119,9 +119,9 @@ class MenuView:
                 x_position = 80
                 for part in parts:
                     if part == "verdes":
-                        text = small_font.render(part, True, RED)  
-                    elif part == "vermelhas":
                         text = small_font.render(part, True, GREEN)  
+                    elif part == "vermelhas":
+                        text = small_font.render(part, True, RED)  
                     else:
                         text = small_font.render(part, True, RULES_COLOR)
                     self.screen.blit(text, (x_position, y_position))

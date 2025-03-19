@@ -1,7 +1,6 @@
 import pygame
-import sys
 import time
-from model.menu import MenuState, PlayerType
+from model.menu import MenuState
 
 class MenuController:
     def __init__(self, menu_model, menu_view):

@@ -1,4 +1,5 @@
 from enum import Enum
+from constants import BotType
 
 class PlayerType(Enum):
     HUMAN = 1
@@ -42,9 +43,9 @@ class Menu:
             ]
         elif self.state == MenuState.CHOOSE_ALGORITHM:
             self.items = [
-                MenuItem("Bot Random", self.set_bot_algorithm_random, "random"),
-                MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, "optimal"),
-                MenuItem("Gonçalo é o maior", self.set_bot_algorithm_random, None),
+                MenuItem("Bot Random", self.set_bot_algorithm_random, BotType.RANDOM),
+                MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, BotType.OPTIMAL),
+                MenuItem("Bot Greedy", self.set_bot_algorithm_greedy, BotType.GREEDY),
                 MenuItem("Voltar", self.back_to_main_menu, None), 
             ]
         self.selected_index = 0  
@@ -62,15 +63,21 @@ class Menu:
         return False
 
     def set_bot_algorithm_random(self):
-        self.bot_type = "random"
+        self.bot_type = BotType.RANDOM
         self.state = MenuState.ACTIVE
         self.initialize_menu_items() 
         return False
 
     def set_bot_algorithm_optimal(self):
-        self.bot_type = "optimal"
+        self.bot_type = BotType.OPTIMAL
         self.state = MenuState.ACTIVE
         self.initialize_menu_items() 
+        return False
+
+    def set_bot_algorithm_greedy(self):
+        self.bot_type = BotType.GREEDY
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items()
         return False
 
     def back_to_main_menu(self):
@@ -129,5 +136,5 @@ class Menu:
     def get_bot_name(self):
         """Retorna o nome do bot selecionado ou 'None'."""
         if self.bot_type:
-            return self.bot_type
+            return self.bot_type.value
         return None

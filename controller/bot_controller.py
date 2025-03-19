@@ -1,6 +1,5 @@
-import pygame
-from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
-import random
+from constants import BotType
+
 class BotController:
     def __init__(self, bot):
         self.bot = bot
@@ -54,13 +53,35 @@ class BotController:
                 
         elif self.bot.state == "executing":
             return self.execute_move()
-        
+    
+    def  play_greedy(self):
+
+        if self.bot.state == "deciding":
+            best_move = self.bot.find_best_greedy()
+            if best_move:
+                self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
+                # UTIL PARA INFORMAÇÃO
+                self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                self.bot.state = "executing"
+            else:
+                self.bot.game.game_over = True
+        elif self.bot.state == "executing":
+            return self.execute_move()
+
+
+
     def play(self):
         match self.bot.algorithm:
-            case "random":
+            case BotType.RANDOM:
                 self.play_random() # Estado "deciding"
                 self.play_random() # Estdo "executing"
-            case "optimal":
+            case BotType.OPTIMAL:
                 self.play_optimal()
                 self.play_optimal()
+            case BotType.GREEDY:
+                self.play_greedy()
+                self.play_greedy()
+            case _:
+                pass
+        return
 

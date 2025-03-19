@@ -19,11 +19,17 @@ RED_POINT = (200, 0, 0)
 WOOD_COLORS = [WOOD_LIGHT, WOOD_MEDIUM, WOOD_DARK]
 BACKGROUND_COLOR = (240, 240, 240)
 
-# Bot
+# Bot Optimal, se quiser melhorar a performance, diminua a profundidade máxima 
 BOT_MOVE_DELAY = 200
 MAX_SIMULATION_DEPTH = 10
 MAX_TRIES = 500
 
+# Bot Types
+from enum import Enum
+class BotType(Enum):
+    RANDOM = "random"
+    OPTIMAL = "optimal"
+    GREEDY = "greedy"
 
 # Rules
 RULES_COLOR = (10, 60, 10)
