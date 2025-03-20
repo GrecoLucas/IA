@@ -1,7 +1,6 @@
 from constants import *
 import copy
 import random
-from constants import MAX_SIMULATION_DEPTH, MAX_TRIES
 class Bot:
     def __init__(self, game, algorithm):
         self.game = game
@@ -9,8 +8,30 @@ class Bot:
         self.target_x = None
         self.target_y = None
         self.state = "deciding"
-        self.algorithm =  algorithm
+        self.algorithm = algorithm
+        
+    def evaluate_move(self, game, green_gained, red_gained, level_advanced, moves_count=1, is_greedy=False):
+        score = 0
+        
+        if level_advanced:
+            return float('inf')
+        
+        # Pontos por pedras coletadas
+        score += green_gained * 50
+        score += red_gained * 50
+        
+        # Penalidade por número de movimentos (para simulações completas)
+        if not is_greedy:
+            score -= moves_count * 5
+        
+        # Bônus/Penalidade pelo estado final do jogo
+        if game.game_won:
+            return float('inf')
+        if game.game_over:
+            return float('-inf')
 
+        return score
+    
 
     def find_best_greedy(self):
         possible_moves = []
@@ -26,6 +47,24 @@ class Bot:
         
         if not possible_moves:
             return None
+        
+        # Verificar primeiro os movimentos que avançam de nível instantaneamente
+        for move in possible_moves:
+            block_index, x, y = move
+            
+            # Criar uma cópia do estado atual do jogo
+            game_copy = copy.deepcopy(self.game)
+            
+            # Fazer o movimento
+            block = game_copy.available_blocks[block_index]
+            level_before = game_copy.level_num
+            
+            # Executar o movimento
+            game_copy.place_block(block, x, y)
+            
+            # Se avançou de nível imediatamente, retorne este movimento
+            if game_copy.level_num > level_before:
+                return move
         
         # Dicionário para armazenar a pontuação de cada movimento
         move_scores = {}
@@ -54,26 +93,15 @@ class Bot:
             red_gained = game_copy.red_stones_collected - red_before
             level_advanced = game_copy.level_num > level_before
             
-            # Inicializar a pontuação para este movimento
-            simulation_score = 0
-            
-            # Pontos por pedras coletadas
-            simulation_score += green_gained * 50
-            simulation_score += red_gained * 50
-            
-            # Pontos por avanço de nível
-            if level_advanced:
-                simulation_score += 500
-            
-            # Bônus para movimentos que completam objetivos do nível
-            if game_copy.green_stones_collected >= game_copy.green_stones_to_collect and \
-               game_copy.red_stones_collected >= game_copy.red_stones_to_collect:
-                simulation_score += 300
-            
-            # Se estamos perto de coletar todas as pedras, dê um bônus extra
-            green_percent = game_copy.green_stones_collected / max(1, game_copy.green_stones_to_collect)
-            red_percent = game_copy.red_stones_collected / max(1, game_copy.red_stones_to_collect)
-            simulation_score += (green_percent + red_percent) * 100
+            # Usar a função centralizada de avaliação
+            simulation_score = self.evaluate_move(
+                game_copy, 
+                green_gained, 
+                red_gained, 
+                level_advanced,
+                1,  # Um único movimento
+                is_greedy=True
+            )
             
             # Armazenar a pontuação para este movimento
             move_scores[move] = simulation_score
@@ -84,7 +112,6 @@ class Bot:
         
         best_move = max(move_scores.items(), key=lambda x: x[1])[0]
         return best_move
-
 
     def find_best_move(self):
         possible_moves = []
@@ -101,19 +128,39 @@ class Bot:
         if not possible_moves:
             return None
         
-    
+        # Verificar primeiro os movimentos que avançam de nível instantaneamente
+        for move in possible_moves:
+            block_index, x, y = move
+            
+            # Criar uma cópia do estado atual do jogo
+            game_copy = copy.deepcopy(self.game)
+            
+            # Fazer o movimento
+            block = game_copy.available_blocks[block_index]
+            level_before = game_copy.level_num
+            
+            # Executar o movimento
+            game_copy.place_block(block, x, y)
+            
+            # Se avançou de nível imediatamente, retorne este movimento
+            if game_copy.level_num > level_before:
+                return move
+        
         # Número de simulações por movimento
         num_simulations = MAX_SIMULATION_DEPTH
         # Dicionário para armazenar a pontuação média de cada movimento
         move_scores = {}
+        # Rastreia movimentos que avançam de nível durante simulações
+        level_advancing_moves = []
     
         # Avaliar cada movimento possível
         for move in possible_moves:
             total_score = 0
             block_index, x, y = move
+            found_level_advance = False
     
             # Executar várias simulações para este movimento
-            for _ in range(num_simulations):
+            for sim_num in range(num_simulations):
                 # Criar uma cópia do estado atual do jogo
                 game_copy = copy.deepcopy(self.game)
                 
@@ -135,11 +182,18 @@ class Bot:
                 red_gained = game_copy.red_stones_collected - red_before
                 level_advanced = game_copy.level_num > level_before
                 
+                # Se avançou de nível imediatamente, marque este movimento como prioritário
+                if level_advanced:
+                    found_level_advance = True
+                    if move not in level_advancing_moves:
+                        level_advancing_moves.append(move)
+                    break  # Não precisamos de mais simulações
+                
                 # Atualizar blocos disponíveis se necessário
                 if game_copy.all_blocks_used():
                     game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
                 
-                # Simular o restante do jogo com movimentos aleatórios (até 20 movimentos à frente)
+                # Simular o restante do jogo com movimentos aleatórios
                 max_simulation_depth = MAX_SIMULATION_DEPTH
                 simulation_depth = 0
                 
@@ -173,8 +227,14 @@ class Bot:
                     # Calcular pontos ganhos com este movimento
                     green_gained += game_copy.green_stones_collected - green_before
                     red_gained += game_copy.red_stones_collected - red_before
+                    
+                    # Verificar se avançou de nível durante a simulação
                     if game_copy.level_num > level_before:
                         level_advanced = True
+                        found_level_advance = True
+                        if move not in level_advancing_moves:
+                            level_advancing_moves.append(move)
+                        break  # Não precisamos continuar esta simulação
                     
                     # Se todos os blocos foram usados, obter novos
                     if game_copy.all_blocks_used():
@@ -182,40 +242,33 @@ class Bot:
                     
                     simulation_depth += 1
                 
-                # Calcular pontuação para esta simulação
-                simulation_score = 0
+                # Se encontramos avanço de nível, não precisamos de mais simulações
+                if found_level_advance:
+                    break
                 
-                # Pontos por pedras coletadas
-                simulation_score += green_gained * 50
-                simulation_score += red_gained * 50
+                # Usar a função centralizada de avaliação
+                simulation_score = self.evaluate_move(
+                    game_copy,
+                    green_gained,
+                    red_gained,
+                    level_advanced,
+                    moves_count,
+                    is_greedy=False
+                )
                 
-                # Pontos por avanço de nível
-                if level_advanced:
-                    simulation_score += 500
-                
-                # Penalidade por movimentos (queremos menos movimentos)
-                simulation_score -= moves_count * 5
-                
-                # Bônus/Penalidade pelo estado final do jogo
-                if game_copy.game_won:
-                    simulation_score += 1000
-                if game_copy.game_over:
-                    simulation_score -= 500
-                    
-                # Bônus para movimentos que completam objetivos do nível
-                if game_copy.green_stones_collected >= game_copy.green_stones_to_collect and \
-                   game_copy.red_stones_collected >= game_copy.red_stones_to_collect:
-                    simulation_score += 300
-                    
-                # Se estamos perto de coletar todas as pedras, dê um bônus extra
-                green_percent = game_copy.green_stones_collected / max(1, game_copy.green_stones_to_collect)
-                red_percent = game_copy.red_stones_collected / max(1, game_copy.red_stones_to_collect)
-                simulation_score += (green_percent + red_percent) * 100
-                    
                 total_score += simulation_score
             
-            # Armazenar a pontuação média para este movimento
-            move_scores[move] = total_score / num_simulations
+            # Se este movimento leva a um avanço de nível em alguma simulação
+            if found_level_advance:
+                move_scores[move] = float('inf')  # Prioridade máxima
+            else:
+                # Armazenar a pontuação média para este movimento
+                simulations_run = sim_num + 1
+                move_scores[move] = total_score / simulations_run
+        
+        # Priorizar movimentos que levam a avanço de nível
+        if level_advancing_moves:
+            return random.choice(level_advancing_moves)
         
         # Retornar o movimento com a melhor pontuação média
         if not move_scores:
@@ -242,7 +295,6 @@ class Bot:
     def choose_random_block(self):
         blocks = [b for b in self.game.available_blocks]
         if not blocks:
-            print("choose_random_block nã encontrou a lista available_blocks")
             return False
         else:
             avail = [0,1,2] # índices de blocos disponíveis
