@@ -42,6 +42,7 @@ def main():
         bot = Bot(game, algorithm)
         bot_controller = BotController(bot)
         controller = GameController(game, view, bot_controller)
+        game.set_bot_type(algorithm) 
     else:
         controller = GameController(game, view)
 

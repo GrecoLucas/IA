@@ -30,6 +30,7 @@ class Game:
         self.number_of_moves = 0
         self.total_moves = 0
         self.player_type = None
+        self.bot_type = None
 
         self.load_level(0)
     
@@ -131,7 +132,6 @@ class Game:
         return True
     
     def place_block(self, block, x, y):
-        has_cleared = False
         
         # Increment the move counter when a block is placed
         self.number_of_moves += 1
@@ -157,57 +157,48 @@ class Game:
             # Place wood block on the board
             self.board[board_y][board_x] = block.color
         
-        # Check and clear complete rows/columns
-        rows_cleared = self.clear_rows()
-        cols_cleared = self.clear_cols()
+        rows_cleared, cols_cleared = self.clear_rows_and_cols()
         
         return rows_cleared > 0 or cols_cleared > 0
 
-    def clear_rows(self):
-        rows_cleared = 0
+    def clear_rows_and_cols(self):
         rows_to_clear = []
+        cols_to_clear = []
         
         # Identify rows to clear
         for y in range(GRID_HEIGHT):
             if all(self.board[y][x] is not None for x in range(GRID_WIDTH)):
                 rows_to_clear.append(y)
-                rows_cleared += 1
-        
-        # Clear rows and collect stones
-        for y in rows_to_clear:
-            for x in range(GRID_WIDTH):
-                if self.board_types[y][x] == 2:  # If there's a green gem
-                    self.green_stones_collected += 1
-                elif self.board_types[y][x] == 3:  # If there's a red gem
-                    self.red_stones_collected += 1
-                
-                self.board[y][x] = None
-                self.board_types[y][x] = 0
-                
-        return rows_cleared
-    
-    def clear_cols(self):
-        cols_cleared = 0
-        cols_to_clear = []
         
         # Identify columns to clear
         for x in range(GRID_WIDTH):
             if all(self.board[y][x] is not None for y in range(GRID_HEIGHT)):
                 cols_to_clear.append(x)
-                cols_cleared += 1
         
-        # Clear columns and collect stones
+        # Create a set of cells to clear (avoiding duplicates at intersections)
+        cells_to_clear = set()
+        
+        # Add all cells from rows that need clearing
+        for y in rows_to_clear:
+            for x in range(GRID_WIDTH):
+                cells_to_clear.add((x, y))
+        
+        # Add all cells from columns that need clearing
         for x in cols_to_clear:
             for y in range(GRID_HEIGHT):
-                if self.board_types[y][x] == 2:  # If there's a green gem
-                    self.green_stones_collected += 1
-                elif self.board_types[y][x] == 3:  # If there's a red gem
-                    self.red_stones_collected += 1
-                
-                self.board[y][x] = None
-                self.board_types[y][x] = 0
-                
-        return cols_cleared
+                cells_to_clear.add((x, y))
+        
+        # Clear cells and collect stones
+        for x, y in cells_to_clear:
+            if self.board_types[y][x] == 2:  
+                self.green_stones_collected += 1
+            elif self.board_types[y][x] == 3: 
+                self.red_stones_collected += 1
+            
+            self.board[y][x] = None
+            self.board_types[y][x] = 0
+        
+        return len(rows_to_clear), len(cols_to_clear)
     
     def check_game_over(self):
         # Check if any available block can be placed on the board
@@ -290,6 +281,9 @@ class Game:
 
     def reset(self):
         self.__init__()
+
+    def set_bot_type(self, bot_type):
+        self.bot_type = bot_type
 
     def make_move(self, block_index, x, y):
         block = self.available_blocks[block_index]

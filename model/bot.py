@@ -347,7 +347,7 @@ class Bot:
             if current_game.check_level_complete() or current_game.game_won:
                 winning_paths.append(path)
                 # Otimização: se encontramos um caminho curto, priorizamos ele
-                if len(path) <= 3:  # Considere caminhos curtos como ótimos
+                if len(path) <= 10:  # Considere caminhos curtos 
                     self.__class__.bfa_cache[game_state_key] = path[0] if path else None
                     return path[0] if path else None
                 continue  # Continue procurando outros caminhos possíveis
@@ -441,11 +441,8 @@ class Bot:
             game.red_stones_to_collect,
             game.level_num
         ))
-    
     ### ------------------------------
 
-
-    
     # Encontrar uma posição random no tabuleiro que seja válida
     def get_possible_positions_block(self, block):
         valid = False

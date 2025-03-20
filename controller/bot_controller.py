@@ -39,7 +39,6 @@ class BotController:
             return self.execute_move()        
         
         
-
     def play_optimal(self):
        
         if self.bot.state == "deciding":
@@ -71,7 +70,7 @@ class BotController:
 
 
 # Faz o bfa de forma difernete, calcula primeiro o caminho completo e depois executa
-# o caminho calculado - terminal tem
+# o caminho calculado - terminal tem prints para informação
     def play_bfa(self):
         # Check if we're at a new level or don't have a solution path yet
         current_level = self.bot.game.level_num
@@ -92,8 +91,7 @@ class BotController:
                 return
     
             # Take the next move from our pre-calculated path
-            best_move = self.bot.bfa_solution_path.pop(0)
-            move_number = len(self.bot.bfa_solution_path) + 1
+            best_move = self.bot.bfa_solution_path.pop(0)           
     
             if best_move:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
