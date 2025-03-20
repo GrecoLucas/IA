@@ -46,6 +46,7 @@ class Menu:
                 MenuItem("Bot Random", self.set_bot_algorithm_random, BotType.RANDOM),
                 MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, BotType.OPTIMAL),
                 MenuItem("Bot Greedy", self.set_bot_algorithm_greedy, BotType.GREEDY),
+                MenuItem("Bot BFA", self.set_bot_algorithm_bfa, BotType.BFA),
                 MenuItem("Voltar", self.back_to_main_menu, None), 
             ]
         self.selected_index = 0  
@@ -79,7 +80,12 @@ class Menu:
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
         return False
-
+    def set_bot_algorithm_bfa(self):
+        self.bot_type = BotType.BFA
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items()
+        return False
+    
     def back_to_main_menu(self):
         """Retorna ao menu principal."""
         self.state = MenuState.ACTIVE

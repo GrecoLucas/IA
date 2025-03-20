@@ -24,12 +24,15 @@ BOT_MOVE_DELAY = 200
 MAX_SIMULATION_DEPTH = 10
 MAX_TRIES = 500
 
+# Bot BFA
+MAX_BFA_MOVES = 100
 # Bot Types
 from enum import Enum
 class BotType(Enum):
     RANDOM = "random"
     OPTIMAL = "optimal"
     GREEDY = "greedy"
+    BFA = "bfa"
 
 # Rules
 RULES_COLOR = (10, 60, 10)

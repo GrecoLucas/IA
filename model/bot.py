@@ -1,6 +1,8 @@
 from constants import *
 import copy
 import random
+from collections import deque
+
 class Bot:
     def __init__(self, game, algorithm):
         self.game = game
@@ -32,7 +34,6 @@ class Bot:
 
         return score
     
-
     def find_best_greedy(self):
         possible_moves = []
         
@@ -276,6 +277,174 @@ class Bot:
             
         best_move = max(move_scores.items(), key=lambda x: x[1])[0]
         return best_move
+    
+
+    ### BOT  BFA ------------------------------
+    def find_best_bfa(self):
+        # Cache de soluções para evitar recomputação
+        if not hasattr(self.__class__, 'bfa_cache'):
+            self.__class__.bfa_cache = {}
+            
+        # Gerar uma chave única para o estado atual do jogo
+        game_state_key = self._create_game_state_key(self.game)
+        
+        # Verificar se já temos uma solução em cache para este estado
+        if game_state_key in self.__class__.bfa_cache:
+            return self.__class__.bfa_cache[game_state_key]
+        
+        possible_moves = []
+        
+        # Coletar todos os movimentos possíveis para o estado atual do jogo
+        for block_index, block in enumerate(self.game.available_blocks):
+            if block is None:
+                continue
+            for y in range(GRID_HEIGHT):
+                for x in range(GRID_WIDTH):
+                    if self.game.is_valid_position(block, x, y):
+                        possible_moves.append((block_index, x, y))
+        
+        if not possible_moves:
+            self.__class__.bfa_cache[game_state_key] = None
+            return None  # Não há movimentos possíveis
+        
+        # Verificar primeiro os movimentos que avançam de nível instantaneamente
+        for move in possible_moves:
+            block_index, x, y = move
+            
+            # Criar uma cópia do estado atual do jogo
+            game_copy = copy.deepcopy(self.game)
+            
+            # Fazer o movimento
+            block = game_copy.available_blocks[block_index]
+            level_before = game_copy.level_num
+            
+            # Executar o movimento
+            game_copy.place_block(block, x, y)
+            game_copy.available_blocks[block_index] = None
+            
+            # Se avançou de nível imediatamente, salve no cache e retorne este movimento
+            if game_copy.level_num > level_before or game_copy.check_level_complete():
+                self.__class__.bfa_cache[game_state_key] = move
+                return move
+        
+        # Use a fila para a busca em largura
+        queue = deque([(self.game, [])])  # Tupla: (estado do jogo, caminho até aqui)
+        visited_states = set()  # Rastrear estados visitados para evitar loops
+        winning_paths = []  # Armazenar todos os caminhos vencedores encontrados
+        
+        while queue:
+            current_game, path = queue.popleft()
+            
+            # Criar uma chave única para o estado atual
+            current_state_key = self._create_game_state_key(current_game)
+            
+            # Se este estado já foi visitado, pule
+            if current_state_key in visited_states:
+                continue
+            visited_states.add(current_state_key)
+            
+            # Se o jogo avançou de nível ou foi vencido, registre o caminho
+            if current_game.check_level_complete() or current_game.game_won:
+                winning_paths.append(path)
+                # Otimização: se encontramos um caminho curto, priorizamos ele
+                if len(path) <= 3:  # Considere caminhos curtos como ótimos
+                    self.__class__.bfa_cache[game_state_key] = path[0] if path else None
+                    return path[0] if path else None
+                continue  # Continue procurando outros caminhos possíveis
+            
+            # Se o jogo terminou sem vitória, pule
+            if current_game.game_over:
+                continue
+            
+            # Coletar todos os movimentos possíveis para o estado atual do jogo
+            possible_moves = []
+            for block_index, block in enumerate(current_game.available_blocks):
+                if block is None:
+                    continue
+                for y in range(GRID_HEIGHT):
+                    for x in range(GRID_WIDTH):
+                        if current_game.is_valid_position(block, x, y):
+                            possible_moves.append((block_index, x, y))
+            
+            if not possible_moves:
+                continue
+            
+            # Explore cada movimento possível a partir do estado atual
+            for block_index, x, y in possible_moves:
+                game_copy = copy.deepcopy(current_game)
+                block = game_copy.available_blocks[block_index]
+                
+                # Armazenar estado antes do movimento
+                green_before = game_copy.green_stones_collected
+                red_before = game_copy.red_stones_collected
+                level_before = game_copy.level_num
+                
+                # Executar o movimento
+                game_copy.place_block(block, x, y)
+                game_copy.available_blocks[block_index] = None
+                
+                # Verificar se este movimento resultou em progresso significativo
+                progress_made = (
+                    game_copy.green_stones_collected > green_before or
+                    game_copy.red_stones_collected > red_before or
+                    game_copy.level_num > level_before or
+                    game_copy.check_level_complete()
+                )
+                
+                # Se todos os blocos foram usados, obtenha os próximos
+                if game_copy.all_blocks_used():
+                    game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
+                
+                # Crie um novo caminho estendendo o caminho atual
+                new_path = path + [(block_index, x, y)]
+                
+                # Priorizar movimentos que fazem progresso
+                if progress_made:
+                    queue.appendleft((game_copy, new_path))  # Coloca no início da fila
+                else:
+                    queue.append((game_copy, new_path))
+        
+        # Selecione o melhor caminho (o mais curto) entre os caminhos vencedores
+        best_move = None
+        if winning_paths:
+            shortest_path = min(winning_paths, key=len)
+            if shortest_path:
+                best_move = shortest_path[0]  # O primeiro movimento do caminho mais curto
+        
+        # Salve a solução no cache
+        self.__class__.bfa_cache[game_state_key] = best_move
+        return best_move
+    
+    def _create_game_state_key(self, game):
+        # Represente o tabuleiro como uma tupla de tuplas
+        board_key = tuple(tuple(row) for row in game.board_types)
+        
+        # Represente os blocos disponíveis como uma tupla
+        blocks_key = []
+        for block in game.available_blocks:
+            if block is None:
+                blocks_key.append(None)
+            else:
+                # Use shape_name em vez de shape_index que não existe na classe Block
+                block_shape = tuple(tuple(row) for row in block.shape)
+                blocks_key.append((block.shape_name, block_shape))
+        
+        blocks_key = tuple(blocks_key)
+        
+        # Combine os elementos em uma chave de estado única
+        return hash((
+            board_key,
+            blocks_key,
+            game.green_stones_collected,
+            game.red_stones_collected,
+            game.green_stones_to_collect,
+            game.red_stones_to_collect,
+            game.level_num
+        ))
+    
+    ### ------------------------------
+
+
     
     # Encontrar uma posição random no tabuleiro que seja válida
     def get_possible_positions_block(self, block):

@@ -12,3 +12,5 @@ timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-03-20 11:12:01,6,17,4,4,63,False
 2025-03-20 11:12:09,3,9,1,1,29,False
 2025-03-20 11:12:16,3,8,0,1,29,False
+2025-03-20 11:48:24,0,5,0,0,5,False
+2025-03-20 11:53:30,9,5,4,1,108,False
