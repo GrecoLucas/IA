@@ -1,12 +1,19 @@
 import pygame
 from constants import *
 from view.block_view import BlockView
+from model.bot import Bot
+import copy
 
 class GameView:
     def __init__(self, screen):
         self.screen = screen
         self.font = pygame.font.SysFont('Arial', 24)
         self.title_font = pygame.font.SysFont('Arial', 36, bold=True)
+        self.help_active = False  # Track if help is being displayed
+        self.hint_active = False  # Track if a hint is being displayed
+        self.hint_block = None    # Block suggested by the bot
+        self.hint_x = None        # X position for the hint
+        self.hint_y = None        # Y position for the hint
     
     def render(self, game):
         self.draw_background()
@@ -15,6 +22,9 @@ class GameView:
         self.draw_available_blocks(game)
         if game.selected_block:
             self.draw_selected_block(game)
+            
+        if self.hint_active and self.hint_block:
+            self.draw_hint(game)
             
         self.draw_objectives(game)
         self.draw_bot_messages(self.screen, game)  # Pass game as parameter
@@ -170,7 +180,64 @@ class GameView:
         pygame.draw.rect(self.screen, WOOD_MEDIUM, help_rect)
         pygame.draw.rect(self.screen, WOOD_DARK, help_rect, 2)
         self.screen.blit(help_text, (SCREEN_WIDTH - 90, 45))
-
+        
+        # Only show help panel if help is active and hint is not active
+        if self.help_active and not self.hint_active:
+            self.draw_help_panel()
+    
+    def draw_help_panel(self):
+        # Create semi-transparent overlay
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))
+        self.screen.blit(overlay, (0, 0))
+        
+        # Create help panel
+        panel_width, panel_height = 500, 350
+        panel_x = (SCREEN_WIDTH - panel_width) // 2
+        panel_y = (SCREEN_HEIGHT - panel_height) // 2
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        
+        # Draw panel background
+        pygame.draw.rect(self.screen, WOOD_LIGHT, panel_rect)
+        pygame.draw.rect(self.screen, WOOD_DARK, panel_rect, 3)
+        
+        # Draw title
+        title = self.title_font.render("Instruções do Jogo", True, WOOD_DARK)
+        self.screen.blit(title, (panel_x + (panel_width - title.get_width()) // 2, panel_y + 20))
+        
+        # Help text lines
+        help_lines = [
+            "• Arraste e solte as peças de madeira no tabuleiro",
+            "• Colete todas as gemas verdes e vermelhas",
+            "• Linhas e colunas completamente preenchidas são removidas",
+            "• Não é possível sobrepor blocos",
+            "• Pressione R para reiniciar o nível",
+            "• Quando não houver mais jogadas possíveis, o jogo termina"
+        ]
+        
+        # Draw help text
+        help_y = panel_y + 80
+        for line in help_lines:
+            text = self.font.render(line, True, WOOD_DARK)
+            self.screen.blit(text, (panel_x + 30, help_y))
+            help_y += 35
+        
+        # Draw close button
+        close_rect = pygame.Rect(panel_x + panel_width - 100, panel_y + panel_height - 50, 80, 30)
+        pygame.draw.rect(self.screen, WOOD_MEDIUM, close_rect)
+        pygame.draw.rect(self.screen, WOOD_DARK, close_rect, 2)
+        close_text = self.font.render("Fechar", True, WOOD_DARK)
+        self.screen.blit(close_text, (close_rect.x + (close_rect.width - close_text.get_width()) // 2, 
+                                     close_rect.y + (close_rect.height - close_text.get_height()) // 2))
+    
+    def get_help_button_rect(self):
+        return pygame.Rect(SCREEN_WIDTH - 100, 40, 80, 30)
+    
+    def get_close_help_button_rect(self):
+        panel_width, panel_height = 500, 350
+        panel_x = (SCREEN_WIDTH - panel_width) // 2
+        panel_y = (SCREEN_HEIGHT - panel_height) // 2
+        return pygame.Rect(panel_x + panel_width - 100, panel_y + panel_height - 50, 80, 30)
 
     def draw_bot_messages(self, screen, game):  # Add game parameter
         # Create a more compact, less obtrusive log display
@@ -201,3 +268,39 @@ class GameView:
                 text_surface = font.render(display_text, True, (220, 220, 220))
                 screen.blit(text_surface, (message_panel.x + 10, message_y))
                 message_y += 20
+    
+    def draw_hint(self, game):
+        # Draw a semi-transparent hint of the suggested block
+        board_x = BOARD_X
+        if hasattr(game, 'bot_type') and game.bot_type:
+            if game.bot_type == BotType.BFA:
+                board_x = NBOARD_X
+                
+        # Draw silhouette of the block
+        for row in range(len(self.hint_block.shape)):
+            for col in range(len(self.hint_block.shape[row])):
+                if self.hint_block.shape[row][col] == "X":
+                    hint_rect = pygame.Rect(
+                        board_x + (self.hint_x + col) * GRID_SIZE, 
+                        BOARD_Y + (self.hint_y + row) * GRID_SIZE, 
+                        GRID_SIZE, GRID_SIZE
+                    )
+                    # Draw translucent block with outline
+                    hint_surface = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+                    hint_surface.fill((42, 157, 143, 160))  # Teal color with transparency
+                    self.screen.blit(hint_surface, hint_rect)
+                    pygame.draw.rect(self.screen, (0, 128, 128), hint_rect, 2)  # Teal outline
+        
+    
+    def set_hint(self, block, x, y):
+        self.hint_block = block
+        self.hint_x = x
+        self.hint_y = y
+        self.hint_active = True
+        self.help_active = False  # Close help panel if open
+    
+    def clear_hint(self):
+        self.hint_active = False
+        self.hint_block = None
+        self.hint_x = None
+        self.hint_y = None
