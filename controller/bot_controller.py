@@ -69,7 +69,6 @@ class BotController:
     # Faz o bfa de forma difernete, calcula primeiro o caminho completo e depois executa
     # o caminho calculado - terminal tem prints para informação
     def play_bfa(self):
-        # Check if we're at a new level or don't have a solution path yet
         current_level = self.bot.game.level_num
         if not hasattr(self.bot, 'bfa_solution_path') or self.bot.bfa_solution_path is None or hasattr(self.bot, 'last_level') and self.bot.last_level != current_level:
             
@@ -100,7 +99,6 @@ class BotController:
                     log_message(self.bot, f"[BFA] Executando movimento {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
                     log_message(self.bot, "Aperte 'P' para procurar a solução.")
             else:
-                # Inicializa contadores se não existirem
                 if not hasattr(self.bot, 'bfa_total_moves'):
                     self.bot.bfa_total_moves = len(self.bot.bfa_solution_path) + 1  # +1 para o movimento atual
                 if not hasattr(self.bot, 'bfa_current_move'):
@@ -203,8 +201,8 @@ class BotController:
     def play(self):
         match self.bot.algorithm:
             case BotType.RANDOM:
-                self.play_random()  # Estado "deciding"
-                self.play_random()  # Estado "executing"
+                self.play_random()  
+                self.play_random() 
             case BotType.OPTIMAL:
                 self.play_optimal()
                 self.play_optimal()

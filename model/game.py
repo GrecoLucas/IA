@@ -32,7 +32,7 @@ class Game:
         self.player_type = None
         self.bot_type = None
         self.message_log = []
-        self.max_messages = 5  # Reduce the maximum number of messages stored
+        self.max_messages = 5  
         
         self.load_level(0)
     
@@ -51,7 +51,6 @@ class Game:
                 name=getattr(level_data, 'name', None)
             )
 
-            # Reset the board
             self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
             self.board_types = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
 
