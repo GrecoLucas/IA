@@ -2,9 +2,17 @@ import pygame
 from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 import random
 class BotController:
+
     def __init__(self, bot):
         self.bot = bot
+        self.iterative_seq = []
+        self.iterative_idx = 0
 
+    def reset(self):
+        self.iterative_seq = []
+        self.iterative_idx = 0
+        self.bot.reset()
+        
     def execute_move(self):
         if self.bot.game.make_move(self.bot.selected_block_index, self.bot.target_x, self.bot.target_y):
                 self.bot.game.selected_block = None
@@ -55,6 +63,33 @@ class BotController:
         elif self.bot.state == "executing":
             return self.execute_move()
         
+    def play_iterative(self):
+        if self.bot.state == "deciding":
+            print("HIHIHIHIIHIHIHIHIH")
+            move_sequence = self.bot.iterative_deepening_search(8)
+            if move_sequence is not None:
+                self.iterative_seq = move_sequence
+                self.bot.state = "executing"
+                self.play_iterative()
+                
+            else:
+                self.bot.game.game_over = True
+
+        elif self.bot.state == "executing":
+                # garante que nunca é feito um acesso fora do array
+                if self.iterative_idx < len(self.iterative_seq):
+                    print(f"move {self.iterative_seq}")
+                    move = self.iterative_seq[self.iterative_idx]
+                    self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
+                    self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                    move_made = self.execute_move()
+                    self.bot.state = "executing"
+                    self.iterative_idx += 1 # Atualiza o bloco em que está
+
+                    
+                    
+    
+        
     def play(self):
         match self.bot.algorithm:
             case "random":
@@ -63,4 +98,8 @@ class BotController:
             case "optimal":
                 self.play_optimal()
                 self.play_optimal()
+            case "iterative":
+                
+                self.play_iterative()
+                
 

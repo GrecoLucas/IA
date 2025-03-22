@@ -13,8 +13,12 @@ class Bot:
         self.state = "deciding"
         self.algorithm =  algorithm
 
-    
-    
+    def reset(self):
+        self.selected_block_index = None
+        self.target_x = None
+        self.target_y = None
+        self.state = "deciding"
+        
     def find_best_move(self):
         possible_moves = []
     
@@ -186,3 +190,85 @@ class Bot:
                     x,y = pos
                     return (candidate_block, selected_index, x, y) 
             return False
+        
+
+    # Função auxilar para encontrar todos os movimentos possíveis
+    def get_all_possible_moves(self, game):
+        possible_moves = []
+        # Coletar todos os movimentos possíveis
+        for block_index, block in enumerate(game.available_blocks):
+            if block is None:
+                continue
+            for y in range(GRID_HEIGHT):
+                for x in range(GRID_WIDTH):
+                    if game.is_valid_position(block, x, y):
+                        possible_moves.append((block_index, x, y))
+        # Não foi encontrado nenhum movimento possível
+        if not possible_moves:
+            return None
+        
+        return possible_moves
+
+    # Iterative deepening search para encontrar o melhor movimento
+    def iterative_deepening_search(self, max_depth):
+        for depth in range(1, max_depth):
+            solution = self.depth_limited_search(depth)
+            if solution is not None:
+                return solution
+        return None     #Não foi encontrada nenhuma solução para a depth máxima dada
+    
+
+    # DFS com profundidade limitada
+    def depth_limited_search(self, depth):
+        game_copy = copy.deepcopy(self.game)
+        move_sequence = self.recursive_depth_limited_search(game_copy, depth, [])
+        return move_sequence
+    
+    # Parte recursiva do DFS
+    def recursive_depth_limited_search(self, game, depth, move_seq):
+        # conjunto de movimentos atuais permitem ganhar o jogo
+        if game.game_won:
+            return move_seq
+        # Nenhuma solução encontrada para a profundidade dada
+        if depth == 0:
+            return None
+        
+        possible_moves = self.get_all_possible_moves(game)
+        # BFS itera sobre todos os movimentos possíveis 
+        if(possible_moves is None):
+            return None
+        for move in possible_moves:
+            # Criar uma cópia do estado atual do jogo passado
+            game_copy = copy.deepcopy(game)
+            
+            block_index, x, y = move
+            #print(f"index: {block_index}, x: {x}, y: {y}")
+            block = game_copy.available_blocks[block_index]
+            # Executar o movimento
+            game_copy.place_block(block, x, y)
+            game_copy.available_blocks[block_index] = None
+            # Adicionar movimento à lista de moves executados
+            new_move_seq = move_seq + [move]
+            # Nível completo 
+            if game_copy.check_level_complete():
+                    print(f"LEVEL {game_copy.level_num} COMPLETE!!!")
+                    next_level = game_copy.get_next_level()
+                    if next_level is not None:
+                        game_copy.load_level(next_level)
+                        # Evitar explorar outros movimentos que não completam o nível
+                        #result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
+                        #return result
+                    else:
+                        game_copy.game_won = True
+                        
+            # Atualizar blocos disponíveis se necessário
+            elif game_copy.all_blocks_used():
+                game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
+            result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
+            if result is not None:
+                return result   # Sequência de movimentos válida encontrada
+        # Não foi encontrada nenhuma sequência de movimentos válida para ganhar o jogo
+        return None
+            
+
+            

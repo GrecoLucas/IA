@@ -38,7 +38,8 @@ class Menu:
             MenuItem("Iniciar Jogo", self.start_game, None),
             MenuItem("Sair", self.exit_game, None),
             MenuItem("Bot Random", self.set_bot_algorithm_random, "random"),
-            MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, "optimal"),
+            MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, "optimal"), #"iterative"
+            MenuItem("Bot Iterativo", self.set_bot_algorithm_iterative, "iterative"),
         ]
         # Define o primeiro item como selecionado inicialmente
         self.items[0].selected = True
@@ -63,6 +64,11 @@ class Menu:
     def set_bot_algorithm_optimal(self):
         """Define i tipo de algoritmo do bot"""
         self.bot_type = "optimal"
+        return False
+    
+    def set_bot_algorithm_iterative(self):
+        """Define i tipo de algoritmo do bot"""
+        self.bot_type = "iterative"
         return False
     
     def start_game(self):

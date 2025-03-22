@@ -1,6 +1,7 @@
 import pygame
 from constants import  BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 from controller.bot_controller import BotController
+
 class GameController:
     def __init__(self, game, view, bot=None):
         self.game = game
@@ -42,7 +43,7 @@ class GameController:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
                 self.game.reset()        
-            
+                self.bot.reset()            
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
