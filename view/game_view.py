@@ -17,7 +17,9 @@ class GameView:
             self.draw_selected_block(game)
             
         self.draw_objectives(game)
-        
+        self.draw_bot_messages(self.screen, game)  # Pass game as parameter
+        self.draw_help_button()
+
         if game.game_over:
             self.draw_game_over()
         elif game.game_won:
@@ -35,8 +37,13 @@ class GameView:
         self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 10))
     
     def draw_board(self, game):
-        # Draw board background
-        board_rect = pygame.Rect(BOARD_X, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
+        board_x = BOARD_X
+
+        if hasattr(game, 'bot_type') and game.bot_type:
+            if game.bot_type == BotType.BFA:
+                board_x = NBOARD_X
+
+        board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
         pygame.draw.rect(self.screen, WHITE, board_rect)
         pygame.draw.rect(self.screen, WOOD_DARK, board_rect, 2)
 
@@ -44,15 +51,15 @@ class GameView:
         for i in range(GRID_WIDTH + 1):
             pygame.draw.line(
                 self.screen, GRID_COLOR, 
-                (BOARD_X + i * GRID_SIZE, BOARD_Y), 
-                (BOARD_X + i * GRID_SIZE, BOARD_Y + GRID_HEIGHT * GRID_SIZE),
+                (board_x + i * GRID_SIZE, BOARD_Y), 
+                (board_x + i * GRID_SIZE, BOARD_Y + GRID_HEIGHT * GRID_SIZE),
                 1
             )
         for i in range(GRID_HEIGHT + 1):
             pygame.draw.line(
                 self.screen, GRID_COLOR, 
-                (BOARD_X, BOARD_Y + i * GRID_SIZE), 
-                (BOARD_X + GRID_WIDTH * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
+                (board_x, BOARD_Y + i * GRID_SIZE), 
+                (board_x + GRID_WIDTH * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
                 1
             )
 
@@ -62,7 +69,7 @@ class GameView:
                 if game.board[y][x]:
                     color = game.board[y][x]
                     rect = pygame.Rect(
-                        BOARD_X + x * GRID_SIZE, 
+                        board_x + x * GRID_SIZE, 
                         BOARD_Y + y * GRID_SIZE, 
                         GRID_SIZE, GRID_SIZE
                     )
@@ -90,8 +97,12 @@ class GameView:
                 BlockView.draw_available_block(self.screen, block, (block_x, block_y), self.font)
     
     def draw_selected_block(self, game):
+        board_x = BOARD_X
+        if hasattr(game, 'bot_type') and game.bot_type:
+            if game.bot_type == BotType.BFA:
+                board_x = NBOARD_X
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        grid_x = (mouse_x - BOARD_X) // GRID_SIZE
+        grid_x = (mouse_x - board_x) // GRID_SIZE
         grid_y = (mouse_y - BOARD_Y) // GRID_SIZE
         
         # Adjust for block offset
@@ -152,3 +163,41 @@ class GameView:
         
         self.screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+    
+    def draw_help_button(self):
+        help_text = self.font.render("Ajuda", True, WOOD_DARK)
+        help_rect = pygame.Rect(SCREEN_WIDTH - 100, 40, 80, 30)
+        pygame.draw.rect(self.screen, WOOD_MEDIUM, help_rect)
+        pygame.draw.rect(self.screen, WOOD_DARK, help_rect, 2)
+        self.screen.blit(help_text, (SCREEN_WIDTH - 90, 45))
+
+
+    def draw_bot_messages(self, screen, game):  # Add game parameter
+        # Create a more compact, less obtrusive log display
+        if hasattr(game, 'message_log') and game.message_log:
+            # Limit to showing only the 3 most recent messages
+            recent_messages = game.message_log[-3:]
+            
+            # Create a panel with wider width to fit longer messages
+            message_panel = pygame.Rect(SCREEN_WIDTH - 430, 80, 400, 15 + 20 * len(recent_messages))
+            overlay = pygame.Surface((message_panel.width, message_panel.height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 120))  # More transparent background
+            screen.blit(overlay, message_panel)
+            
+            # Draw a thin border
+            pygame.draw.rect(screen, (100, 100, 100), message_panel, 1)
+            
+            # Draw the messages
+            font = pygame.font.Font(None, 18)  # Smaller font
+            message_y = message_panel.y + 10
+            
+            for message in recent_messages:
+                # Adjust truncation length since we have wider panel now
+                if len(message) > 60:  # Increased from 40
+                    display_text = message[:57] + "..."
+                else:
+                    display_text = message
+                    
+                text_surface = font.render(display_text, True, (220, 220, 220))
+                screen.blit(text_surface, (message_panel.x + 10, message_y))
+                message_y += 20

@@ -31,7 +31,9 @@ class Game:
         self.total_moves = 0
         self.player_type = None
         self.bot_type = None
-
+        self.message_log = []
+        self.max_messages = 5  # Reduce the maximum number of messages stored
+        
         self.load_level(0)
     
     def load_level(self, level_num):
@@ -292,3 +294,8 @@ class Game:
             self.available_blocks[block_index] = None
             return True
         return False
+
+    def add_message(self, message):
+        self.message_log.append(message)
+        if len(self.message_log) > self.max_messages:
+            self.message_log.pop(0)
