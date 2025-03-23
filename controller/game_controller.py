@@ -1,15 +1,13 @@
 import pygame
 from constants import  BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
-from controller.bot_controller import BotController
-
 class GameController:
     def __init__(self, game, view, bot=None):
         self.game = game
         self.view = view
         self.bot = bot
         self.dragging = False
-        self.selected_block_index = -1  # Indica qual o bloco selecionado
-        self.animation_delay = 100  # ms
+        self.selected_block_index = -1  
+        self.animation_delay = 100  
     
     def handle_bot_press_play(self, event):
         print("bot playing!")
@@ -21,6 +19,9 @@ class GameController:
 
         
     def handle_bot(self,event):
+        if event is None:  # Add check for None event
+            return
+        
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
                 self.game.reset()       
@@ -30,20 +31,20 @@ class GameController:
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
-        
-        
-        
-        
 
     def handle_event(self, event):
+        if event is None:  
+            return
+        
         if self.bot: 
             self.handle_bot(event)
             
         # Handle restart with R key
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
+                #self.bot.reset()
                 self.game.reset()        
-                self.bot.reset()            
+                            
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
@@ -143,4 +144,3 @@ class GameController:
             if self.game.check_game_over():
                 self.game.game_over = True
                 self.game.save_game_stats()
-            

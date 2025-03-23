@@ -19,7 +19,36 @@ RED_POINT = (200, 0, 0)
 WOOD_COLORS = [WOOD_LIGHT, WOOD_MEDIUM, WOOD_DARK]
 BACKGROUND_COLOR = (240, 240, 240)
 
-# Bot
+# Bot Optimal, se quiser melhorar a performance, diminua a profundidade máxima 
 BOT_MOVE_DELAY = 200
 MAX_SIMULATION_DEPTH = 10
 MAX_TRIES = 500
+
+# Bot BFA
+MAX_BFA_MOVES = 100
+# Bot Types
+from enum import Enum
+class BotType(Enum):
+    RANDOM = "random"
+    OPTIMAL = "optimal"
+    GREEDY = "greedy"
+    BFA = "bfa"
+    ITERATIVE = "iterative"
+
+# Rules
+RULES_COLOR = (10, 60, 10)
+RED = (200, 0, 0)
+GREEN = (0, 200, 0)
+
+RULES_TEXT = [
+                "Modo Jogador:",
+            "• Arraste e solte blocos de madeira no tabuleiro.",
+            "• Para passar de fase é necessário pegar as peças ",
+            "verdes ou vermelhas indicadas no canto inferior esquerdo",
+            "completando a linha ou coluna.",
+            "• Se não houver mais espaço no tabuleiro, o jogo acaba.",
+            "• Tente chegar no ultimo nivel com o menor ",
+            "numero de movimentos possíveis.",
+            "Modo Bot:",
+            "• Aperte a tecla 'P' para o bot fazer o movimento.",
+]

@@ -13,7 +13,6 @@ class GameView:
         self.draw_title(game)
         self.draw_board(game)
         self.draw_available_blocks(game)
-        
         if game.selected_block:
             self.draw_selected_block(game)
             
