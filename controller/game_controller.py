@@ -28,7 +28,10 @@ class GameController:
         
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
-                self.game.reset()       
+                bot_type = self.bot.get_bot().algorithm
+                self.game.reset()
+                self.game.set_bot_type(bot_type)
+                self.bot.reset()       
             if event.key == pygame.K_p:
                 self.handle_bot_press_play(event)
  

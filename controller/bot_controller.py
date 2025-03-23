@@ -18,7 +18,10 @@ class BotController:
         self.iterative_seq = []
         self.iterative_idx = 0
         self.bot.reset()
-                
+    
+    def get_bot(self):
+        return self.bot
+      
     def execute_move(self):
         if self.bot.game.make_move(self.bot.selected_block_index, self.bot.target_x, self.bot.target_y):
             self.bot.game.selected_block = None
