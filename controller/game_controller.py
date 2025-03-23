@@ -1,34 +1,91 @@
 import pygame
-from constants import BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+from constants import  BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+import copy
+from model.bot import Bot
+from constants import BotType
 
 class GameController:
-    def __init__(self, game, view):
+    def __init__(self, game, view, bot=None):
         self.game = game
         self.view = view
+        self.bot = bot
         self.dragging = False
-        self.selected_block_index = -1  # Track which block was selected
-        self.animation_delay = 100  # ms
+        self.selected_block_index = -1  
+        self.animation_delay = 100  
     
+    def handle_bot_press_play(self, event):
+        print("bot playing!")
+        move_made = self.bot.play()
+        if move_made:
+            # Render após cada movimento do bot
+            self.view.render(self.game)
+            pygame.display.flip()
+
+        
+    def handle_bot(self,event):
+        if event is None:  # Add check for None event
+            return
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
+                self.game.reset()       
+            if event.key == pygame.K_p:
+                self.handle_bot_press_play(event)
+ 
+        # Skip other events if game is over
+        if self.game.game_over or self.game.game_won:
+            return
+
     def handle_event(self, event):
+        if event is None:  
+            return
+        
+        if self.bot: 
+            self.handle_bot(event)
+            
         # Handle restart with R key
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
+                #self.bot.reset()
                 self.game.reset()        
+                            
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
         
-        # Handle mouse events
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
-                self.handle_mouse_down(event.pos)
-                
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1 and self.dragging:  # Left mouse button release
-                self.handle_mouse_up(event.pos)
+        # Handle mouse events (only for human player)
+        if self.bot is None:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    self.handle_mouse_down(event.pos)
+                    
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1 and self.dragging:  # Left mouse button release
+                    self.handle_mouse_up(event.pos)
     
     def handle_mouse_down(self, pos):
         mouse_x, mouse_y = pos
+        
+        # Check if help button was clicked
+        help_button_rect = self.view.get_help_button_rect()
+        if help_button_rect.collidepoint(mouse_x, mouse_y):
+            # Instead of just showing help panel, get a move suggestion
+            self.get_move_suggestion()
+            return
+        
+        # Check if close help button was clicked when help is active
+        if self.view.help_active:
+            close_help_button_rect = self.view.get_close_help_button_rect()
+            if close_help_button_rect.collidepoint(mouse_x, mouse_y):
+                self.view.help_active = False
+                return
+            else:
+                # If help is active and click wasn't on close button, ignore other interactions
+                return
+        
+        # Clear any active hint when clicking elsewhere
+        if self.view.hint_active:
+            self.view.clear_hint()
         
         # Check if clicked on any of the available blocks
         for i in range(3):
@@ -85,12 +142,12 @@ class GameController:
                 if animation_needed:
                     self.view.render(self.game)
                     pygame.display.flip()
-                    pygame.time.delay(self.animation_delay)
+
                 
                 # Check if level is complete
                 if self.game.check_level_complete():
                     next_level = self.game.get_next_level()
-                    if next_level is not None:
+                    if (next_level is not None):
                         self.game.load_level(next_level)
                     else:
                         self.game.game_won = True
@@ -107,8 +164,25 @@ class GameController:
         self.game.selected_block = None
         self.selected_block_index = -1
 
+    def get_move_suggestion(self):
+        # Create a copy of the current game to avoid modifying the actual game state
+        game_copy = copy.deepcopy(self.game)
+        
+        # Create a temporary optimal bot
+        temp_bot = Bot(game_copy, BotType.BFA)
+        
+        # Get the best move without actually making it
+        best_move = temp_bot.find_best_bfa()
+        
+        if best_move:
+            block_index, x, y = best_move
+            suggested_block = copy.deepcopy(self.game.available_blocks[block_index])
+            
+            # Set the hint in the view
+            self.view.set_hint(suggested_block, x, y)
+            
+    
     def update(self):
-        # Check game over condition
         if not self.game.game_over and not self.game.game_won:
             if self.game.check_game_over():
                 self.game.game_over = True
