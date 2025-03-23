@@ -544,13 +544,13 @@ class Bot:
             new_move_seq = move_seq + [move]
             # Nível completo 
             if game_copy.check_level_complete():
-                    print(f"LEVEL {game_copy.level_num} COMPLETE!!!")
+                    #print(f"LEVEL {game_copy.level_num} COMPLETE!!!")
                     next_level = game_copy.get_next_level()
                     if next_level is not None:
                         game_copy.load_level(next_level)
                         # Evitar explorar outros movimentos que não completam o nível
-                        #result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
-                        #return result
+                        result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
+                        return result
                     else:
                         game_copy.game_won = True
                         

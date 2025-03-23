@@ -1,5 +1,9 @@
 import pygame
 from constants import  BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
+import copy
+from model.bot import Bot
+from constants import BotType
+
 class GameController:
     def __init__(self, game, view, bot=None):
         self.game = game
@@ -62,6 +66,27 @@ class GameController:
     def handle_mouse_down(self, pos):
         mouse_x, mouse_y = pos
         
+        # Check if help button was clicked
+        help_button_rect = self.view.get_help_button_rect()
+        if help_button_rect.collidepoint(mouse_x, mouse_y):
+            # Instead of just showing help panel, get a move suggestion
+            self.get_move_suggestion()
+            return
+        
+        # Check if close help button was clicked when help is active
+        if self.view.help_active:
+            close_help_button_rect = self.view.get_close_help_button_rect()
+            if close_help_button_rect.collidepoint(mouse_x, mouse_y):
+                self.view.help_active = False
+                return
+            else:
+                # If help is active and click wasn't on close button, ignore other interactions
+                return
+        
+        # Clear any active hint when clicking elsewhere
+        if self.view.hint_active:
+            self.view.clear_hint()
+        
         # Check if clicked on any of the available blocks
         for i in range(3):
             if self.game.available_blocks[i]:
@@ -122,7 +147,7 @@ class GameController:
                 # Check if level is complete
                 if self.game.check_level_complete():
                     next_level = self.game.get_next_level()
-                    if next_level is not None:
+                    if (next_level is not None):
                         self.game.load_level(next_level)
                     else:
                         self.game.game_won = True
@@ -139,6 +164,24 @@ class GameController:
         self.game.selected_block = None
         self.selected_block_index = -1
 
+    def get_move_suggestion(self):
+        # Create a copy of the current game to avoid modifying the actual game state
+        game_copy = copy.deepcopy(self.game)
+        
+        # Create a temporary optimal bot
+        temp_bot = Bot(game_copy, BotType.BFA)
+        
+        # Get the best move without actually making it
+        best_move = temp_bot.find_best_bfa()
+        
+        if best_move:
+            block_index, x, y = best_move
+            suggested_block = copy.deepcopy(self.game.available_blocks[block_index])
+            
+            # Set the hint in the view
+            self.view.set_hint(suggested_block, x, y)
+            
+    
     def update(self):
         if not self.game.game_over and not self.game.game_won:
             if self.game.check_game_over():
