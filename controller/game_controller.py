@@ -11,7 +11,8 @@ class GameController:
         self.bot = bot
         self.dragging = False
         self.selected_block_index = -1  
-        self.animation_delay = 100  
+        self.animation_delay = 100
+        self.return_to_menu = False  # Add flag to track menu return request
     
     def handle_bot_press_play(self, event):
         print("bot playing!")
@@ -20,24 +21,32 @@ class GameController:
             # Render após cada movimento do bot
             self.view.render(self.game)
             pygame.display.flip()
-
         
-    def handle_bot(self,event):
-        if event is None:  # Add check for None event
+    def handle_bot(self, event):
+        if event is None:
             return
         
+        # Both menu button and ESC key should work in bot mode
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = event.pos
+            menu_button_rect = self.view.menu_button_rect()
+            if menu_button_rect.collidepoint(mouse_x, mouse_y):
+                self.return_to_menu = True
+                return
+        
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
+            # ESC key to return to menu (works even when game is not over)
+            if event.key == pygame.K_ESCAPE:
+                self.return_to_menu = True
+                return
+            # Reset if game is over and R is pressed    
+            elif event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
                 bot_type = self.bot.get_bot().algorithm
                 self.game.reset()
                 self.game.set_bot_type(bot_type)
                 self.bot.reset()       
-            if event.key == pygame.K_p:
+            elif event.key == pygame.K_p:
                 self.handle_bot_press_play(event)
- 
-        # Skip other events if game is over
-        if self.game.game_over or self.game.game_won:
-            return
 
     def handle_event(self, event):
         if event is None:  
@@ -45,29 +54,39 @@ class GameController:
         
         if self.bot: 
             self.handle_bot(event)
+            return  # Exit early for bot mode
             
-        # Handle restart with R key
+        # Player mode event handling
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
-                #self.bot.reset()
-                self.game.reset()        
-                            
+            # ESC key to return to menu (works even when game is not over)
+            if event.key == pygame.K_ESCAPE:
+                self.return_to_menu = True
+                return
+            # Reset if game is over and R is pressed
+            elif event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
+                self.game.reset()       
+        
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
             return
         
         # Handle mouse events (only for human player)
-        if self.bot is None:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
-                    self.handle_mouse_down(event.pos)
-                    
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1 and self.dragging:  # Left mouse button release
-                    self.handle_mouse_up(event.pos)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Left mouse button
+                self.handle_mouse_down(event.pos)
+                
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1 and self.dragging:  # Left mouse button release
+                self.handle_mouse_up(event.pos)
     
     def handle_mouse_down(self, pos):
         mouse_x, mouse_y = pos
+        
+        # Check if menu button was clicked
+        menu_button_rect = self.view.menu_button_rect()
+        if menu_button_rect.collidepoint(mouse_x, mouse_y):
+            self.return_to_menu = True
+            return
         
         # Check if help button was clicked
         help_button_rect = self.view.get_help_button_rect()

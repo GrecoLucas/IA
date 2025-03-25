@@ -31,6 +31,8 @@ class GameView:
 
         if game.bot_type is None:
             self.draw_help_button()
+            
+        self.draw_menu_button()
 
         if game.game_over:
             self.draw_game_over()
@@ -161,9 +163,11 @@ class GameView:
         
         gameover_text = self.title_font.render("GAME OVER", True, WHITE)
         restart_text = self.font.render("Pressione R para reiniciar", True, WHITE)
+        menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
         
         self.screen.blit(gameover_text, (SCREEN_WIDTH // 2 - gameover_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+        self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 70))
     
     def draw_game_won(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -244,7 +248,10 @@ class GameView:
                     hint_surface.fill((42, 157, 143, 160))  
                     self.screen.blit(hint_surface, hint_rect)
                     pygame.draw.rect(self.screen, (0, 128, 128), hint_rect, 2)  
-           
+    def draw_comeback_to_menu(self):
+        comeback_text = self.font.render("Pressione ESC para voltar ao menu", True, WOOD_DARK)
+        self.screen.blit(comeback_text, (SCREEN_WIDTH - 250, SCREEN_HEIGHT - 30))
+
     def set_hint(self, block, x, y):
         self.hint_block = block
         self.hint_x = x
@@ -257,3 +264,14 @@ class GameView:
         self.hint_block = None
         self.hint_x = None
         self.hint_y = None
+
+    def draw_menu_button(self):
+        menu_button_rect = self.menu_button_rect()
+        pygame.draw.rect(self.screen, WOOD_MEDIUM, menu_button_rect)
+        pygame.draw.rect(self.screen, WOOD_DARK, menu_button_rect, 2)
+        
+        menu_text = self.font.render("Menu", True, WOOD_DARK)
+        self.screen.blit(menu_text, (menu_button_rect.x + 10, menu_button_rect.y + 5))
+    
+    def menu_button_rect(self):
+        return pygame.Rect(10, 20, 80, 30)
