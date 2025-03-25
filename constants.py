@@ -42,7 +42,7 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 
 RULES_TEXT = [
-                "Modo Jogador:",
+            "Modo Jogador:",
             "• Arraste e solte blocos de madeira no tabuleiro.",
             "• Para passar de fase é necessário pegar as peças ",
             "verdes ou vermelhas indicadas no canto inferior esquerdo",
@@ -52,4 +52,5 @@ RULES_TEXT = [
             "numero de movimentos possíveis.",
             "Modo Bot:",
             "• Aperte a tecla 'P' para o bot fazer o movimento.",
+            "Para voltar ao menu aperte a tecla 'ESC' ou clique no botão.",
 ]

@@ -26,13 +26,6 @@ class GameController:
         if event is None:
             return
         
-        # Both menu button and ESC key should work in bot mode
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = event.pos
-            menu_button_rect = self.view.menu_button_rect()
-            if menu_button_rect.collidepoint(mouse_x, mouse_y):
-                self.return_to_menu = True
-                return
         
         if event.type == pygame.KEYDOWN:
             # ESC key to return to menu (works even when game is not over)
@@ -81,12 +74,6 @@ class GameController:
     
     def handle_mouse_down(self, pos):
         mouse_x, mouse_y = pos
-        
-        # Check if menu button was clicked
-        menu_button_rect = self.view.menu_button_rect()
-        if menu_button_rect.collidepoint(mouse_x, mouse_y):
-            self.return_to_menu = True
-            return
         
         # Check if help button was clicked
         help_button_rect = self.view.get_help_button_rect()

@@ -1,5 +1,6 @@
 from enum import Enum
 from constants import BotType
+from levels import LEVELS
 
 class PlayerType(Enum):
     HUMAN = 1
@@ -12,6 +13,7 @@ class MenuState(Enum):
     EXIT = 3
     CHOOSE_ALGORITHM = 6
     RULES = 7
+    CHOOSE_LEVEL = 8
 
 class MenuItem:
     def __init__(self, text, action=None, value=None):
@@ -19,6 +21,7 @@ class MenuItem:
         self.action = action
         self.value = value
         self.selected = False
+        self.selected_level = 0
 
     def get_value(self):
         return self.value
@@ -30,6 +33,7 @@ class Menu:
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
         self.bot_type = None
+        self.selected_level = 0  
 
     def initialize_menu_items(self):
         """Define as opções do menu com base no estado atual."""
@@ -38,6 +42,7 @@ class Menu:
                 MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
                 MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
                 MenuItem("Iniciar Jogo", self.start_game, None),
+                MenuItem("Escolher Nivel", self.select_level, None),
                 MenuItem("Como Jogar", self.rules, None),
                 MenuItem("Sair", self.exit_game, None),
             ]
@@ -50,6 +55,13 @@ class Menu:
                 MenuItem("Bot Iterativo", self.set_bot_algorithm_iterative, BotType.ITERATIVE),
                 MenuItem("Voltar", self.back_to_main_menu, None), 
             ]
+        elif self.state == MenuState.CHOOSE_LEVEL:
+            self.items = []
+            for level in LEVELS:
+                level_name = f"{level.name}" 
+                self.items.append(MenuItem(level_name, self.set_level, level.level_num))
+            self.items.append(MenuItem("Voltar", self.back_to_main_menu, None))
+            
         self.selected_index = 0  
         if self.items: 
             self.items[0].selected = True
@@ -151,3 +163,21 @@ class Menu:
         if self.bot_type:
             return self.bot_type.value
         return None
+
+    def select_level(self):
+        """Abre o menu de seleção de nível."""
+        self.state = MenuState.CHOOSE_LEVEL
+        self.initialize_menu_items()
+        return False
+
+    def set_level(self):
+        """Define o nível selecionado."""
+        current_item = self.items[self.selected_index]
+        self.selected_level = current_item.value
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items()
+        return False
+
+    def get_selected_level(self):
+        """Retorna o nível selecionado."""
+        return self.selected_level

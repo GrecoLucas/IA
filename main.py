@@ -49,7 +49,9 @@ def main():
         else:
             controller = GameController(game, view)
 
-        game.load_level(0)
+        selected_level = menu_model.get_selected_level()
+        game.load_level(selected_level if selected_level > 0 else 0)
+        
         clock = pygame.time.Clock()
         game_running = True
         

@@ -31,8 +31,6 @@ class GameView:
 
         if game.bot_type is None:
             self.draw_help_button()
-            
-        self.draw_menu_button()
 
         if game.game_over:
             self.draw_game_over()
@@ -264,14 +262,3 @@ class GameView:
         self.hint_block = None
         self.hint_x = None
         self.hint_y = None
-
-    def draw_menu_button(self):
-        menu_button_rect = self.menu_button_rect()
-        pygame.draw.rect(self.screen, WOOD_MEDIUM, menu_button_rect)
-        pygame.draw.rect(self.screen, WOOD_DARK, menu_button_rect, 2)
-        
-        menu_text = self.font.render("Menu", True, WOOD_DARK)
-        self.screen.blit(menu_text, (menu_button_rect.x + 10, menu_button_rect.y + 5))
-    
-    def menu_button_rect(self):
-        return pygame.Rect(10, 20, 80, 30)
