@@ -28,16 +28,16 @@ class GameController:
         
         
         if event.type == pygame.KEYDOWN:
-            # ESC key to return to menu (works even when game is not over)
             if event.key == pygame.K_ESCAPE:
                 self.return_to_menu = True
                 return
-            # Reset if game is over and R is pressed    
             elif event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
                 bot_type = self.bot.get_bot().algorithm
                 self.game.reset()
                 self.game.set_bot_type(bot_type)
                 self.bot.reset()       
+            elif event.key == pygame.K_0 and (self.game.game_over or self.game.game_won):
+                self.game.reset_from_level0()    
             elif event.key == pygame.K_p:
                 self.handle_bot_press_play(event)
 
@@ -51,13 +51,14 @@ class GameController:
             
         # Player mode event handling
         if event.type == pygame.KEYDOWN:
-            # ESC key to return to menu (works even when game is not over)
             if event.key == pygame.K_ESCAPE:
                 self.return_to_menu = True
                 return
             # Reset if game is over and R is pressed
             elif event.key == pygame.K_r and (self.game.game_over or self.game.game_won):
-                self.game.reset()       
+                self.game.reset()   
+            elif event.key == pygame.K_0 and (self.game.game_over or self.game.game_won):
+                self.game.reset_from_level0()    
         
         # Skip other events if game is over
         if self.game.game_over or self.game.game_won:
@@ -65,11 +66,11 @@ class GameController:
         
         # Handle mouse events (only for human player)
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left mouse button
+            if event.button == 1:  
                 self.handle_mouse_down(event.pos)
                 
         elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1 and self.dragging:  # Left mouse button release
+            if event.button == 1 and self.dragging:  
                 self.handle_mouse_up(event.pos)
     
     def handle_mouse_down(self, pos):
@@ -78,25 +79,21 @@ class GameController:
         # Check if help button was clicked
         help_button_rect = self.view.get_help_button_rect()
         if help_button_rect.collidepoint(mouse_x, mouse_y):
-            # Instead of just showing help panel, get a move suggestion
             self.get_move_suggestion()
             return
         
-        # Check if close help button was clicked when help is active
         if self.view.help_active:
             close_help_button_rect = self.view.get_close_help_button_rect()
             if close_help_button_rect.collidepoint(mouse_x, mouse_y):
                 self.view.help_active = False
                 return
             else:
-                # If help is active and click wasn't on close button, ignore other interactions
                 return
         
         # Clear any active hint when clicking elsewhere
         if self.view.hint_active:
             self.view.clear_hint()
         
-        # Check if clicked on any of the available blocks
         for i in range(3):
             if self.game.available_blocks[i]:
                 block = self.game.available_blocks[i]

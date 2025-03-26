@@ -280,8 +280,32 @@ class Game:
     def set_player_type(self, player_type):
         self.player_type = player_type
 
-    def reset(self):
+    
+    def reset_from_level0(self):
         self.__init__()
+        
+    def reset(self):
+        # Store the current level number before reset
+        current_level_num = self.level_num
+        
+        # Store the total moves (we want to preserve this)
+        total_moves_before_reset = self.total_moves
+        
+        # Clear the message log
+        self.message_log = []
+        
+        # Reload the current level
+        self.load_level(current_level_num)
+        
+        # Restore the total moves count (since load_level resets it)
+        self.total_moves = total_moves_before_reset
+        
+        # Reset game state flags
+        self.game_over = False
+        self.game_won = False
+        
+        # Clear selection
+        self.selected_block = None
 
     def set_bot_type(self, bot_type):
         self.bot_type = bot_type

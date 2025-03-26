@@ -32,6 +32,7 @@ class GameView:
         if game.bot_type is None:
             self.draw_help_button()
 
+
         if game.game_over:
             self.draw_game_over()
         elif game.game_won:
@@ -160,12 +161,15 @@ class GameView:
         self.screen.blit(overlay, (0, 0))
         
         gameover_text = self.title_font.render("GAME OVER", True, WHITE)
-        restart_text = self.font.render("Pressione R para reiniciar", True, WHITE)
+        restart_text = self.font.render("Pressione R para jogar novamente o último nível", True, WHITE)
+        restart_text_from_level_0 = self.font.render("Pressione 0 para jogar do início", True, WHITE)
         menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
         
         self.screen.blit(gameover_text, (SCREEN_WIDTH // 2 - gameover_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
-        self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 70))
+        self.screen.blit(restart_text_from_level_0, (SCREEN_WIDTH // 2 - restart_text_from_level_0.get_width() // 2, SCREEN_HEIGHT // 2 + 70))
+        self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
+    
     
     def draw_game_won(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -173,10 +177,15 @@ class GameView:
         self.screen.blit(overlay, (0, 0))
         
         win_text = self.title_font.render("PARABÉNS! VOCÊ VENCEU!", True, WHITE)
-        restart_text = self.font.render("Pressione R para jogar novamente", True, WHITE)
+        restart_text = self.font.render("Pressione R para jogar novamente o último nível", True, WHITE)
+        restart_text_from_level_0 = self.font.render("Pressione 0 para jogar do início", True, WHITE)
+        menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
+
         
         self.screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+        self.screen.blit(restart_text_from_level_0, (SCREEN_WIDTH // 2 - restart_text_from_level_0.get_width() // 2, SCREEN_HEIGHT // 2 + 70))
+        self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
     
     def draw_help_button(self):
         help_text = self.font.render("Ajuda", True, WOOD_DARK)
