@@ -47,6 +47,7 @@ class Game:
                 green_goal=level_data.green_goal,  
                 red_goal=level_data.red_goal,      
                 grid=level_data.grid,
+                difficulty= getattr(level_data, 'difficulty', 1),
                 sequence=level_data.sequence,
                 name=getattr(level_data, 'name', None)
             )

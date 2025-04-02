@@ -35,6 +35,7 @@ class BotType(Enum):
     GREEDY = "greedy"
     BFA = "bfa"
     ITERATIVE = "iterative"
+    ASTAR = "astar"
 
 # Rules
 RULES_COLOR = (10, 60, 10)

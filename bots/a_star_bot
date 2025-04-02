@@ -1,0 +1,107 @@
+import heapq
+import copy
+from constants import *
+from model.bot import *
+from levels import LEVEL_MAP, LEVELS
+
+class AStarSolver:
+    def __init__(self, game):
+        self.game = game
+
+    def heuristics_easy_dif(board, blocks, game):
+            
+
+
+    def heuristic(self, board, blocks, game):
+        """Estimate the remaining steps needed to collect all green and red pieces."""
+        total_levels = len(LEVELS)
+        if game.level_num <= 0.25*total_levels:
+            return self.heuristics_easy_dif(board,blocks,game)
+        elif game.level_num <= 0.75*total_levels:
+            return self.heuristics_medium_dif(board,blocks,game)
+        elif game.level_num > 0.75 * total_levels:
+            return self.heuristics_hard_dif(board, block, game)
+
+        else:
+            print("Não foi possível estimar a dificuldade do nível")
+            return 0
+
+
+        remaining_pieces = self.count_remaining_pieces(board)
+        collectable_pieces = self.estimate_collectable_pieces(board, blocks)
+
+        return max(remaining_pieces - collectable_pieces, 0)  # Ensure non-negative h(n)
+
+    def count_remaining_pieces(self, board):
+        """Count all uncollected green and red pieces on the board."""
+        count = 0
+        for row in board:
+            for cell in row:
+                if cell == GREEN_POINT or cell == RED_POINT:
+                    count += 1
+        return count
+
+    def estimate_collectable_pieces(self, board):
+        """Estimate how many pieces can be collected with current blocks."""
+        collectable_gems = 0
+        gem_positions = []
+        for y in range(GRID_HEIGHT):
+            for x in range(GRID_WIDTH):
+                if board[y][x] == GREEN_POINT or board[y][x] == RED_POINT:
+                    gem_positions.append((y,x))
+        
+        for (y,x) in gem_positions:
+            if all(self.board[y][x_grid] is not None for x_grid in range(GRID_WIDTH)) or all(self.board[y_grid][x] is not None for y_grid in range(GRID_HEIGHT)):
+                collectable_gems += 1
+
+
+        
+    def a_star_search(self):
+        """A* Algorithm to solve the level"""
+        initial_state = (copy.deepcopy(self.game),  0)  # (Game, Moves)
+        queue = [(0, initial_state)]  # Priority Queue sorted by f = g + h
+        visited = set()
+
+        while queue:
+            _, (game_state, g_moves) = heapq.heappop(queue)
+
+            # If we collected all pieces, return the number of moves taken
+            if game_state.game_won:
+                return g_moves
+
+            state_key = self.state_to_tuple(game_state, g_moves)
+            if state_key in visited:
+                continue
+            visited.add(state_key)
+
+            # Try placing each block in every valid position
+            possible_moves = 
+            for i, block in enumerate(blocks):
+                if block is None:
+                    continue
+
+                for x in range(GRID_WIDTH):
+                    for y in range(GRID_HEIGHT):
+                        if self.game.is_valid_position(block, x, y):
+                            new_board = copy.deepcopy(board)
+                            self.game.place_block(block, x, y)  # Simulate placement
+                            # SIMULATE MOVE _> BOARD UPDATE
+                            new_blocks = blocks[:]
+                            new_blocks[i] = None  # Mark block as used
+
+                            # If all blocks are used, refresh the next 3 blocks
+                            if all(b is None for b in new_blocks):
+                                new_blocks = self.game.get_next_blocks_from_sequence()
+
+                            h = self.heuristic(new_board, new_blocks, self.game)
+                            f = g + 1 + h  # f(n) = g(n) + h(n)
+
+                            heapq.heappush(queue, (f, (new_board, new_blocks, g + 1)))
+
+        return float('inf')  # If no solution is found
+
+    def state_to_tuple(self, board, blocks):
+        """Convert state to a hashable format for tracking visited states"""
+        board_tuple = tuple(tuple(row) for row in board)
+        blocks_tuple = tuple(block.shape_name if block else None for block in blocks)
+        return (board_tuple, blocks_tuple)

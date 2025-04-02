@@ -10,6 +10,7 @@ from model.menu import Menu, MenuState, PlayerType
 from controller.menu_controller import MenuController
 from model.bot import Bot
 
+from constants import *
 def main():
     # Initialize Pygame
     pygame.init()
@@ -38,7 +39,7 @@ def main():
 
     # Choose controller based on player type
     if player_type == PlayerType.BOT:
-        algorithm = bot_type
+        algorithm =  BotType.ASTAR  #bot_type
         bot = Bot(game, algorithm)
         bot_controller = BotController(bot)
         controller = GameController(game, view, bot_controller)
