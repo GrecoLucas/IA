@@ -240,7 +240,6 @@ class BotController:
 
     def play_a_star(self):
         if self.bot.state == "deciding":
-            print("O7")
             move_sequence = self.bot.a_star_search()
             if move_sequence is not None:
                 self.bot_move_seq = move_sequence
@@ -254,9 +253,7 @@ class BotController:
         elif self.bot.state == "executing":
                 # garante que nunca é feito um acesso fora do array
                 if self.move_seq_idx < len(self.bot_move_seq):
-                    #print(f"move {self.bot_move_seq}")
                     move = self.bot_move_seq[self.move_seq_idx]
-                    print(f"move: {move}, move_idx: {self.move_seq_idx}")
                     self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
                     self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
                     move_made = self.execute_move()

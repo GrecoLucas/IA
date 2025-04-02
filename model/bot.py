@@ -648,13 +648,15 @@ class Bot:
                 reward += 1*0.3 
         fill = self.check_board_gems_pos(old_game_state, game_state)
         fill_reward = max(0, fill)
-        reward += fill_reward * 0.3
+        reward += fill_reward * 0.2
         adjacent_reward = self.check_board_gems_adjacent_pos(old_game_state, game_state) 
         reward += adjacent_reward* 0.5
         collected_pieces_old = old_game_state.red_stones_collected + old_game_state.green_stones_collected
         collected_pieces = game_state.red_stones_collected + game_state.green_stones_collected
         gems_collected = collected_pieces - collected_pieces_old
-        reward += gems_collected
+        reward += collected_pieces_old*current_amount_moves
+        reward += gems_collected*current_amount_moves*2
+
         
         return punishment - reward
 
@@ -663,8 +665,8 @@ class Bot:
         """A* Algorithm to solve the level"""
         initial_state = (copy.deepcopy(self.game),  [])  # (Game, Moves)
         queue = [(0, id(initial_state[0]), initial_state)] # deque([(0, id(initial_state[0]), initial_state)])# Priority Queue sorted by f = g + h
-        print(f"available blocks: {self.game.available_blocks}")
         visited = set()
+        
         while queue:
             _, _, (game_state, g_moves) =  heapq.heappop(queue) #queue.popleft()
             # Verifica se o estado já foi visitado
@@ -709,14 +711,8 @@ class Bot:
                 f = g + h  # f(n) = g(n) + h(n)
                 # Assign a unique ID to the new state
                 state_id = id(game_copy)
-                if h < 0.4* self.game.current_level.difficulty:
+                if h < 0.4:
                     heapq.heappush(queue, (f, state_id, (game_copy, new_g_moves)))
-                    #queue.appendleft((f, state_id, (game_copy, new_g_moves)))
-                else:
-                    if h != -1:
-                        heapq.heappush(queue, (f, state_id, (game_copy, new_g_moves)))
-                        #queue.append((f, state_id, (game_copy, new_g_moves)))
-                
         return None # If no solution is found
     
     
@@ -724,8 +720,6 @@ class Bot:
         """Convert state to a hashable format for tracking visited states"""
         board_tuple = tuple(tuple(row) for row in game_state.board)
         moves_tuple = tuple( move for move in moves )
-        #board_tuple = tuple(tuple(row) for row in board)
-        #blocks_tuple = tuple(block.shape_name if block else None for block in blocks)
         return (board_tuple, moves_tuple)
 
 
