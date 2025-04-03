@@ -4,7 +4,7 @@ from model.game import Game
 from view.game_view import GameView
 from controller.game_controller import GameController
 from controller.bot_controller import BotController
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BotType
 from view.menu_view import MenuView
 from model.menu import Menu, MenuState, PlayerType
 from controller.menu_controller import MenuController
@@ -42,16 +42,58 @@ def main():
         # Choose controller based on player type
         if player_type == PlayerType.BOT:
             algorithm = bot_type
+            print(algorithm)
             bot = Bot(game, algorithm)
             bot_controller = BotController(bot)
             controller = GameController(game, view, bot_controller)
             game.set_bot_type(algorithm) 
         else:
             controller = GameController(game, view)
+        
+        if player_type == PlayerType.TEST:
+            for bot_type in BotType:
+                bot = Bot(game, bot_type)
+                bot_controller = BotController(bot)
+                controller = GameController(game, view, bot_controller)
+                game.set_bot_type(bot_type)
+                game.load_level(0)
+                clock = pygame.time.Clock()
+                game_running = True
+                print(f"Running bot {bot_type}")
+                while game_running:
+                    # Process all events
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
+                        
+                        # Only pass actual events to the controller
+                        controller.handle_event(event)
+
+                    # Check if we need to return to menu
+                    if controller.return_to_menu:
+                        game_running = False
+                        
+                    view.render(game)
+                    pygame.display.flip()
+
+                    #controller.update()
+
+                    clock.tick(60)
+                    if game.game_over or game.game_won:
+                        print("game OBER")
+                        controller.update()
+                        game_running = False
+                        game.reset
+                        game.game_over = False
+                        game.game_won = False
+            pygame.quit()
+            sys.exit()
+
 
         selected_level = menu_model.get_selected_level()
         game.load_level(selected_level if selected_level > 0 else 0)
-        
+                
         clock = pygame.time.Clock()
         game_running = True
         

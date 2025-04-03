@@ -43,3 +43,5 @@ timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-03-26 08:56:41,2,10,3,0,33,False
 2025-03-26 08:58:46,2,10,3,0,23,False
 2025-03-26 08:58:55,2,10,3,0,33,False
+2025-04-03 09:25:43,6,8,2,0,8,False
+2025-04-03 09:51:03,4,19,2,3,50,False

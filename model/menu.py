@@ -5,6 +5,7 @@ from levels import LEVELS
 class PlayerType(Enum):
     HUMAN = 1
     BOT = 2
+    TEST = 3
 
 class MenuState(Enum):
     ACTIVE = 1
@@ -44,6 +45,7 @@ class Menu:
                 MenuItem("Iniciar Jogo", self.start_game, None),
                 MenuItem("Escolher Nivel", self.select_level, None),
                 MenuItem("Como Jogar", self.rules, None),
+                MenuItem("Testar Algoritmos", self.test_all_bots, None),
                 MenuItem("Sair", self.exit_game, None),
             ]
         elif self.state == MenuState.CHOOSE_ALGORITHM:
@@ -66,6 +68,10 @@ class Menu:
         self.selected_index = 0  
         if self.items: 
             self.items[0].selected = True
+
+    def test_all_bots(self):
+        self.player_type = PlayerType.TEST
+        return False
 
     def set_player_human(self):
         self.player_type = PlayerType.HUMAN
