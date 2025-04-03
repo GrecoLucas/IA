@@ -531,29 +531,29 @@ class Bot:
                 game_copy = copy.deepcopy(current_game)
                 block = game_copy.available_blocks[block_index]
                 
-                green_before = game_copy.green_stones_collected
-                red_before = game_copy.red_stones_collected
-                level_before = game_copy.level_num
+                #green_before = game_copy.green_stones_collected
+                #red_before = game_copy.red_stones_collected
+                #level_before = game_copy.level_num
                 
                 game_copy.place_block(block, x, y)
                 game_copy.available_blocks[block_index] = None
                 
-                progress_made = (
-                    game_copy.green_stones_collected > green_before or
-                    game_copy.red_stones_collected > red_before or
-                    game_copy.level_num > level_before or
-                    game_copy.check_level_complete()
-                )
+                #progress_made = (
+                #    game_copy.green_stones_collected > green_before or
+                #    game_copy.red_stones_collected > red_before or
+                #    game_copy.level_num > level_before or
+                #    game_copy.check_level_complete()
+                #)
                 
                 if game_copy.all_blocks_used():
                     game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
                 
                 new_path = path + [(block_index, x, y)]
                 
-                if progress_made:
-                    stack.append((game_copy, new_path))  # DFS adiciona ao topo da pilha
-                else:
-                    stack.append((game_copy, new_path))
+                #if progress_made:
+                stack.append((game_copy, new_path))  # DFS adiciona ao topo da pilha
+                #else:
+                #    stack.insert(0, (game_copy, new_path))
     
         best_move = None
         if winning_paths:
@@ -562,7 +562,7 @@ class Bot:
                 best_move = shortest_path[0]
         else:
             self.game.game_over = True
-    
+        
         self.__class__.dfs_cache[game_state_key] = best_move
         return best_move
     
