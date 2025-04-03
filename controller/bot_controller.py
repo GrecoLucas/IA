@@ -109,6 +109,18 @@ class BotController:
     # o caminho calculado - terminal tem prints para informação
     def play_bfa(self):
         current_level = self.bot.game.level_num
+        
+        # Add the print_once attribute if it doesn't exist
+        if not hasattr(self, 'print_once'):
+            self.print_once = False
+            
+        # Check if game ended and save stats if needed
+        if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+            self.bot.game.save_game_stats()
+            self.print_once = True
+            print("[DEBUG] Saved game statistics in automatic mode")
+            return
+        
         if not hasattr(self.bot, 'bfa_solution_path') or self.bot.bfa_solution_path is None or hasattr(self.bot, 'last_level') and self.bot.last_level != current_level:
             
             self.bot.last_level = current_level
@@ -119,11 +131,23 @@ class BotController:
                 self.bot.bfa_current_move = 0
             else:
                 log_message(self.bot, "[BFA] Não foi possível encontrar uma solução.")
+                # Mark game as over when no solution found
+                self.bot.game.game_over = True
+                # Save stats when game is over due to no solution
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after no solution found")
                 return
         
         if self.bot.state == "deciding":
             if not self.bot.bfa_solution_path:
                 self.bot.game.game_over = True
+                # Save stats when game is over due to empty solution path
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after empty solution path")
                 return
             
             # Take the next move from our pre-calculated path
@@ -152,9 +176,20 @@ class BotController:
             else:
                 log_message(self.bot, "[BFA] Movimento inválido encontrado.")
                 self.bot.game.game_over = True
+                # Save stats when game is over due to invalid move
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after invalid move")
         
         elif self.bot.state == "executing":
-            return self.execute_move()
+            move_result = self.execute_move()
+            # Check if game ended after executing a move
+            if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+                self.bot.game.save_game_stats()
+                self.print_once = True
+                print("[DEBUG] Saved game statistics after move execution")
+            return move_result
     
     def _find_complete_solution_path(self):
         game_copy = copy.deepcopy(self.bot.game)

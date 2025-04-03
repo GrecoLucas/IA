@@ -75,8 +75,7 @@ class MenuView:
             subtitle = self.font.render("Selecione o Algoritmo", True, WOOD_DARK)
         self.screen.blit(subtitle, (SCREEN_WIDTH // 2 - subtitle.get_width() // 2, 130))
 
-        # Handle scrolling for level selection (if too many levels)
-        visible_items = 8  # Maximum number of visible menu items
+        visible_items = 8  
         scroll_offset = 0
         
         if menu.state == MenuState.CHOOSE_LEVEL and len(menu.items) > visible_items:

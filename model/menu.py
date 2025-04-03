@@ -22,7 +22,6 @@ class MenuItem:
         self.action = action
         self.value = value
         self.selected = False
-        self.selected_level = 0
 
     def get_value(self):
         return self.value
@@ -32,12 +31,12 @@ class Menu:
         self.selected_index = 0
         self.player_type = PlayerType.HUMAN
         self.state = MenuState.ACTIVE
-        self.initialize_menu_items()
         self.bot_type = None
         self.selected_level = 0  
+        self.fully_automatic = False
+        self.initialize_menu_items()
 
     def initialize_menu_items(self):
-        """Define as opções do menu com base no estado atual."""
         if self.state == MenuState.ACTIVE:
             self.items = [
                 MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
@@ -45,6 +44,8 @@ class Menu:
                 MenuItem("Iniciar Jogo", self.start_game, None),
                 MenuItem("Escolher Nivel", self.select_level, None),
                 MenuItem("Como Jogar", self.rules, None),
+                MenuItem("Modo Automático: " + ("ON" if self.fully_automatic else "OFF"),
+                       self.set_fully_automatic, None),
                 MenuItem("Testar Algoritmos", self.test_all_bots, None),
                 MenuItem("Sair", self.exit_game, None),
             ]
@@ -53,7 +54,7 @@ class Menu:
                 MenuItem("Bot Random", self.set_bot_algorithm_random, BotType.RANDOM),
                 MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, BotType.OPTIMAL),
                 MenuItem("Bot Greedy", self.set_bot_algorithm_greedy, BotType.GREEDY),
-                MenuItem("Bot BFA", self.set_bot_algorithm_bfa, BotType.BFA),
+                MenuItem("Bot BFS", self.set_bot_algorithm_bfa, BotType.BFA),
                 MenuItem("Bot DFS", self.set_bot_algorithm_dfs, BotType.DFS),
                 MenuItem("Bot Iterativo", self.set_bot_algorithm_iterative, BotType.ITERATIVE),
                 MenuItem("Voltar", self.back_to_main_menu, None), 
@@ -71,11 +72,15 @@ class Menu:
 
     def test_all_bots(self):
         self.player_type = PlayerType.TEST
+        self.fully_automatic = True
         return False
 
     def set_player_human(self):
         self.player_type = PlayerType.HUMAN
         return False
+
+    def get_fully_automatic(self):
+        return self.fully_automatic
 
     def set_player_bot(self):
         self.player_type = PlayerType.BOT
@@ -110,7 +115,12 @@ class Menu:
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
         return False
-    
+
+    def set_fully_automatic(self):
+        self.fully_automatic = not self.fully_automatic
+        self.initialize_menu_items()  # Refresh the menu to update the text
+        return False
+
     def set_bot_algorithm_iterative(self):
         self.bot_type = BotType.ITERATIVE
         self.state = MenuState.ACTIVE

@@ -292,16 +292,16 @@ class Bot:
         # Cache de soluções para evitar recomputação
         if not hasattr(self.__class__, 'bfa_cache'):
             self.__class__.bfa_cache = {}
-            
+
         # Gerar uma chave única para o estado atual do jogo
         game_state_key = self._create_game_state_key(self.game)
-        
+
         # Verificar se já temos uma solução em cache para este estado
         if game_state_key in self.__class__.bfa_cache:
             return self.__class__.bfa_cache[game_state_key]
-        
+
         possible_moves = []
-        
+
         # Coletar todos os movimentos possíveis para o estado atual do jogo
         for block_index, block in enumerate(self.game.available_blocks):
             if block is None:
@@ -310,50 +310,56 @@ class Bot:
                 for x in range(GRID_WIDTH):
                     if self.game.is_valid_position(block, x, y):
                         possible_moves.append((block_index, x, y))
-        
+
         if not possible_moves:
+            # Não há movimentos possíveis, marcar o jogo como terminado se não estiver ganho
+            if not self.game.game_won:
+                self.game.game_over = True
             self.__class__.bfa_cache[game_state_key] = None
-            return None  # Não há movimentos possíveis
-        
+            return None
+
         # Verificar primeiro os movimentos que avançam de nível instantaneamente
         for move in possible_moves:
             block_index, x, y = move
-            
+
             # Criar uma cópia do estado atual do jogo
             game_copy = copy.deepcopy(self.game)
-            
+
             # Fazer o movimento
             block = game_copy.available_blocks[block_index]
             level_before = game_copy.level_num
-            
+
             # Executar o movimento
             game_copy.place_block(block, x, y)
             game_copy.available_blocks[block_index] = None
-            
+
             # Se avançou de nível imediatamente, salve no cache e retorne este movimento
             if game_copy.level_num > level_before or game_copy.check_level_complete():
                 self.__class__.bfa_cache[game_state_key] = move
                 return move
-        
+
         # Use a fila para a busca em largura
         queue = deque([(self.game, [])])  # Tupla: (estado do jogo, caminho até aqui)
         visited_states = set()  # Rastrear estados visitados para evitar loops
         winning_paths = []  # Armazenar todos os caminhos vencedores encontrados
-        
+
         while queue:
             current_game, path = queue.popleft()
-            
+
             # Criar uma chave única para o estado atual
             current_state_key = self._create_game_state_key(current_game)
-            
+
             # Se este estado já foi visitado, pule
             if current_state_key in visited_states:
                 continue
             visited_states.add(current_state_key)
-            
+
             # Se o jogo avançou de nível ou foi vencido, registre o caminho
             if current_game.check_level_complete() or current_game.game_won:
                 winning_paths.append(path)
+                # Atualizar o estado do jogo principal se encontramos vitória
+                if current_game.game_won:
+                    self.game.game_won = True
                 # Otimização: se encontramos um caminho curto, priorizamos ele
                 if len(path) <= 10:  # Considere caminhos curtos 
                     self.__class__.bfa_cache[game_state_key] = path[0] if path else None
@@ -373,24 +379,30 @@ class Bot:
                     for x in range(GRID_WIDTH):
                         if current_game.is_valid_position(block, x, y):
                             possible_moves.append((block_index, x, y))
-            
+
             if not possible_moves:
+                # Se não há movimentos possíveis e não encontramos solução, marcar como jogo terminado
+                if len(winning_paths) == 0:
+                    current_game.game_over = True
+                    # Propagar esse estado para o jogo principal se necessário
+                    if current_game is self.game or path == []:
+                        self.game.game_over = True
                 continue
             
             # Explore cada movimento possível a partir do estado atual
             for block_index, x, y in possible_moves:
                 game_copy = copy.deepcopy(current_game)
                 block = game_copy.available_blocks[block_index]
-                
+
                 # Armazenar estado antes do movimento
                 green_before = game_copy.green_stones_collected
                 red_before = game_copy.red_stones_collected
                 level_before = game_copy.level_num
-                
+
                 # Executar o movimento
                 game_copy.place_block(block, x, y)
                 game_copy.available_blocks[block_index] = None
-                
+
                 # Verificar se este movimento resultou em progresso significativo
                 progress_made = (
                     game_copy.green_stones_collected > green_before or
@@ -398,27 +410,28 @@ class Bot:
                     game_copy.level_num > level_before or
                     game_copy.check_level_complete()
                 )
-                
+
                 # Se todos os blocos foram usados, obtenha os próximos
                 if game_copy.all_blocks_used():
                     game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
-                
+
                 # Crie um novo caminho estendendo o caminho atual
                 new_path = path + [(block_index, x, y)]
-                
+
                 # Priorizar movimentos que fazem progresso
                 if progress_made:
                     queue.appendleft((game_copy, new_path))  # Coloca no início da fila
                 else:
                     queue.append((game_copy, new_path))
-        
-        # Selecione o melhor caminho (o mais curto) entre os caminhos vencedores
+
         best_move = None
         if winning_paths:
             shortest_path = min(winning_paths, key=len)
             if shortest_path:
                 best_move = shortest_path[0]  # O primeiro movimento do caminho mais curto
-        
+        else:
+            self.game.game_over = True
+
         # Salve a solução no cache
         self.__class__.bfa_cache[game_state_key] = best_move
         return best_move
@@ -530,8 +543,8 @@ class Bot:
                     
                     if progress_made:
                         stack.append((game_copy, new_path))  # DFS adiciona ao topo da pilha
-                    else:
-                        stack.append((game_copy, new_path))
+                    #else:
+                    #    stack.append((game_copy, new_path))
 
             best_move = None
             if winning_paths:
