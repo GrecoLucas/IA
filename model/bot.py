@@ -502,39 +502,69 @@ class Bot:
             return None
         
         return possible_moves
+    
+    def get_all_possible_moves_stack(self, game):
+        possible_moves = deque([])
+        # Coletar todos os movimentos possíveis
+        for block_index, block in enumerate(game.available_blocks):
+            if block is None:
+                continue
+            for y in range(GRID_HEIGHT):
+                for x in range(GRID_WIDTH):
+                    if game.is_valid_position(block, x, y):
+                        possible_moves.appendleft((block_index, x, y))
+        # Não foi encontrado nenhum movimento possível
+        if not possible_moves:
+            return None
+        
+        return possible_moves
 
     # Iterative deepening search para encontrar o melhor movimento
     def iterative_deepening_search(self, max_depth):
-        for depth in range(1, max_depth):
-            solution = self.depth_limited_search(depth)
+
+        for depth in range(4, max_depth+1):
+
+            solution = self.depth_limited_search(depth, max_depth)
             if solution is not None:
                 return solution
         return None     #Não foi encontrada nenhuma solução para a depth máxima dada
     
 
     # DFS com profundidade limitada
-    def depth_limited_search(self, depth):
+    def depth_limited_search(self, depth, max_depth):
+        #  #print(f"depth: {depth}, cache: {self.visited_iterative_states}")
+        #  for (initial_state, curr_move_sequence) in self.visited_iterative_states:
+        #     #initial_state, curr_move_sequence = self.visited_iterative_states.pop()
+        #     temp = set()
+        #     move_sequence = self.recursive_depth_limited_search(initial_state,depth - len(curr_move_sequence), list(curr_move_sequence), temp )
+        #     if move_sequence is not None:
+        #         return move_sequence
+        #     else:
+        #         self.visited_iterative_states = temp
+        
         game_copy = copy.deepcopy(self.game)
         move_sequence = self.recursive_depth_limited_search(game_copy, depth, [])
         return move_sequence
+        
     
     # Parte recursiva do DFS
     def recursive_depth_limited_search(self, game, depth, move_seq):
-        # conjunto de movimentos atuais permitem ganhar o jogo
-        if game.game_won:
+        if game.game_won or game.check_level_complete():
             return move_seq
+        if game.game_over:
+                return None
         # Nenhuma solução encontrada para a profundidade dada
         if depth == 0:
             return None
         
-        possible_moves = self.get_all_possible_moves(game)
+        possible_moves = self.get_all_possible_moves_stack(game)
         # BFS itera sobre todos os movimentos possíveis 
         if(possible_moves is None):
             return None
-        for move in possible_moves:
+        while possible_moves:
+            move = possible_moves.pop()
             # Criar uma cópia do estado atual do jogo passado
             game_copy = copy.deepcopy(game)
-            
             block_index, x, y = move
             #print(f"index: {block_index}, x: {x}, y: {y}")
             block = game_copy.available_blocks[block_index]
@@ -543,27 +573,70 @@ class Bot:
             game_copy.available_blocks[block_index] = None
             # Adicionar movimento à lista de moves executados
             new_move_seq = move_seq + [move]
-            # Nível completo 
             if game_copy.check_level_complete():
-                    #print(f"LEVEL {game_copy.level_num} COMPLETE!!!")
-                    next_level = game_copy.get_next_level()
-                    if next_level is not None:
-                        game_copy.load_level(next_level)
-                        # Evitar explorar outros movimentos que não completam o nível
-                        result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
-                        return result
-                    else:
-                        game_copy.game_won = True
-                        
+                return new_move_seq
             # Atualizar blocos disponíveis se necessário
-            elif game_copy.all_blocks_used():
+            if game_copy.all_blocks_used():
                 game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
-            result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
+        
+            result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq)
+            #if result is None:
             if result is not None:
                 return result   # Sequência de movimentos válida encontrada
         # Não foi encontrada nenhuma sequência de movimentos válida para ganhar o jogo
         return None
-    
+        
+
+
+    def rows_near_completion(self, old_game_state, game_state, rows):
+        for y in rows:
+            biggest_seq_complete_old = 0
+            biggest_seq_complete_new = 0
+            curr = 0
+            curr_old = 0
+            for x in range(GRID_WIDTH):
+                if game_state.board[y][x]:
+                    curr += 1
+                    biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
+                if old_game_state.board[y][x]:
+                    curr_old += 1
+                    biggest_seq_complete_old = max(curr_old, biggest_seq_complete_old)
+        if biggest_seq_complete_new > biggest_seq_complete_old:
+            return biggest_seq_complete_new - biggest_seq_complete_old
+        return 0
+
+    def cols_near_completion(self, old_game_state, game_state, cols):
+        for x in cols:
+            biggest_seq_complete_old = 0
+            biggest_seq_complete_new = 0
+            curr = 0
+            curr_old = 0
+            for y in range(GRID_HEIGHT):
+                if game_state.board[y][x]:
+                    curr += 1
+                    biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
+                if old_game_state.board[y][x]:
+                    curr_old += 1
+                    biggest_seq_complete_old = max(curr_old, biggest_seq_complete_old)
+        if biggest_seq_complete_new > biggest_seq_complete_old:
+            return biggest_seq_complete_new - biggest_seq_complete_old
+        return 0
+
+    def check_near_completion(self, old_game_state, game_state):
+        rows = []
+        cols = []
+        for y in range( GRID_HEIGHT):
+            for x in range( GRID_WIDTH):
+                if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
+                    if y not in rows:
+                        rows.append(y)
+                    if x not in cols:
+                        cols.append(x)
+        return self.rows_near_completion( old_game_state, game_state, rows) + self.cols_near_completion(old_game_state, game_state, cols)
+        
+
+
+
     def treshold(self, game_state):
         amount_moves = 10
         dif = game_state.current_level.difficulty
@@ -646,7 +719,7 @@ class Bot:
         else:
             if cleared: 
                 reward += 1*0.3 
-        fill = self.check_board_gems_pos(old_game_state, game_state)
+        fill = self.check_board_gems_pos(old_game_state, game_state) # self.check_near_completion(old_game_state, game_state)
         fill_reward = max(0, fill)
         reward += fill_reward * 0.2
         adjacent_reward = self.check_board_gems_adjacent_pos(old_game_state, game_state) 
