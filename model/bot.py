@@ -357,16 +357,13 @@ class Bot:
             # Se o jogo avançou de nível ou foi vencido, registre o caminho
             if current_game.check_level_complete() or current_game.game_won:
                 winning_paths.append(path)
-                # Atualizar o estado do jogo principal se encontramos vitória
                 if current_game.game_won:
                     self.game.game_won = True
-                # Otimização: se encontramos um caminho curto, priorizamos ele
-                if len(path) <= 10:  # Considere caminhos curtos 
+                if len(path) <= 10: 
                     self.__class__.bfa_cache[game_state_key] = path[0] if path else None
                     return path[0] if path else None
-                continue  # Continue procurando outros caminhos possíveis
-            
-            # Se o jogo terminou sem vitória, pule
+                continue  
+
             if current_game.game_over:
                 continue
             
@@ -437,124 +434,137 @@ class Bot:
         return best_move
 
     def find_best_dfs(self):
-            # Cache de soluções para evitar recomputação
-            if not hasattr(self.__class__, 'dfs_cache'):
-                self.__class__.dfs_cache = {}
-                
-            # Gerar uma chave única para o estado atual do jogo
-            game_state_key = self._create_game_state_key(self.game)
+        # Cache de soluções para evitar recomputação
+        if not hasattr(self.__class__, 'dfs_cache'):
+            self.__class__.dfs_cache = {}
             
-            # Verificar se já temos uma solução em cache para este estado
-            if game_state_key in self.__class__.dfs_cache:
-                return self.__class__.dfs_cache[game_state_key]
+        # Gerar uma chave única para o estado atual do jogo
+        game_state_key = self._create_game_state_key(self.game)
+        
+        # Verificar se já temos uma solução em cache para este estado
+        if game_state_key in self.__class__.dfs_cache:
+            return self.__class__.dfs_cache[game_state_key]
+        
+        possible_moves = []
+        
+        # Coletar todos os movimentos possíveis para o estado atual do jogo
+        for block_index, block in enumerate(self.game.available_blocks):
+            if block is None:
+                continue
+            for y in range(GRID_HEIGHT):
+                for x in range(GRID_WIDTH):
+                    if self.game.is_valid_position(block, x, y):
+                        possible_moves.append((block_index, x, y))
+        
+        if not possible_moves:
+            # Não há movimentos possíveis, marcar o jogo como terminado se não estiver ganho
+            if not self.game.game_won:
+                self.game.game_over = True
+            self.__class__.dfs_cache[game_state_key] = None
+            return None  # Não há movimentos possíveis
+        
+        # Verificar primeiro os movimentos que avançam de nível instantaneamente
+        for move in possible_moves:
+            block_index, x, y = move
+            
+            # Criar uma cópia do estado atual do jogo
+            game_copy = copy.deepcopy(self.game)
+            
+            # Fazer o movimento
+            block = game_copy.available_blocks[block_index]
+            level_before = game_copy.level_num
+            
+            # Executar o movimento
+            game_copy.place_block(block, x, y)
+            game_copy.available_blocks[block_index] = None
+            
+            # Se avançou de nível imediatamente, salve no cache e retorne este movimento
+            if game_copy.level_num > level_before or game_copy.check_level_complete():
+                self.__class__.dfs_cache[game_state_key] = move
+                return move
+        
+        stack = [(self.game, [])]  # Tupla: (estado do jogo, caminho até aqui)
+        visited_states = set()  # Rastrear estados visitados para evitar loops
+        winning_paths = []  # Armazenar todos os caminhos vencedores encontrados
+    
+        while stack:
+            current_game, path = stack.pop()  # Remove do topo da pilha (DFS)
+            
+            current_state_key = self._create_game_state_key(current_game)
+            
+            if current_state_key in visited_states:
+                continue
+            visited_states.add(current_state_key)
+            
+            if current_game.check_level_complete() or current_game.game_won:
+                winning_paths.append(path)
+                # Atualizar o estado do jogo principal se encontramos vitória
+                if current_game.game_won:
+                    self.game.game_won = True
+                if len(path) <= 15:
+                    self.__class__.dfs_cache[current_state_key] = path[0] if path else None
+                    return path[0] if path else None
+                continue
+            
+            if current_game.game_over:
+                continue
             
             possible_moves = []
-            
-            # Coletar todos os movimentos possíveis para o estado atual do jogo
-            for block_index, block in enumerate(self.game.available_blocks):
+            for block_index, block in enumerate(current_game.available_blocks):
                 if block is None:
                     continue
                 for y in range(GRID_HEIGHT):
                     for x in range(GRID_WIDTH):
-                        if self.game.is_valid_position(block, x, y):
+                        if current_game.is_valid_position(block, x, y):
                             possible_moves.append((block_index, x, y))
             
             if not possible_moves:
-                self.__class__.dfs_cache[game_state_key] = None
-                return None  # Não há movimentos possíveis
+                # Se não há movimentos possíveis e não encontramos solução, marcar como jogo terminado
+                if len(winning_paths) == 0:
+                    current_game.game_over = True
+                    # Propagar esse estado para o jogo principal se necessário
+                    if current_game is self.game or path == []:
+                        self.game.game_over = True
+                continue
             
-            # Verificar primeiro os movimentos que avançam de nível instantaneamente
-            for move in possible_moves:
-                block_index, x, y = move
-                
-                # Criar uma cópia do estado atual do jogo
-                game_copy = copy.deepcopy(self.game)
-                
-                # Fazer o movimento
+            for block_index, x, y in reversed(possible_moves):  # Inverte para manter a ordem do DFS
+                game_copy = copy.deepcopy(current_game)
                 block = game_copy.available_blocks[block_index]
+                
+                green_before = game_copy.green_stones_collected
+                red_before = game_copy.red_stones_collected
                 level_before = game_copy.level_num
                 
-                # Executar o movimento
                 game_copy.place_block(block, x, y)
                 game_copy.available_blocks[block_index] = None
                 
-                # Se avançou de nível imediatamente, salve no cache e retorne este movimento
-                if game_copy.level_num > level_before or game_copy.check_level_complete():
-                    self.__class__.dfs_cache[game_state_key] = move
-                    return move
-            
-            stack = [(self.game, [])]  # Tupla: (estado do jogo, caminho até aqui)
-            visited_states = set()  # Rastrear estados visitados para evitar loops
-            winning_paths = []  # Armazenar todos os caminhos vencedores encontrados
-
-            while stack:
-                current_game, path = stack.pop()  # Remove do topo da pilha (DFS)
+                progress_made = (
+                    game_copy.green_stones_collected > green_before or
+                    game_copy.red_stones_collected > red_before or
+                    game_copy.level_num > level_before or
+                    game_copy.check_level_complete()
+                )
                 
-                current_state_key = self._create_game_state_key(current_game)
+                if game_copy.all_blocks_used():
+                    game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
                 
-                if current_state_key in visited_states:
-                    continue
-                visited_states.add(current_state_key)
+                new_path = path + [(block_index, x, y)]
                 
-                if current_game.check_level_complete() or current_game.game_won:
-                    winning_paths.append(path)
-                    if len(path) <= 15:
-                        self.__class__.dfs_cache[current_state_key] = path[0] if path else None
-                        return path[0] if path else None
-                    continue
-                
-                if current_game.game_over:
-                    continue
-                
-                possible_moves = []
-                for block_index, block in enumerate(current_game.available_blocks):
-                    if block is None:
-                        continue
-                    for y in range(GRID_HEIGHT):
-                        for x in range(GRID_WIDTH):
-                            if current_game.is_valid_position(block, x, y):
-                                possible_moves.append((block_index, x, y))
-                
-                if not possible_moves:
-                    continue
-                
-                for block_index, x, y in reversed(possible_moves):  # Inverte para manter a ordem do DFS
-                    game_copy = copy.deepcopy(current_game)
-                    block = game_copy.available_blocks[block_index]
-                    
-                    green_before = game_copy.green_stones_collected
-                    red_before = game_copy.red_stones_collected
-                    level_before = game_copy.level_num
-                    
-                    game_copy.place_block(block, x, y)
-                    game_copy.available_blocks[block_index] = None
-                    
-                    progress_made = (
-                        game_copy.green_stones_collected > green_before or
-                        game_copy.red_stones_collected > red_before or
-                        game_copy.level_num > level_before or
-                        game_copy.check_level_complete()
-                    )
-                    
-                    if game_copy.all_blocks_used():
-                        game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
-                    
-                    new_path = path + [(block_index, x, y)]
-                    
-                    if progress_made:
-                        stack.append((game_copy, new_path))  # DFS adiciona ao topo da pilha
-                    #else:
-                    #    stack.append((game_copy, new_path))
-
-            best_move = None
-            if winning_paths:
-                shortest_path = min(winning_paths, key=len)
-                if shortest_path:
-                    best_move = shortest_path[0]
-
-            self.__class__.dfs_cache[current_state_key] = best_move
-            return best_move
-
+                if progress_made:
+                    stack.append((game_copy, new_path))  # DFS adiciona ao topo da pilha
+                else:
+                    stack.append((game_copy, new_path))
+    
+        best_move = None
+        if winning_paths:
+            shortest_path = min(winning_paths, key=len)
+            if shortest_path:
+                best_move = shortest_path[0]
+        else:
+            self.game.game_over = True
+    
+        self.__class__.dfs_cache[game_state_key] = best_move
+        return best_move
     
     def _create_game_state_key(self, game):
         # Represente o tabuleiro como uma tupla de tuplas

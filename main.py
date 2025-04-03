@@ -62,6 +62,7 @@ def main():
                 clock = pygame.time.Clock()
                 game_running = True
                 fully_automatic = menu_model.get_fully_automatic()
+                game.set_fully_automatic(fully_automatic)
                 print(f"Running bot {bot_type}")
                 while game_running:
                     # Process all events
@@ -70,8 +71,7 @@ def main():
                             pygame.quit()
                             sys.exit()
                         
-                        # Only pass actual events to the controller
-                        controller.handle_event(event, fully_automatic)
+                    controller.handle_bot(None, fully_automatic)
 
                     # Check if we need to return to menu
                     if controller.return_to_menu:
@@ -99,6 +99,8 @@ def main():
 
         fully_automatic = menu_model.get_fully_automatic()
         print(f"[DEBUG] Game starting - fully_automatic: {fully_automatic}, player_type: {player_type}, level: {selected_level}")
+        game.set_fully_automatic(fully_automatic)
+        
         
         clock = pygame.time.Clock()
         game_running = True

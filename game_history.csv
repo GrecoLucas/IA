@@ -1,3 +1,7 @@
+timestamp,time_spent,player_type,bot_type,level,moves,green_collected,red_collected,total_moves,level_complete,game_over,game_won,Is_fully_automatic
+2025-04-03 11:31:49,00:00:00,BOT,BotType.GREEDY,2,10,3,0,23,False,True,False,True
+2025-04-03 11:32:07,00:00:04,BOT,BotType.GREEDY,2,10,3,0,23,False,True,False,False
+2025-04-03 11:33:02,00:00:37,BOT,BotType.DFS,8,19,2,4,109,True,False,True,True
 timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-03-19 14:20:42,7,10,3,5,80,False
 2025-03-20 11:02:07,3,9,1,1,32,False
@@ -57,3 +61,26 @@ timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-04-03 15:05:03,3,11,2,0,42,False
 2025-04-03 15:05:09,2,10,3,0,65,False
 2025-04-03 15:05:12,8,14,2,4,156,True
+2025-04-03 15:09:41,00:00:13,BOT,BotType.DFS,8,19,2,4,109,True,False,True,True
+2025-04-03 15:13:05,00:00:05,BOT,BotType.RANDOM,0,8,1,0,8,False,True,False,False
+2025-04-03 15:14:47,00:00:32,BOT,BotType.OPTIMAL,8,18,1,4,91,False,True,False,True
+2025-04-03 15:15:25,00:00:00,BOT,BotType.RANDOM,0,4,0,0,4,False,True,False,True2025-04-03 15:17:11,00:00:08,BOT,BotType.RANDOM,1,11,0,0,20,False,True,False,False
+2025-04-03 15:17:53,00:00:11,BOT,BotType.RANDOM,0,4,0,0,4,False,True,False,False
+2025-04-03 15:18:56,00:01:14,BOT,BotType.OPTIMAL,3,10,1,1,35,False,True,False,False
+2025-04-03 15:19:11,00:01:28,BOT,BotType.GREEDY,2,10,3,0,58,False,True,False,False
+2025-04-03 15:20:38,00:02:56,BOT,BotType.BFA,8,14,2,4,149,True,False,True,False
+2025-04-03 15:21:24,00:03:41,BOT,BotType.DFS,8,19,2,4,258,True,False,True,False
+2025-04-03 15:25:04,00:00:21,BOT,BotType.RANDOM,1,11,0,0,18,False,True,False,True
+2025-04-03 15:25:36,00:00:53,BOT,BotType.OPTIMAL,3,10,2,0,51,False,True,False,True
+2025-04-03 15:25:37,00:00:53,BOT,BotType.GREEDY,2,10,3,0,74,False,True,False,True
+2025-04-03 15:26:10,00:01:26,BOT,BotType.BFA,8,14,2,4,165,True,False,True,True
+2025-04-03 15:26:23,00:01:39,BOT,BotType.DFS,8,19,2,4,274,True,False,True,True
+2025-04-03 15:28:03,00:00:00,BOT,BotType.RANDOM,1,11,0,0,19,False,True,False,True
+2025-04-03 15:28:16,00:00:13,BOT,BotType.OPTIMAL,3,11,0,2,46,False,True,False,True
+2025-04-03 15:28:16,00:00:13,BOT,BotType.GREEDY,2,10,3,0,69,False,True,False,True
+2025-04-03 15:28:47,00:00:44,BOT,BotType.BFA,8,14,2,4,160,True,False,True,True
+2025-04-03 15:29:01,00:00:58,BOT,BotType.DFS,8,19,2,4,269,True,False,True,True
+2025-04-03 15:29:56,00:00:00,BOT,BotType.RANDOM,0,20,1,0,20,False,True,False,True
+2025-04-03 15:30:27,00:00:30,BOT,BotType.GREEDY,2,10,3,0,117,False,True,False,True
+2025-04-03 15:30:58,00:01:01,BOT,BotType.BFA,8,14,2,4,208,True,False,True,True
+2025-04-03 15:31:13,00:01:16,BOT,BotType.DFS,8,19,2,4,317,True,False,True,True
