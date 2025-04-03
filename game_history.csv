@@ -1,15 +1,4 @@
-timestamp,player_type,bot_type,level,moves,green_collected,red_collected,total_moves,level_complete,game_over,game_won
-2025-04-03 10:16:26,BOT,BotType.GREEDY,8,17,2,3,17,False,True,False
-2025-04-03 10:17:26,BOT,BotType.BFA,8,14,2,4,14,True,False,True
-2025-04-03 10:26:13,BOT,BotType.BFA,8,14,2,4,91,True,False,True
-2025-04-03 10:26:13,BOT,BotType.BFA,8,14,2,4,91,True,True,True
-2025-04-03 10:47:13,BOT,BotType.DFS,8,19,2,4,19,True,True,True
-2025-04-03 10:48:28,BOT,BotType.DFS,8,19,2,4,19,True,True,True
-2025-04-03 10:48:48,BOT,BotType.RANDOM,8,10,1,0,10,False,True,False
-2025-04-03 10:49:08,BOT,BotType.RANDOM,8,5,0,0,5,False,True,False
-2025-04-03 10:51:03,BOT,BotType.BFA,8,14,2,4,14,True,False,True
-2025-04-03 10:55:04,BOT,BotType.GREEDY,2,10,3,0,23,False,True,False
-2025-04-03 11:03:56,BOT,BotType.DFS,8,19,2,4,19,True,True,True
-2025-04-03 11:06:40,BOT,BotType.DFS,8,19,2,4,19,True,False,True
-2025-04-03 11:07:16,BOT,BotType.DFS,8,19,2,4,19,True,False,True
-2025-04-03 11:08:16,BOT,BotType.DFS,8,19,2,4,109,True,False,True
+timestamp,time_spent,player_type,bot_type,level,moves,green_collected,red_collected,total_moves,level_complete,game_over,game_won,Is_fully_automatic
+2025-04-03 11:31:49,00:00:00,BOT,BotType.GREEDY,2,10,3,0,23,False,True,False,True
+2025-04-03 11:32:07,00:00:04,BOT,BotType.GREEDY,2,10,3,0,23,False,True,False,False
+2025-04-03 11:33:02,00:00:37,BOT,BotType.DFS,8,19,2,4,109,True,False,True,True

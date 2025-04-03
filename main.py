@@ -56,7 +56,8 @@ def main():
         
         fully_automatic = menu_model.get_fully_automatic()
         print(f"[DEBUG] Game starting - fully_automatic: {fully_automatic}, player_type: {player_type}, level: {selected_level}")
-
+        game.set_fully_automatic(fully_automatic)
+        
         clock = pygame.time.Clock()
         game_running = True
         
