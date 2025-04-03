@@ -32,6 +32,7 @@ class GameView:
         if game.bot_type is None:
             self.draw_help_button()
 
+
         if game.game_over:
             self.draw_game_over()
         elif game.game_won:
@@ -52,7 +53,7 @@ class GameView:
         board_x = BOARD_X
 
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
                 board_x = NBOARD_X
 
         board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
@@ -111,7 +112,7 @@ class GameView:
     def draw_selected_block(self, game):
         board_x = BOARD_X
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
                 board_x = NBOARD_X
         mouse_x, mouse_y = pygame.mouse.get_pos()
         grid_x = (mouse_x - board_x) // GRID_SIZE
@@ -160,10 +161,15 @@ class GameView:
         self.screen.blit(overlay, (0, 0))
         
         gameover_text = self.title_font.render("GAME OVER", True, WHITE)
-        restart_text = self.font.render("Pressione R para reiniciar", True, WHITE)
+        restart_text = self.font.render("Pressione R para jogar novamente o último nível", True, WHITE)
+        restart_text_from_level_0 = self.font.render("Pressione 0 para jogar do início", True, WHITE)
+        menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
         
         self.screen.blit(gameover_text, (SCREEN_WIDTH // 2 - gameover_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+        self.screen.blit(restart_text_from_level_0, (SCREEN_WIDTH // 2 - restart_text_from_level_0.get_width() // 2, SCREEN_HEIGHT // 2 + 70))
+        self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
+    
     
     def draw_game_won(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -171,10 +177,15 @@ class GameView:
         self.screen.blit(overlay, (0, 0))
         
         win_text = self.title_font.render("PARABÉNS! VOCÊ VENCEU!", True, WHITE)
-        restart_text = self.font.render("Pressione R para jogar novamente", True, WHITE)
+        restart_text = self.font.render("Pressione R para jogar novamente o último nível", True, WHITE)
+        restart_text_from_level_0 = self.font.render("Pressione 0 para jogar do início", True, WHITE)
+        menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
+
         
         self.screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
+        self.screen.blit(restart_text_from_level_0, (SCREEN_WIDTH // 2 - restart_text_from_level_0.get_width() // 2, SCREEN_HEIGHT // 2 + 70))
+        self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
     
     def draw_help_button(self):
         help_text = self.font.render("Ajuda", True, WOOD_DARK)
@@ -229,7 +240,7 @@ class GameView:
     def draw_hint(self, game):
         board_x = BOARD_X
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
                 board_x = NBOARD_X
                 
         for row in range(len(self.hint_block.shape)):
@@ -244,7 +255,10 @@ class GameView:
                     hint_surface.fill((42, 157, 143, 160))  
                     self.screen.blit(hint_surface, hint_rect)
                     pygame.draw.rect(self.screen, (0, 128, 128), hint_rect, 2)  
-           
+    def draw_comeback_to_menu(self):
+        comeback_text = self.font.render("Pressione ESC para voltar ao menu", True, WOOD_DARK)
+        self.screen.blit(comeback_text, (SCREEN_WIDTH - 250, SCREEN_HEIGHT - 30))
+
     def set_hint(self, block, x, y):
         self.hint_block = block
         self.hint_x = x

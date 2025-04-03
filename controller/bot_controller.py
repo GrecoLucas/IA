@@ -114,6 +114,18 @@ class BotController:
     # o caminho calculado - terminal tem prints para informação
     def play_bfa(self):
         current_level = self.bot.game.level_num
+        
+        # Add the print_once attribute if it doesn't exist
+        if not hasattr(self, 'print_once'):
+            self.print_once = False
+            
+        # Check if game ended and save stats if needed
+        if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+            self.bot.game.save_game_stats()
+            self.print_once = True
+            print("[DEBUG] Saved game statistics in automatic mode")
+            return
+        
         if not hasattr(self.bot, 'bfa_solution_path') or self.bot.bfa_solution_path is None or hasattr(self.bot, 'last_level') and self.bot.last_level != current_level:
             
             self.bot.last_level = current_level
@@ -124,11 +136,23 @@ class BotController:
                 self.bot.bfa_current_move = 0
             else:
                 log_message(self.bot, "[BFA] Não foi possível encontrar uma solução.")
+                # Mark game as over when no solution found
+                self.bot.game.game_over = True
+                # Save stats when game is over due to no solution
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after no solution found")
                 return
         
         if self.bot.state == "deciding":
             if not self.bot.bfa_solution_path:
                 self.bot.game.game_over = True
+                # Save stats when game is over due to empty solution path
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after empty solution path")
                 return
             
             # Take the next move from our pre-calculated path
@@ -157,9 +181,20 @@ class BotController:
             else:
                 log_message(self.bot, "[BFA] Movimento inválido encontrado.")
                 self.bot.game.game_over = True
+                # Save stats when game is over due to invalid move
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after invalid move")
         
         elif self.bot.state == "executing":
-            return self.execute_move()
+            move_result = self.execute_move()
+            # Check if game ended after executing a move
+            if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+                self.bot.game.save_game_stats()
+                self.print_once = True
+                print("[DEBUG] Saved game statistics after move execution")
+            return move_result
     
     def _find_complete_solution_path(self):
         game_copy = copy.deepcopy(self.bot.game)
@@ -242,6 +277,174 @@ class BotController:
         
         return solution_path
     
+    # Faz o dfs de forma difernete, calcula primeiro o caminho completo e depois executa
+    # o caminho calculado - terminal tem prints para informação
+    def play_dfs(self):
+        current_level = self.bot.game.level_num
+        
+        # Add the print_once attribute if it doesn't exist
+        if not hasattr(self, 'print_once'):
+            self.print_once = False
+            
+        # Check if game ended and save stats if needed
+        if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+            self.bot.game.save_game_stats()
+            self.print_once = True
+            print("[DEBUG] Saved game statistics in automatic mode")
+            return
+        
+        if not hasattr(self.bot, 'dfs_solution_path') or self.bot.dfs_solution_path is None or hasattr(self.bot, 'last_level') and self.bot.last_level != current_level:
+            
+            self.bot.last_level = current_level
+            self.bot.dfs_solution_path = self._find_complete_solution_path_dfs()
+            
+            if self.bot.dfs_solution_path:
+                log_message(self.bot, f"[DFS] Solução encontrada! {len(self.bot.dfs_solution_path)} movimentos necessários.")
+                self.bot.dfs_current_move = 0
+            else:
+                log_message(self.bot, "[DFS] Não foi possível encontrar uma solução.")
+                # Mark game as over when no solution found
+                self.bot.game.game_over = True
+                # Save stats when game is over due to no solution
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after no solution found")
+                return
+        
+        if self.bot.state == "deciding":
+            if not self.bot.dfs_solution_path:
+                self.bot.game.game_over = True
+                # Save stats when game is over due to empty solution path
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after empty solution path")
+                return
+            
+            # Take the next move from our pre-calculated path
+            best_move = self.bot.dfs_solution_path.pop(0)
+            
+            if hasattr(self.bot, 'dfs_total_moves') and hasattr(self.bot, 'dfs_current_move'):
+                self.bot.dfs_current_move += 1
+                moves_remaining = len(self.bot.dfs_solution_path)
+                if moves_remaining > 0:
+                    log_message(self.bot, f"[DFS] Executando movimento {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
+                else:
+                    log_message(self.bot, f"[DFS] Executando movimento {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
+                    log_message(self.bot, "Aperte 'P' para procurar a solução.")
+            else:
+                if not hasattr(self.bot, 'dfs_total_moves'):
+                    self.bot.dfs_total_moves = len(self.bot.dfs_solution_path) + 1  # +1 para o movimento atual
+                if not hasattr(self.bot, 'dfs_current_move'):
+                    self.bot.dfs_current_move = 1
+                log_message(self.bot, f"[DFS] Executando movimento {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
+            
+            if best_move:
+                self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
+                # UTIL PARA INFORMAÇÃO
+                self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                self.bot.state = "executing"
+            else:
+                log_message(self.bot, "[DFS] Movimento inválido encontrado.")
+                self.bot.game.game_over = True
+                # Save stats when game is over due to invalid move
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after invalid move")
+        
+        elif self.bot.state == "executing":
+            move_result = self.execute_move()
+            # Check if game ended after executing a move
+            if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+                self.bot.game.save_game_stats()
+                self.print_once = True
+                print("[DEBUG] Saved game statistics after move execution")
+            return move_result
+    
+    def _find_complete_solution_path_dfs(self):
+        game_copy = copy.deepcopy(self.bot.game)
+        
+        solution_path = []
+        max_moves = MAX_DFS_MOVES
+        moves_made = 0
+        
+        # Inicializa contadores para informação do usuário
+        if not hasattr(self.bot, 'dfs_total_moves'):
+            self.bot.dfs_total_moves = 0
+        if not hasattr(self.bot, 'dfs_current_move'):
+            self.bot.dfs_current_move = 0
+        
+        while not game_copy.check_level_complete() and not game_copy.game_over and moves_made < max_moves:
+            # Create a temporary bot for finding the next move
+            temp_bot = copy.deepcopy(self.bot)
+            temp_bot.game = game_copy
+            
+            # Find the next best move using BFA, with fallback to greedy
+            next_move = temp_bot.find_best_dfs()
+            
+            # Se BFA falhar, tente com greedy
+            if not next_move:
+                log_message(self.bot, "[DFS] DFS falhou, tentando greedy...")
+                next_move = temp_bot.find_best_greedy()
+                
+            if not next_move:
+                log_message(self.bot, "[DFS] Buscando qualquer movimento válido...")
+                has_valid_moves = False
+                for block_index, block in enumerate(game_copy.available_blocks):
+                    if block is None:
+                        continue
+                    for y in range(GRID_HEIGHT):
+                        for x in range(GRID_WIDTH):
+                            if game_copy.is_valid_position(block, x, y):
+                                has_valid_moves = True
+                                next_move = (block_index, x, y)
+                                break
+                        if has_valid_moves:
+                            break
+                    if has_valid_moves:
+                        break
+                        
+                if not has_valid_moves:
+                    log_message(self.bot, "[DFS] Realmente não há movimentos válidos.")
+                    return None
+            
+            # Add this move to our solution path
+            solution_path.append(next_move)
+            
+            # Log do movimento sendo realizado
+            block_index, x, y = next_move
+            
+            # Apply the move to our simulation
+            move_success = game_copy.make_move(block_index, x, y)
+            if not move_success:
+                log_message(self.bot, f"[DFS] Erro: movimento {moves_made+1} falhou!")
+                return None
+            
+            # Get new blocks if needed
+            if game_copy.all_blocks_used():
+                game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
+            
+            # Check if level is complete
+            if game_copy.check_level_complete():
+                self.bot.dfs_total_moves = len(solution_path)
+                break
+            
+            moves_made += 1
+
+        
+        if moves_made >= max_moves:
+            log_message(self.bot, f"[DFS] Falha: Limite de {max_moves} movimentos excedido")
+            return None
+        
+        if game_copy.game_over:
+            log_message(self.bot, "[DFS] Falha: Game over na simulação")
+            return None
+        
+        return solution_path
+
+    
 
     def play_a_star(self):
         if self.bot.state == "deciding":
@@ -291,6 +494,9 @@ class BotController:
             case BotType.BFA:
                 self.play_bfa()
                 self.play_bfa()
+            case BotType.DFS:
+                self.play_dfs()
+                self.play_dfs()
 
             case BotType.ASTAR:
                 print(" STAR CHOSEN")

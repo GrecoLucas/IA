@@ -1,3 +1,4 @@
+from datetime import datetime
 from model.block import Block
 from model.level import Level
 from shapes import SHAPES
@@ -33,7 +34,8 @@ class Game:
         self.bot_type = None
         self.message_log = []
         self.max_messages = 5  
-        
+        self.is_fully_automatic = False
+        self.starttime = datetime.now()
         self.load_level(0)
     
     def load_level(self, level_num):
@@ -249,20 +251,47 @@ class Game:
         # Data e hora atual
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
+        # Initialize starttime if it doesn't exist
+        if not hasattr(self, 'starttime'):
+            self.starttime = datetime.now()
+        
+        # Calculate elapsed time
+        elapsed_time = datetime.now() - self.starttime
+        elapsed_seconds = int(elapsed_time.total_seconds())
+        
+        # Format elapsed time as HH:MM:SS
+        hours, remainder = divmod(elapsed_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        time_spent = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        
+        # Determine player type and bot type for logging
+        player_type_str = "HUMAN" if self.player_type is None else "BOT"
+        bot_type_str = "NONE" if self.bot_type is None else str(self.bot_type)
+        
+        
         # Dados para salvar
         data = {
             'timestamp': current_time,
+            'time_spent': time_spent,
+            'player_type': player_type_str,
+            'bot_type': bot_type_str,
             'level': self.level_num,
             'moves': self.number_of_moves,
             'green_collected': self.green_stones_collected,
             'red_collected': self.red_stones_collected,
             'total_moves': self.total_moves,
-            'level_complete': self.check_level_complete()
+            'level_complete': self.check_level_complete(),
+            'game_over': self.game_over,
+            'game_won': self.game_won,
+            'Is_fully_automatic': self.is_fully_automatic
         }
         
         # Campos do CSV
-        fieldnames = ['timestamp', 'level', 'moves', 'green_collected', 
-                     'red_collected', 'total_moves', 'level_complete']
+        fieldnames = [
+            'timestamp', 'time_spent', 'player_type', 'bot_type', 'level', 'moves', 
+            'green_collected', 'red_collected', 'total_moves', 
+            'level_complete', 'game_over', 'game_won', 'Is_fully_automatic'
+        ]
         
         try:
             with open(csv_filename, 'a', newline='') as csvfile:
@@ -273,7 +302,7 @@ class Game:
                     writer.writeheader()
                 
                 writer.writerow(data)
-                print(f"Game stats saved to {csv_filename}")
+                print(f"Game stats saved to {csv_filename}: {player_type_str} - {bot_type_str}, Time: {time_spent}")
                 
         except Exception as e:
             print(f"Error saving game stats: {e}")
@@ -281,8 +310,32 @@ class Game:
     def set_player_type(self, player_type):
         self.player_type = player_type
 
-    def reset(self):
+    
+    def reset_from_level0(self):
         self.__init__()
+        
+    def reset(self):
+        # Store the current level number before reset
+        current_level_num = self.level_num
+        
+        # Store the total moves (we want to preserve this)
+        total_moves_before_reset = self.total_moves
+        
+        # Clear the message log
+        self.message_log = []
+        
+        # Reload the current level
+        self.load_level(current_level_num)
+        
+        # Restore the total moves count (since load_level resets it)
+        self.total_moves = total_moves_before_reset
+        
+        # Reset game state flags
+        self.game_over = False
+        self.game_won = False
+        
+        # Clear selection
+        self.selected_block = None
 
     def set_bot_type(self, bot_type):
         self.bot_type = bot_type
@@ -299,3 +352,8 @@ class Game:
         self.message_log.append(message)
         if len(self.message_log) > self.max_messages:
             self.message_log.pop(0)
+
+    def set_fully_automatic(self, value):
+        if value:
+            self.is_fully_automatic = True
+    

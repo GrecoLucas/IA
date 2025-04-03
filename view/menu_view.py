@@ -69,13 +69,32 @@ class MenuView:
         self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 80))
 
         subtitle = self.font.render("Menu Principal", True, WOOD_DARK)
+        if menu.state == MenuState.CHOOSE_LEVEL:
+            subtitle = self.font.render("Selecione o Nível", True, WOOD_DARK)
+        elif menu.state == MenuState.CHOOSE_ALGORITHM:
+            subtitle = self.font.render("Selecione o Algoritmo", True, WOOD_DARK)
         self.screen.blit(subtitle, (SCREEN_WIDTH // 2 - subtitle.get_width() // 2, 130))
 
+        visible_items = 8  
+        scroll_offset = 0
+        
+        if menu.state == MenuState.CHOOSE_LEVEL and len(menu.items) > visible_items:
+            # Calculate scroll offset based on selected index
+            scroll_offset = max(0, min(menu.selected_index - 2, len(menu.items) - visible_items))
+        
+        # Display visible menu items
         menu_y = 200
-        for i, item in enumerate(menu.items):
+        visible_count = min(visible_items, len(menu.items))
+        
+        for i in range(scroll_offset, scroll_offset + visible_count):
+            if i >= len(menu.items):
+                break
+                
+            item = menu.items[i]
             color = WOOD_DARK
+            
             if item.selected:
-                select_rect = pygame.Rect(SCREEN_WIDTH // 2 - 150, menu_y - 5, 300, 40)
+                select_rect = pygame.Rect(SCREEN_WIDTH // 2 - 200, menu_y - 5, 400, 40)
                 pygame.draw.rect(self.screen, (240, 240, 220), select_rect, border_radius=5)
                 pygame.draw.rect(self.screen, WOOD_MEDIUM, select_rect, 2, border_radius=5)
 
@@ -90,12 +109,28 @@ class MenuView:
             self.screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, menu_y))
             menu_y += 50
 
+        # Show scroll indicators if needed
+        if menu.state == MenuState.CHOOSE_LEVEL and len(menu.items) > visible_items:
+            if scroll_offset > 0:
+                up_arrow = self.font.render("▲ Mais níveis", True, WOOD_MEDIUM)
+                self.screen.blit(up_arrow, (SCREEN_WIDTH // 2 - up_arrow.get_width() // 2, 165))
+            
+            if scroll_offset + visible_count < len(menu.items):
+                down_arrow = self.font.render("▼ Mais níveis", True, WOOD_MEDIUM)
+                self.screen.blit(down_arrow, (SCREEN_WIDTH // 2 - down_arrow.get_width() // 2, menu_y))
+
+        # Display instructions and selected info
         instructions = self.font.render("Setas: Mover   Enter: Selecionar", True, WOOD_MEDIUM)
         self.screen.blit(instructions, (SCREEN_WIDTH // 2 - instructions.get_width() // 2, SCREEN_HEIGHT - 50))
 
         if selected_bot_name:
             bot_name_text = self.font.render(f"Bot: {selected_bot_name}", True, WOOD_DARK)
             self.screen.blit(bot_name_text, (50, 50))
+            
+        # Display selected level if any
+        if menu.get_selected_level() > 0:
+            level_text = self.font.render(f"Nível: {menu.get_selected_level()}", True, WOOD_DARK)
+            self.screen.blit(level_text, (SCREEN_WIDTH - level_text.get_width() - 50, 50))
 
     def draw_rules(self):
         """Draw the rules screen."""

@@ -1,6 +1,6 @@
 # Constantes do jogo
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 700
 GRID_SIZE = 40
 GRID_WIDTH = 8
 GRID_HEIGHT = 8
@@ -27,6 +27,7 @@ MAX_TRIES = 500
 
 # Bot BFA
 MAX_BFA_MOVES = 100
+MAX_DFS_MOVES = 100
 # Bot Types
 from enum import Enum
 class BotType(Enum):
@@ -34,6 +35,7 @@ class BotType(Enum):
     OPTIMAL = "optimal"
     GREEDY = "greedy"
     BFA = "bfa"
+    DFS = "dfs"
     ITERATIVE = "iterative"
     ASTAR = "astar"
 
@@ -43,7 +45,7 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 
 RULES_TEXT = [
-                "Modo Jogador:",
+            "Modo Jogador:",
             "• Arraste e solte blocos de madeira no tabuleiro.",
             "• Para passar de fase é necessário pegar as peças ",
             "verdes ou vermelhas indicadas no canto inferior esquerdo",
@@ -53,4 +55,5 @@ RULES_TEXT = [
             "numero de movimentos possíveis.",
             "Modo Bot:",
             "• Aperte a tecla 'P' para o bot fazer o movimento.",
+            "Para voltar ao menu aperte a tecla 'ESC' ou clique no botão.",
 ]
