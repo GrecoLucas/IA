@@ -27,6 +27,7 @@ MAX_TRIES = 500
 
 # Bot BFA
 MAX_BFA_MOVES = 100
+MAX_DFS_MOVES = 100
 # Bot Types
 from enum import Enum
 class BotType(Enum):
@@ -34,6 +35,7 @@ class BotType(Enum):
     OPTIMAL = "optimal"
     GREEDY = "greedy"
     BFA = "bfa"
+    DFS = "dfs"
     ITERATIVE = "iterative"
 
 # Rules

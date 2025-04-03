@@ -52,6 +52,7 @@ class Menu:
                 MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, BotType.OPTIMAL),
                 MenuItem("Bot Greedy", self.set_bot_algorithm_greedy, BotType.GREEDY),
                 MenuItem("Bot BFA", self.set_bot_algorithm_bfa, BotType.BFA),
+                MenuItem("Bot DFS", self.set_bot_algorithm_dfs, BotType.DFS),
                 MenuItem("Bot Iterativo", self.set_bot_algorithm_iterative, BotType.ITERATIVE),
                 MenuItem("Voltar", self.back_to_main_menu, None), 
             ]
@@ -95,6 +96,11 @@ class Menu:
         return False
     def set_bot_algorithm_bfa(self):
         self.bot_type = BotType.BFA
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items()
+        return False
+    def set_bot_algorithm_dfs(self):
+        self.bot_type = BotType.DFS
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
         return False

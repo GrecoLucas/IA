@@ -73,9 +73,11 @@ def main():
             view.render(game)
             pygame.display.flip()
 
-            controller.update()
+            #controller.update()
 
             clock.tick(60)
+            if game.game_over or game.game_won:
+                controller.update()
 
     pygame.quit()
     sys.exit()

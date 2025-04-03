@@ -193,3 +193,4 @@ class GameController:
             if self.game.check_game_over():
                 self.game.game_over = True
                 self.game.save_game_stats()
+
