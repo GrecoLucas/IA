@@ -248,20 +248,31 @@ class Game:
         # Data e hora atual
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
+        # Determine player type and bot type for logging
+        player_type_str = "HUMAN" if self.player_type is None else "BOT"
+        bot_type_str = "NONE" if self.bot_type is None else str(self.bot_type)
+        
         # Dados para salvar
         data = {
             'timestamp': current_time,
+            'player_type': player_type_str,
+            'bot_type': bot_type_str,
             'level': self.level_num,
             'moves': self.number_of_moves,
             'green_collected': self.green_stones_collected,
             'red_collected': self.red_stones_collected,
             'total_moves': self.total_moves,
-            'level_complete': self.check_level_complete()
+            'level_complete': self.check_level_complete(),
+            'game_over': self.game_over,
+            'game_won': self.game_won
         }
         
         # Campos do CSV
-        fieldnames = ['timestamp', 'level', 'moves', 'green_collected', 
-                     'red_collected', 'total_moves', 'level_complete']
+        fieldnames = [
+            'timestamp', 'player_type', 'bot_type', 'level', 'moves', 
+            'green_collected', 'red_collected', 'total_moves', 
+            'level_complete', 'game_over', 'game_won'
+        ]
         
         try:
             with open(csv_filename, 'a', newline='') as csvfile:
@@ -272,7 +283,7 @@ class Game:
                     writer.writeheader()
                 
                 writer.writerow(data)
-                print(f"Game stats saved to {csv_filename}")
+                print(f"Game stats saved to {csv_filename}: {player_type_str} - {bot_type_str}")
                 
         except Exception as e:
             print(f"Error saving game stats: {e}")
