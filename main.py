@@ -13,6 +13,7 @@ from model.bot import Bot
 def main():
     # Initialize Pygame
     pygame.init()
+    print("[DEBUG] Pygame initialized")
 
     # Set up the display
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -20,6 +21,7 @@ def main():
 
     # Main application loop to allow returning to menu
     running = True
+    frame_counter = 0
     while running:
         # Set up menu system
         menu_model = Menu()
@@ -52,19 +54,28 @@ def main():
         selected_level = menu_model.get_selected_level()
         game.load_level(selected_level if selected_level > 0 else 0)
         
+        fully_automatic = menu_model.get_fully_automatic()
+        print(f"[DEBUG] Game starting - fully_automatic: {fully_automatic}, player_type: {player_type}, level: {selected_level}")
+
         clock = pygame.time.Clock()
         game_running = True
         
         # Game loop
         while game_running:
+ 
+            
             # Process all events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print("[DEBUG] Quit event received")
                     pygame.quit()
                     sys.exit()
                 
                 # Only pass actual events to the controller
-                controller.handle_event(event)
+                controller.handle_event(event, fully_automatic)
+            
+            if fully_automatic and player_type == PlayerType.BOT:
+                controller.handle_bot(None, fully_automatic)
 
             # Check if we need to return to menu
             if controller.return_to_menu:
@@ -79,6 +90,7 @@ def main():
             if game.game_over or game.game_won:
                 controller.update()
 
+    print("[DEBUG] Exiting game")
     pygame.quit()
     sys.exit()
 
