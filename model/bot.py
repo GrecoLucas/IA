@@ -1,6 +1,7 @@
 from constants import *
 import copy
 import random
+import heapq
 from collections import deque
 
 class Bot:
@@ -644,39 +645,69 @@ class Bot:
             return None
         
         return possible_moves
+    
+    def get_all_possible_moves_stack(self, game):
+        possible_moves = deque([])
+        # Coletar todos os movimentos possíveis
+        for block_index, block in enumerate(game.available_blocks):
+            if block is None:
+                continue
+            for y in range(GRID_HEIGHT):
+                for x in range(GRID_WIDTH):
+                    if game.is_valid_position(block, x, y):
+                        possible_moves.appendleft((block_index, x, y))
+        # Não foi encontrado nenhum movimento possível
+        if not possible_moves:
+            return None
+        
+        return possible_moves
 
     # Iterative deepening search para encontrar o melhor movimento
     def iterative_deepening_search(self, max_depth):
-        for depth in range(1, max_depth):
-            solution = self.depth_limited_search(depth)
+
+        for depth in range(4, max_depth+1):
+
+            solution = self.depth_limited_search(depth, max_depth)
             if solution is not None:
                 return solution
         return None     #Não foi encontrada nenhuma solução para a depth máxima dada
     
 
     # DFS com profundidade limitada
-    def depth_limited_search(self, depth):
+    def depth_limited_search(self, depth, max_depth):
+        #  #print(f"depth: {depth}, cache: {self.visited_iterative_states}")
+        #  for (initial_state, curr_move_sequence) in self.visited_iterative_states:
+        #     #initial_state, curr_move_sequence = self.visited_iterative_states.pop()
+        #     temp = set()
+        #     move_sequence = self.recursive_depth_limited_search(initial_state,depth - len(curr_move_sequence), list(curr_move_sequence), temp )
+        #     if move_sequence is not None:
+        #         return move_sequence
+        #     else:
+        #         self.visited_iterative_states = temp
+        
         game_copy = copy.deepcopy(self.game)
         move_sequence = self.recursive_depth_limited_search(game_copy, depth, [])
         return move_sequence
+        
     
     # Parte recursiva do DFS
     def recursive_depth_limited_search(self, game, depth, move_seq):
-        # conjunto de movimentos atuais permitem ganhar o jogo
-        if game.game_won:
+        if game.game_won or game.check_level_complete():
             return move_seq
+        if game.game_over:
+                return None
         # Nenhuma solução encontrada para a profundidade dada
         if depth == 0:
             return None
         
-        possible_moves = self.get_all_possible_moves(game)
+        possible_moves = self.get_all_possible_moves_stack(game)
         # BFS itera sobre todos os movimentos possíveis 
         if(possible_moves is None):
             return None
-        for move in possible_moves:
+        while possible_moves:
+            move = possible_moves.pop()
             # Criar uma cópia do estado atual do jogo passado
             game_copy = copy.deepcopy(game)
-            
             block_index, x, y = move
             #print(f"index: {block_index}, x: {x}, y: {y}")
             block = game_copy.available_blocks[block_index]
@@ -685,26 +716,228 @@ class Bot:
             game_copy.available_blocks[block_index] = None
             # Adicionar movimento à lista de moves executados
             new_move_seq = move_seq + [move]
-            # Nível completo 
             if game_copy.check_level_complete():
-                    #print(f"LEVEL {game_copy.level_num} COMPLETE!!!")
-                    next_level = game_copy.get_next_level()
-                    if next_level is not None:
-                        game_copy.load_level(next_level)
-                        # Evitar explorar outros movimentos que não completam o nível
-                        result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
-                        return result
-                    else:
-                        game_copy.game_won = True
-                        
+                return new_move_seq
             # Atualizar blocos disponíveis se necessário
-            elif game_copy.all_blocks_used():
+            if game_copy.all_blocks_used():
                 game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
-            result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq )
+        
+            result = self.recursive_depth_limited_search(game_copy, depth-1, new_move_seq)
+            #if result is None:
             if result is not None:
                 return result   # Sequência de movimentos válida encontrada
         # Não foi encontrada nenhuma sequência de movimentos válida para ganhar o jogo
         return None
+        
+
+
+    def rows_near_completion(self, old_game_state, game_state, rows):
+        for y in rows:
+            biggest_seq_complete_old = 0
+            biggest_seq_complete_new = 0
+            curr = 0
+            curr_old = 0
+            for x in range(GRID_WIDTH):
+                if game_state.board[y][x]:
+                    curr += 1
+                    biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
+                if old_game_state.board[y][x]:
+                    curr_old += 1
+                    biggest_seq_complete_old = max(curr_old, biggest_seq_complete_old)
+        if biggest_seq_complete_new > biggest_seq_complete_old:
+            return biggest_seq_complete_new - biggest_seq_complete_old
+        return 0
+
+    def cols_near_completion(self, old_game_state, game_state, cols):
+        for x in cols:
+            biggest_seq_complete_old = 0
+            biggest_seq_complete_new = 0
+            curr = 0
+            curr_old = 0
+            for y in range(GRID_HEIGHT):
+                if game_state.board[y][x]:
+                    curr += 1
+                    biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
+                if old_game_state.board[y][x]:
+                    curr_old += 1
+                    biggest_seq_complete_old = max(curr_old, biggest_seq_complete_old)
+        if biggest_seq_complete_new > biggest_seq_complete_old:
+            return biggest_seq_complete_new - biggest_seq_complete_old
+        return 0
+
+    def check_near_completion(self, old_game_state, game_state):
+        rows = []
+        cols = []
+        for y in range( GRID_HEIGHT):
+            for x in range( GRID_WIDTH):
+                if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
+                    if y not in rows:
+                        rows.append(y)
+                    if x not in cols:
+                        cols.append(x)
+        return self.rows_near_completion( old_game_state, game_state, rows) + self.cols_near_completion(old_game_state, game_state, cols)
+        
+
+
+
+    def treshold(self, game_state):
+        amount_moves = 10
+        dif = game_state.current_level.difficulty
+        return amount_moves * dif
+
+    def check_board_gems_pos(self, old_game_state, game_state):
+        fill_reward = 0
+        for y in range( GRID_HEIGHT):
+            for x in range (GRID_WIDTH):
+                # Check if there's a green gem at position
+                # Check if there's a red gem at position
+                if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
+                    old_same_row_count = 0
+                    current_same_row_count = 0
+                    old_same_col_count = 0
+                    current_same_col_count = 0
+                    # Check if row is more filled
+                    for x_ in range (GRID_WIDTH):
+                        old_pos = old_game_state.board_types[y][x_]
+                        if old_game_state.board[y][x_] != None and old_pos != 2 and old_pos != 3:
+                            old_same_row_count += 1
+                        curr_pos = game_state.board_types[y][x_]
+                        if game_state.board[y][x_] != None and curr_pos != 2 and curr_pos != 3:
+                            current_same_row_count += 1
+                    # Check if column is more filled
+                    for y_ in range (GRID_HEIGHT):
+                        old_pos = old_game_state.board_types[y_][x]
+                        if old_game_state.board[y_][x] != None and old_pos != 2 and old_pos != 3:
+                            old_same_col_count += 1
+                        curr_pos = game_state.board_types[y_][x]
+                        if game_state.board[y_][x] != None and curr_pos != 2 and curr_pos != 3:
+                            current_same_col_count += 1
+                            #print("FACK")
+                    row_diff = current_same_row_count - old_same_row_count
+                    col_diff = current_same_col_count - old_same_col_count
+                    if row_diff > 0:
+                        fill_reward +=  row_diff
+                    if col_diff > 0:
+                        fill_reward += col_diff
+        #print(f"fill: {fill_reward} old_same_col_count: {old_same_col_count}, current_same_col_count: {current_same_col_count}, col_diff: {col_diff}")
+        #print(f"current_same_row_count: {current_same_row_count}, old_same_row_count: {old_same_row_count}, row_diff: {row_diff} ")
+        return fill_reward
+    
+    # Check if there were pieces placed right next to gems
+    def check_board_gems_adjacent_pos(self, old_game_state, game_state):
+        adjacent_reward = 0
+        gem_positions = []
+        # Get the positions of every gem on the board
+        for y in range( GRID_HEIGHT):
+            for x in range (GRID_WIDTH):
+                # Check if there's a green gem at position
+                # Check if there's a red gem at position
+                if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
+                    gem_positions.append((y,x))
+        adjacent = []
+        # Get all valid adjacent positions
+        for (gem_y, gem_x) in gem_positions:
+            check_positions = [(gem_y, gem_x-1), (gem_y, gem_x+1), (gem_y-1, gem_x), (gem_y+1, gem_x)]
+            for (y,x) in check_positions:
+                if y < GRID_HEIGHT and y >= 0 and x < GRID_WIDTH and x >= 0:
+                    adjacent.append((y,x))
+        # Check if piece was placed in empty pos
+        for (y,x) in adjacent:
+            if old_game_state.board[y][x] == None and game_state.board[y][x]:
+                adjacent_reward += 1
+
+        
+        return adjacent_reward
+
+    # Algorítmo A*
+    def heuristic(self, game_state, old_game_state, cleared, current_amount_moves ):
+        """Estimate the remaining steps needed to collect all green and red pieces."""
+        punishment = 0
+        reward = 0
+        expected_amount_moves = self.treshold(game_state)
+        difference = current_amount_moves - expected_amount_moves
+        
+        if (difference > 0):
+            punishment += difference
+        else:
+            if cleared: 
+                reward += 1*0.3 
+        fill = self.check_board_gems_pos(old_game_state, game_state) # self.check_near_completion(old_game_state, game_state)
+        fill_reward = max(0, fill)
+        reward += fill_reward * 0.2
+        adjacent_reward = self.check_board_gems_adjacent_pos(old_game_state, game_state) 
+        reward += adjacent_reward* 0.5
+        collected_pieces_old = old_game_state.red_stones_collected + old_game_state.green_stones_collected
+        collected_pieces = game_state.red_stones_collected + game_state.green_stones_collected
+        gems_collected = collected_pieces - collected_pieces_old
+        reward += collected_pieces_old*current_amount_moves
+        reward += gems_collected*current_amount_moves*2
+
+        
+        return punishment - reward
+
+    
+    def a_star_search(self):
+        """A* Algorithm to solve the level"""
+        initial_state = (copy.deepcopy(self.game),  [])  # (Game, Moves)
+        queue = [(0, id(initial_state[0]), initial_state)] # deque([(0, id(initial_state[0]), initial_state)])# Priority Queue sorted by f = g + h
+        visited = set()
+        
+        while queue:
+            _, _, (game_state, g_moves) =  heapq.heappop(queue) #queue.popleft()
+            # Verifica se o estado já foi visitado
+            state_key = self.state_to_tuple(game_state, g_moves)
+            if state_key in visited:
+                continue
+            visited.add(state_key)
+
+            # If we collected all pieces, return the number of moves taken
+            if game_state.check_level_complete() or game_state.game_won:
+                return g_moves
+            if game_state.game_over:
+                continue
+
+            possible_moves = self.get_all_possible_moves(game_state)
+            # Não existem movimentos possíveis = Game over 
+            if(possible_moves is None):
+                continue
             
+            # BFS itera sobre todos os movimentos possíveis
+            for move in possible_moves:
+                # Criar uma cópia do estado atual do jogo passado
+                game_copy = copy.deepcopy(game_state)
+                block_index, x, y = move
+                block = game_copy.available_blocks[block_index]
+                # Executar o movimento
+                cleared = game_copy.place_block(block, x, y)
+                game_copy.available_blocks[block_index] = None
+                if game_copy.all_blocks_used():
+                    game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
+
+                # Adicionar movimento à lista de moves executados
+                new_g_moves = g_moves + [move]
+
+                if game_copy.check_level_complete() or game_copy.game_won:
+                    return new_g_moves
+                if game_copy.game_over:
+                    continue
+                
+                g = len(new_g_moves)
+                h = self.heuristic(game_copy, game_state, cleared, len(new_g_moves))
+                f = g + h  # f(n) = g(n) + h(n)
+                # Assign a unique ID to the new state
+                state_id = id(game_copy)
+                if h < 0.4:
+                    heapq.heappush(queue, (f, state_id, (game_copy, new_g_moves)))
+        return None # If no solution is found
+    
+    
+    def state_to_tuple(self, game_state, moves):
+        """Convert state to a hashable format for tracking visited states"""
+        board_tuple = tuple(tuple(row) for row in game_state.board)
+        moves_tuple = tuple( move for move in moves )
+        return (board_tuple, moves_tuple)
+
+
 
             

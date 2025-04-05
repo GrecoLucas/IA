@@ -2,13 +2,14 @@ import random
 from levels import LEVEL_MAP, LEVELS
 
 class Level:
-    def __init__(self, level_num, green_goal, red_goal, grid, sequence, name=None):
+    def __init__(self, level_num, green_goal, red_goal, grid, sequence, difficulty, name=None):
         self.level_num = level_num
         self.green_goal = green_goal        
         self.red_goal = red_goal            
         self.grid = grid
         self.sequence = sequence
         self.name = name or f"Nível {level_num}"
+        self.difficulty = difficulty
         self.current_block_index = 0
 
     def get_next_block_name(self):

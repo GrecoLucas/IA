@@ -57,6 +57,7 @@ class Menu:
                 MenuItem("Bot BFS", self.set_bot_algorithm_bfa, BotType.BFA),
                 MenuItem("Bot DFS", self.set_bot_algorithm_dfs, BotType.DFS),
                 MenuItem("Bot Iterativo", self.set_bot_algorithm_iterative, BotType.ITERATIVE),
+                MenuItem("Bot A*", self.set_bot_algorithm_a_star, BotType.ASTAR),
                 MenuItem("Voltar", self.back_to_main_menu, None), 
             ]
         elif self.state == MenuState.CHOOSE_LEVEL:
@@ -123,6 +124,12 @@ class Menu:
 
     def set_bot_algorithm_iterative(self):
         self.bot_type = BotType.ITERATIVE
+        self.state = MenuState.ACTIVE
+        self.initialize_menu_items()
+        return False
+    
+    def set_bot_algorithm_a_star(self):
+        self.bot_type = BotType.ASTAR
         self.state = MenuState.ACTIVE
         self.initialize_menu_items()
         return False

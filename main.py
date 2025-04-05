@@ -10,6 +10,7 @@ from model.menu import Menu, MenuState, PlayerType
 from controller.menu_controller import MenuController
 from model.bot import Bot
 
+from constants import *
 def main():
     # Initialize Pygame
     pygame.init()

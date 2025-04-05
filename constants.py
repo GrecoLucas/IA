@@ -37,6 +37,7 @@ class BotType(Enum):
     BFA = "bfa"
     DFS = "dfs"
     ITERATIVE = "iterative"
+    ASTAR = "astar"
 
 # Rules
 RULES_COLOR = (10, 60, 10)

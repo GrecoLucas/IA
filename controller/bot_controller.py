@@ -11,12 +11,12 @@ class BotController:
 
     def __init__(self, bot):
         self.bot = bot
-        self.iterative_seq = []
-        self.iterative_idx = 0
+        self.bot_move_seq = []
+        self.move_seq_idx = 0
 
     def reset(self):
-        self.iterative_seq = []
-        self.iterative_idx = 0
+        self.bot_move_seq = []
+        self.move_seq_idx = 0
         self.bot.reset()
     
     def get_bot(self):
@@ -66,9 +66,10 @@ class BotController:
         
     def play_iterative(self):
         if self.bot.state == "deciding":
-            move_sequence = self.bot.iterative_deepening_search(8)
+            move_sequence = self.bot.iterative_deepening_search(10)
             if move_sequence is not None:
-                self.iterative_seq = move_sequence
+                self.bot_move_seq = move_sequence
+                print(f"move_seq: {self.bot_move_seq}")
                 self.bot.state = "executing"
                 self.play_iterative()
                 
@@ -77,14 +78,18 @@ class BotController:
 
         elif self.bot.state == "executing":
                 # garante que nunca é feito um acesso fora do array
-                if self.iterative_idx < len(self.iterative_seq):
-                    print(f"move {self.iterative_seq}")
-                    move = self.iterative_seq[self.iterative_idx]
+                if self.move_seq_idx < len(self.bot_move_seq):
+                    move = self.bot_move_seq[self.move_seq_idx]
                     self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
                     self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
                     move_made = self.execute_move()
-                    self.bot.state = "executing"
-                    self.iterative_idx += 1 # Atualiza o bloco em que está
+                    
+                    # Para o último movimento, o estado deve voltar a "deciding" para o bot calcular a próxima sequencia de movimentos no nível seguinte
+                    if  self.move_seq_idx < len(self.bot_move_seq) - 1:
+                        self.bot.state = "executing"
+                        self.move_seq_idx += 1 # Atualiza o bloco em que está
+                    elif self.move_seq_idx == len(self.bot_move_seq) - 1:
+                        self.move_seq_idx = 0
 
                     
                     
@@ -439,6 +444,37 @@ class BotController:
         
         return solution_path
 
+    
+
+    def play_a_star(self):
+        if self.bot.state == "deciding":
+            move_sequence = self.bot.a_star_search()
+            if move_sequence is not None:
+                self.bot_move_seq = move_sequence
+                print(f"move_seq: {self.bot_move_seq}")
+                self.bot.state = "executing"
+                self.play_a_star()
+                
+            else:
+                self.bot.game.game_over = True
+
+        elif self.bot.state == "executing":
+                # garante que nunca é feito um acesso fora do array
+                if self.move_seq_idx < len(self.bot_move_seq):
+                    move = self.bot_move_seq[self.move_seq_idx]
+                    self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
+                    self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                    move_made = self.execute_move()
+                    
+                    # Para o último movimento, o estado deve voltar a "deciding" para o bot calcular a próxima sequencia de movimentos no nível seguinte
+                    if  self.move_seq_idx < len(self.bot_move_seq) - 1:
+                        self.bot.state = "executing"
+                        self.move_seq_idx += 1 # Atualiza o bloco em que está
+                    elif self.move_seq_idx == len(self.bot_move_seq) - 1:
+                        self.move_seq_idx = 0
+                    
+
+
     def play(self):
         match self.bot.algorithm:
             case BotType.RANDOM:
@@ -454,12 +490,18 @@ class BotController:
             case BotType.GREEDY:
                 self.play_greedy()
                 self.play_greedy()
+
             case BotType.BFA:
                 self.play_bfa()
                 self.play_bfa()
             case BotType.DFS:
                 self.play_dfs()
                 self.play_dfs()
+
+            case BotType.ASTAR:
+                print(" STAR CHOSEN")
+                self.play_a_star()
+            
             case _:
                 pass
         return
