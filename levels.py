@@ -4,178 +4,32 @@
 # 2 blocos verdes (objetivos a coletar)
 # 3 blocos vermelhos (pontos extras)
 
+from level_parser import parse_levels_file
+import os
+
 class LevelData:
     def __init__(self, level_num, green_goal, red_goal, sequence, grid, name=None):
-        self.level_num = level_num  # Número do nível
-        self.green_goal = green_goal  # Pedras verdes a coletar
-        self.red_goal = red_goal  # Pedras vermelhas a coletar
-        self.sequence = sequence  # Sequência de blocos, SE REPETEM APÓS ACABAR, SE DEIXAR VAZIO = ALEATÓRIO
-        self.grid = grid  # Layout do tabuleiro
-        self.name = name or f"Nível {level_num}"  # Nome descritivo do nível
+        self.level_num = level_num  
+        self.green_goal = green_goal  
+        self.red_goal = red_goal 
+        self.sequence = sequence  
+        self.grid = grid  
+        self.name = name or f"Nível {level_num}" 
 
-LEVELS = [
-    LevelData(
-        level_num=0,
-        green_goal=2,
-        red_goal=0,
-        name="0 Noob",
-        sequence=["L", "J", "I", "J"],
-        grid=[
-            [0, 2, 0, 0, 0],
-            [0, 2, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0]
-        ]
-    ),
-    
-    LevelData(
-        level_num=1,
-        green_goal=2,
-        red_goal=2,
-        name="1 Beginner",
-        sequence=["double", "single", "single", "triple", "3x2", "I_H"],
-        grid=[
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 0, 0],
-            [2, 2, 0, 0, 0, 0, 0, 0],
-            [3, 3, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    ),
+# Carrega os níveis do arquivo de texto
+LEVELS_FILE = "levels.txt"
 
-    LevelData(
-        level_num=2,
-        green_goal=5,
-        red_goal=0,
-        name="2 Good Beginner",
-        sequence=["left_down_corner", "right_down_corner", "left_up_corner", 
-                 "right_up_corner", "I", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO"],
-        grid=[
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 2, 1, 1, 1, 1, 2, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 1, 0, 2, 2, 0, 1, 0],
-            [0, 1, 0, 2, 2, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 1, 0],
-            [0, 2, 1, 1, 1, 1, 2, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    ),
-    
-    LevelData(
-        level_num=3,
-        green_goal=2,
-        red_goal=2,
-        name="3 Advanced",
-        sequence=["S", "Z", "T", "T_INVERTIDO", "single",
-                 "right_up_corner", "left_up_corner", "I", "T_INVERTIDO"],
-        grid=[
-            [2, 0, 0, 0, 0, 0, 1, 1],
-            [0, 2, 0, 0, 0, 1, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 0, 0, 0, 3, 0],
-            [1, 1, 0, 0, 0, 0, 0, 3]
-        ]
-    ),
-        
-    LevelData(
-        level_num=4,
-        green_goal=5,
-        red_goal=3,
-        name="4 Better",
-        sequence=["Z", "|-", "right_up_corner", "single", "single", 
-                 "L", "J", "L", "J", "I", "T_INVERTIDO"],
-        grid=[
-            [2, 2, 2, 2, 2, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 3, 3, 3]
-        ]
-    ),
-    LevelData(
-        level_num=5,
-        green_goal=2,  
-        red_goal=0,    
-        name="5 Good",
-        sequence=[ "I", "L", "I_H", "single",  "single",  "L", "J"  ],
-        grid=[
-            [2, 0, 0, 0, 0, 0, 0, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],  
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],  
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    ),
-    LevelData(
-        level_num=6,
-        green_goal=5,
-        red_goal=2,
-        name="6 Pro",
-        sequence=["left_down_corner", "right_down_corner", "left_up_corner", 
-                 "right_up_corner", "I", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO"],
-        grid=[
-            [2, 2, 0, 0, 0, 0, 1, 1],
-            [2, 0, 0, 0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 3, 3, 0, 0, 0],
-            [0, 0, 0, 3, 3, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 2],
-            [1, 1, 0, 0, 0, 0, 2, 2]
-        ]
-    ),
-    LevelData(
-        level_num=7,
-        green_goal=5,
-        red_goal=5,
-        name="7 Epic",
-        sequence=["D", "I", "O", "G", "O", "right_down_corner", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO" ],
-        grid=[
-            [0, 0, 0, 0, 3, 0, 0, 0],
-            [2, 0, 0, 0, 3, 0, 0, 0],
-            [2, 0, 0, 0, 3, 0, 0, 0],
-            [2, 0, 0, 0, 0, 0, 0, 0],
-            [2, 0, 0, 0, 3, 0, 0, 0],
-            [2, 0, 0, 3, 0, 0, 1, 1],
-            [2, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    ),
-    LevelData(
-        level_num=8,
-        green_goal=2,
-        red_goal=4,
-        name="8 More Epic",
-        sequence=["left_down_corner", "right_down_corner", "left_up_corner", "right_up_corner", "I", "I_H", "L", "J", "L", "J", "I", "T_INVERTIDO"],
-        grid=[
-            [0, 0, 0, 0, 3, 0, 0, 0],
-            [2, 0, 0, 0, 3, 0, 0, 0],
-            [0, 1, 0, 0, 0, 0, 0, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1],
-            [0, 1, 0, 3, 0, 0, 0, 1],
-            [0, 0, 0, 3, 0, 0, 0, 1],
-            [2, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    )
-]
+if not os.path.exists(LEVELS_FILE):
+    from level_parser import convert_levels_to_file
+    convert_levels_to_file()
 
+# Carrega os níveis do arquivo
+LEVELS = parse_levels_file(LEVELS_FILE)
+
+# Cria o mapa de níveis por número
 LEVEL_MAP = {level.level_num: level for level in LEVELS}
 
+# Mantém a compatibilidade com o código existente
 LEVEL = [
     (level.level_num, level.green_goal, level.red_goal, level.sequence, level.grid)
     for level in LEVELS

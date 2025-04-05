@@ -4,3 +4,4 @@ timestamp,time_spent,player_type,bot_type,level,moves,green_collected,red_collec
 2025-04-03 11:33:02,00:00:37,BOT,BotType.DFS,8,19,2,4,109,True,False,True,True
 2025-04-05 11:55:59,00:00:06,BOT,BotType.GREEDY,2,10,3,0,22,False,True,False,False
 2025-04-05 11:56:44,00:00:36,BOT,BotType.BFA,8,14,2,4,90,True,False,True,True
+2025-04-05 13:27:37,00:00:36,BOT,BotType.BFA,8,14,2,4,90,True,False,True,True

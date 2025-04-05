@@ -1,0 +1,131 @@
+[LEVEL 0]
+name=0 Noob
+green_goal=2
+red_goal=0
+sequence=L,J,I,J
+grid=
+02000
+02000
+00000
+00000
+00000
+===
+[LEVEL 1]
+name=1 Beginner
+green_goal=2
+red_goal=2
+sequence=double,single,single,triple,3x2,I_H
+grid=
+00000000
+11111100
+22000000
+33000000
+00000000
+00000000
+00000000
+00000000
+===
+[LEVEL 2]
+name=2 Good Beginner
+green_goal=5
+red_goal=0
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+00000000
+02111120
+01000010
+01020010
+01020010
+01000010
+02111120
+00000000
+===
+[LEVEL 3]
+name=3 Advanced
+green_goal=2
+red_goal=2
+sequence=S,Z,T,T_INVERTIDO,single,right_up_corner,left_up_corner,I,T_INVERTIDO
+grid=
+20000011
+02000110
+00000000
+00000000
+00000000
+00000000
+01100030
+11000003
+===
+[LEVEL 4]
+name=4 Better
+green_goal=5
+red_goal=3
+sequence=Z,|-,right_up_corner,single,single,L,J,L,J,I,T_INVERTIDO
+grid=
+22222000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000333
+===
+[LEVEL 5]
+name=5 Good
+green_goal=2
+red_goal=0
+sequence=I,L,I_H,single,single,L,J
+grid=
+20000002
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+===
+[LEVEL 6]
+name=6 Pro
+green_goal=5
+red_goal=2
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+22000011
+20000001
+00000000
+00033000
+00033000
+00000000
+10000002
+11000022
+===
+[LEVEL 7]
+name=7 Epic
+green_goal=5
+red_goal=5
+sequence=D,I,O,G,O,right_down_corner,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+00003000
+20003000
+20003000
+20000000
+20003000
+20030011
+20000000
+00000000
+===
+[LEVEL 8]
+name=8 More Epic
+green_goal=2
+red_goal=4
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+00003000
+20003000
+01000000
+01000001
+01030001
+00030001
+20000000
+00000000

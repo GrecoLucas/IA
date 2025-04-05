@@ -19,9 +19,11 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Wood Block")
 
+    # Ensure levels are loaded from file
+    print("[DEBUG] Checking levels.txt file")
+    
     # Main application loop to allow returning to menu
     running = True
-    frame_counter = 0
     while running:
         # Set up menu system
         menu_model = Menu()
@@ -63,8 +65,6 @@ def main():
         
         # Game loop
         while game_running:
- 
-            
             # Process all events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -84,8 +84,6 @@ def main():
                 
             view.render(game)
             pygame.display.flip()
-
-            #controller.update()
 
             clock.tick(60)
             if game.game_over or game.game_won:
