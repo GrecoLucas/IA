@@ -2,8 +2,11 @@
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 700
 GRID_SIZE = 40
-GRID_WIDTH = 8
-GRID_HEIGHT = 8
+# Make these variables accessible globally but adjustable
+variable_W = 8
+variable_H = 8	
+GRID_WIDTH = variable_W
+GRID_HEIGHT = variable_H
 NBOARD_X = (SCREEN_WIDTH - GRID_WIDTH * GRID_SIZE) // 2 - 200
 BOARD_X = (SCREEN_WIDTH - GRID_WIDTH * GRID_SIZE) // 2 
 BOARD_Y = 50

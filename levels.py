@@ -13,7 +13,6 @@ class LevelData:
         self.grid = grid  # Layout do tabuleiro
         self.name = name or f"Nível {level_num}"  # Nome descritivo do nível
 
-# Definição de níveis como objetos LevelData
 LEVELS = [
     LevelData(
         level_num=0,
@@ -22,14 +21,11 @@ LEVELS = [
         name="0 Noob",
         sequence=["L", "J", "I", "J"],
         grid=[
-            [0, 1, 0, 0, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 0, 0, 1],
-            [0, 2, 0, 0, 0, 0, 0, 2],
-            [0, 1, 0, 0, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
+            [0, 2, 0, 0, 0],
+            [0, 2, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]
         ]
     ),
     

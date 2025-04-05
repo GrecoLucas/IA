@@ -56,30 +56,35 @@ class GameView:
             if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
                 board_x = NBOARD_X
 
-        board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
+        # Get actual board dimensions from the game instance
+        grid_height = len(game.board)
+        grid_width = len(game.board[0]) if grid_height > 0 else 0
+
+        board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * grid_width, GRID_SIZE * grid_height)
         pygame.draw.rect(self.screen, WHITE, board_rect)
         pygame.draw.rect(self.screen, WOOD_DARK, board_rect, 2)
 
         # Draw grid lines
-        for i in range(GRID_WIDTH + 1):
+        for i in range(grid_width + 1):
             pygame.draw.line(
                 self.screen, GRID_COLOR, 
                 (board_x + i * GRID_SIZE, BOARD_Y), 
-                (board_x + i * GRID_SIZE, BOARD_Y + GRID_HEIGHT * GRID_SIZE),
+                (board_x + i * GRID_SIZE, BOARD_Y + grid_height * GRID_SIZE),
                 1
             )
-        for i in range(GRID_HEIGHT + 1):
+        for i in range(grid_height + 1):
             pygame.draw.line(
                 self.screen, GRID_COLOR, 
                 (board_x, BOARD_Y + i * GRID_SIZE), 
-                (board_x + GRID_WIDTH * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
+                (board_x + grid_width * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
                 1
             )
 
         # Draw blocks placed on the board
-        for y in range(GRID_HEIGHT):
-            for x in range(GRID_WIDTH):
-                if game.board[y][x]:
+        for y in range(grid_height):
+            for x in range(grid_width):
+                # Add defensive check to prevent index errors
+                if y < len(game.board) and x < len(game.board[y]) and game.board[y][x]:
                     color = game.board[y][x]
                     rect = pygame.Rect(
                         board_x + x * GRID_SIZE, 
