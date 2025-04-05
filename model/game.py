@@ -318,7 +318,7 @@ class Game:
         current_level_num = self.level_num
         
         # Store the total moves (we want to preserve this)
-        total_moves_before_reset = self.total_moves
+        #total_moves_before_reset = self.total_moves
         
         # Clear the message log
         self.message_log = []
@@ -327,7 +327,7 @@ class Game:
         self.load_level(current_level_num)
         
         # Restore the total moves count (since load_level resets it)
-        self.total_moves = total_moves_before_reset
+        self.total_moves = 0#total_moves_before_reset
         
         # Reset game state flags
         self.game_over = False

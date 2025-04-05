@@ -87,7 +87,7 @@ def main():
                         print("game OBER")
                         controller.update()
                         game_running = False
-                        game.reset
+                        game.reset()
                         game.game_over = False
                         game.game_won = False
             pygame.quit()
