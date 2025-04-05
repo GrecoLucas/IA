@@ -663,18 +663,18 @@ class Bot:
         return possible_moves
 
     # Iterative deepening search para encontrar o melhor movimento
-    def iterative_deepening_search(self, max_depth):
+    def iterative_deepening_search(self, min_depth, max_depth):
 
-        for depth in range(4, max_depth+1):
+        for depth in range(min_depth, max_depth+1):
 
-            solution = self.depth_limited_search(depth, max_depth)
+            solution = self.depth_limited_search(depth)
             if solution is not None:
                 return solution
         return None     #Não foi encontrada nenhuma solução para a depth máxima dada
     
 
     # DFS com profundidade limitada
-    def depth_limited_search(self, depth, max_depth):
+    def depth_limited_search(self, depth):
         #  #print(f"depth: {depth}, cache: {self.visited_iterative_states}")
         #  for (initial_state, curr_move_sequence) in self.visited_iterative_states:
         #     #initial_state, curr_move_sequence = self.visited_iterative_states.pop()
@@ -698,6 +698,10 @@ class Bot:
                 return None
         # Nenhuma solução encontrada para a profundidade dada
         if depth == 0:
+            if (move_seq == [(0, 4, 0), (2, 2, 0), (1, 4, 6), (0, 3, 6), (1, 0, 1), (2, 6, 0), (0, 6, 4), (1, 3, 7), (2, 6, 1), (0, 4, 4)]):
+                print(f"Has Winning move sequence")
+            #if (move_seq[0] == (0, 4, 0) and move_seq[1] == (2, 2, 0) and move_seq[2] == (1, 4, 6) ):
+            print(f" REACHED DEPTH 0, move seq: {move_seq}")
             return None
         
         possible_moves = self.get_all_possible_moves_stack(game)

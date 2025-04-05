@@ -35,14 +35,6 @@ timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-03-23 13:20:38,0,7,1,0,7,False
 2025-03-23 13:20:42,0,5,1,0,5,False
 2025-03-23 13:25:34,1,6,3,0,8,False
-<<<<<<< HEAD
-2025-04-02 13:45:45,4,19,5,1,54,False
-2025-04-02 18:38:43,6,9,3,0,46,False
-2025-04-02 18:39:08,2,6,0,0,12,False
-2025-04-02 18:44:28,7,2,0,0,53,False
-2025-04-02 19:04:50,6,9,2,0,44,False
-2025-04-02 19:32:50,0,8,2,0,8,False
-=======
 2025-03-25 13:51:20,0,8,1,0,8,False
 2025-03-25 18:57:49,6,6,0,0,6,False
 2025-03-25 19:01:32,8,17,2,3,17,False
@@ -120,4 +112,7 @@ timestamp,level,moves,green_collected,red_collected,total_moves,level_complete
 2025-04-03 16:22:55,00:00:00,BOT,BotType.GREEDY,2,10,3,0,23,False,True,False,True
 2025-04-03 16:23:33,00:00:30,BOT,BotType.BFA,8,14,2,4,91,True,False,True,True
 2025-04-03 16:25:36,00:00:09,BOT,BotType.DFS,8,19,2,4,109,True,False,True,True
->>>>>>> c021b511453c7fd135b657185581d3f07cf70483
+
+2025-04-05 19:20:41,00:02:18,BOT,BotType.ASTAR,8,13,2,4,81,True,False,True,False
+2025-04-05 19:42:14,00:02:36,BOT,BotType.DFS,8,19,2,4,109,True,False,True,False
+2025-04-05 19:43:04,00:00:00,BOT,BotType.RANDOM,0,4,0,0,4,False,True,False,True

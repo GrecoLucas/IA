@@ -1,5 +1,6 @@
 from constants import *
 import copy
+import pygame
 
 # Helper function for logging messages both to console and game
 def log_message(bot, message):
@@ -13,6 +14,7 @@ class BotController:
         self.bot = bot
         self.bot_move_seq = []
         self.move_seq_idx = 0
+        self.preview_start_time = None
 
     def reset(self):
         self.bot_move_seq = []
@@ -40,33 +42,38 @@ class BotController:
             
         return move_made  # Retorna se uma atualização visual é necessária
                         
-    def play_random(self):
+    def play_random(self, view):
         if self.bot.state == "deciding":
             move = self.bot.choose_random_block()
             if move:
                 self.bot.game.selected_block, self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = move
+                #self.preview_start_time = pygame.time.get_ticks()
+                view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
                 self.bot.game.game_over = True
         elif self.bot.state == "executing":
+            view.clear_hint()
             return self.execute_move()        
         
-    def play_optimal(self):
+    def play_optimal(self, view):
         if self.bot.state == "deciding":
             best_move = self.bot.find_best_move()
             if best_move:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
                 # UTIL PARA INFORMAÇÃO
                 self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
                 self.bot.game.game_over = True
         elif self.bot.state == "executing":
+            view.clear_hint()
             return self.execute_move()
         
     def play_iterative(self):
         if self.bot.state == "deciding":
-            move_sequence = self.bot.iterative_deepening_search(10)
+            move_sequence = self.bot.iterative_deepening_search(1,7)
             if move_sequence is not None:
                 self.bot_move_seq = move_sequence
                 print(f"move_seq: {self.bot_move_seq}")
@@ -96,7 +103,7 @@ class BotController:
     
         
     
-    def  play_greedy(self):
+    def  play_greedy(self, view):
 
         if self.bot.state == "deciding":
             best_move = self.bot.find_best_greedy()
@@ -104,15 +111,17 @@ class BotController:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
                 # UTIL PARA INFORMAÇÃO
                 self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
                 self.bot.game.game_over = True
         elif self.bot.state == "executing":
+            view.clear_hint()
             return self.execute_move()
 
     # Faz o bfa de forma difernete, calcula primeiro o caminho completo e depois executa
     # o caminho calculado - terminal tem prints para informação
-    def play_bfa(self):
+    def play_bfa(self, view):
         current_level = self.bot.game.level_num
         
         # Add the print_once attribute if it doesn't exist
@@ -177,6 +186,8 @@ class BotController:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
                 # UTIL PARA INFORMAÇÃO
                 self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                # Draw preview
+                view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
                 log_message(self.bot, "[BFA] Movimento inválido encontrado.")
@@ -188,6 +199,7 @@ class BotController:
                     print("[DEBUG] Saved game statistics after invalid move")
         
         elif self.bot.state == "executing":
+            view.clear_hint()
             move_result = self.execute_move()
             # Check if game ended after executing a move
             if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
@@ -279,7 +291,7 @@ class BotController:
     
     # Faz o dfs de forma difernete, calcula primeiro o caminho completo e depois executa
     # o caminho calculado - terminal tem prints para informação
-    def play_dfs(self):
+    def play_dfs(self, view):
         current_level = self.bot.game.level_num
         
         # Add the print_once attribute if it doesn't exist
@@ -344,6 +356,7 @@ class BotController:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
                 # UTIL PARA INFORMAÇÃO
                 self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
                 log_message(self.bot, "[DFS] Movimento inválido encontrado.")
@@ -355,6 +368,7 @@ class BotController:
                     print("[DEBUG] Saved game statistics after invalid move")
         
         elif self.bot.state == "executing":
+            view.clear_hint()
             move_result = self.execute_move()
             # Check if game ended after executing a move
             if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
@@ -446,61 +460,107 @@ class BotController:
 
     
 
-    def play_a_star(self):
+    def play_a_star(self, view):
+
+        # Add the print_once attribute if it doesn't exist
+        if not hasattr(self, 'print_once'):
+            self.print_once = False
+            
+        # Check if game ended and save stats if needed
+        if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+            self.bot.game.save_game_stats()
+            self.print_once = True
+            print("[DEBUG] Saved game statistics in automatic mode")
+            return
+        
+
         if self.bot.state == "deciding":
             move_sequence = self.bot.a_star_search()
+
             if move_sequence is not None:
+                
                 self.bot_move_seq = move_sequence
-                print(f"move_seq: {self.bot_move_seq}")
+                log_message(self.bot, f"[A STAR] Solução encontrada! {len(move_sequence)} movimentos necessários.")
+                #print(f"move_seq: {self.bot_move_seq}")
                 self.bot.state = "executing"
-                self.play_a_star()
+                move = self.bot_move_seq[self.move_seq_idx]
+                self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
+                self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
+                #self.play_a_star(view)
                 
             else:
+                log_message(self.bot, "[A STAR] Não foi possível encontrar uma solução.")
                 self.bot.game.game_over = True
-
+                # Save stats when game is over due to no solution
+                if self.print_once == False:
+                    self.bot.game.save_game_stats()
+                    self.print_once = True
+                    print("[DEBUG] Saved game statistics after no solution found")
+        
         elif self.bot.state == "executing":
                 # garante que nunca é feito um acesso fora do array
                 if self.move_seq_idx < len(self.bot_move_seq):
-                    move = self.bot_move_seq[self.move_seq_idx]
+                    view.clear_hint()
+                    """move = self.bot_move_seq[self.move_seq_idx]
                     self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
-                    self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
-                    move_made = self.execute_move()
+                    self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]"""
+                    
+                    
+                    log_message(self.bot, f"[A STAR] Executando movimento {self.move_seq_idx + 1}.")
+                    """"self.preview_start_time = pygame.time.get_ticks()
+                    current_time = pygame.time.get_ticks()
+                    while (current_time - self.preview_start_time) < 3000:
+                        current_time = pygame.time.get_ticks()"""
+                    
+
+                    self.execute_move()
                     
                     # Para o último movimento, o estado deve voltar a "deciding" para o bot calcular a próxima sequencia de movimentos no nível seguinte
                     if  self.move_seq_idx < len(self.bot_move_seq) - 1:
+                        log_message(self.bot, "Aperte 'P' para ver a próxima jogada.")
                         self.bot.state = "executing"
                         self.move_seq_idx += 1 # Atualiza o bloco em que está
+                        # get next move's info and display the preview
+                        move = self.bot_move_seq[self.move_seq_idx]
+                        self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
+                        self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
+                        view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
+                        
                     elif self.move_seq_idx == len(self.bot_move_seq) - 1:
+                        log_message(self.bot, "Aperte 'P' para procurar a solução.")
                         self.move_seq_idx = 0
+
+                    if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
+                        self.bot.game.save_game_stats()
+                        self.print_once = True
+                        print("[DEBUG] Saved game statistics after move execution")
                     
 
 
-    def play(self):
+    def play(self, view):
         match self.bot.algorithm:
             case BotType.RANDOM:
-                self.play_random()  
-                self.play_random() 
+                self.play_random(view)
+
             case BotType.OPTIMAL:
-                self.play_optimal()
-                self.play_optimal()
+                self.play_optimal(view)
             
             case BotType.ITERATIVE:  
                 self.play_iterative()
                 
             case BotType.GREEDY:
-                self.play_greedy()
-                self.play_greedy()
+                self.play_greedy(view)
 
             case BotType.BFA:
-                self.play_bfa()
-                self.play_bfa()
+                self.play_bfa(view)
+                
             case BotType.DFS:
-                self.play_dfs()
-                self.play_dfs()
+                self.play_dfs(view)
 
             case BotType.ASTAR:
                 print(" STAR CHOSEN")
-                self.play_a_star()
+                self.play_a_star(view)
             
             case _:
                 pass

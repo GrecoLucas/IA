@@ -3,6 +3,7 @@ from constants import  BOARD_X, BOARD_Y, GRID_SIZE, GRID_WIDTH, GRID_HEIGHT
 import copy
 from model.bot import Bot
 from constants import BotType
+from model.menu import PlayerType
 
 class GameController:
     def __init__(self, game, view, bot=None):
@@ -14,15 +15,17 @@ class GameController:
         self.animation_delay = 100
         self.return_to_menu = False 
         self.print_once = False
+        self.input_locked = False
 
         print("[DEBUG] GameController initialized, bot present:", self.bot is not None)
     
     def handle_bot_press_play(self, event):
-        move_made = self.bot.play()
-        if move_made:
-            print("[DEBUG] Bot successfully made a move!")
-            self.view.render(self.game)
-            pygame.display.flip()
+        self.bot.play(self.view)
+        #if move_made:
+            #print("[DEBUG] Bot successfully made a move!")
+            #self.view.set_hint(suggested_block, x, y)
+            #self.view.render(self.game)
+            #pygame.display.flip()
         
     def handle_bot(self, event, fully_automatic=False):
         if event is None:
@@ -58,12 +61,17 @@ class GameController:
                 self.handle_bot_press_play(event)
 
     def handle_event(self, event, fully_automatic=False):
-        if event is None:  
+        if event is None or self.input_locked:  
             return
         
-        if self.bot: 
+        if self.bot:
+            self.input_locked = True
             print(f"[DEBUG] Handling bot event, fully_automatic={fully_automatic}")
             self.handle_bot(event, fully_automatic)
+            # Clear key queue to avoid spam
+            pygame.event.clear(pygame.KEYDOWN)
+            self.input_locked = False
+            
             return  # Exit early for bot mode
             
         # Player mode event handling

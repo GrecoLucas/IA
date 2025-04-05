@@ -1,5 +1,6 @@
 import pygame
 from constants import *
+from model.menu import PlayerType
 from view.block_view import BlockView
 from model.bot import Bot
 import copy
@@ -20,7 +21,7 @@ class GameView:
         self.draw_title(game)
         self.draw_board(game)
         self.draw_available_blocks(game)
-        if game.selected_block:
+        if game.selected_block and game.player_type == PlayerType.HUMAN:
             self.draw_selected_block(game)
             
         if self.hint_active and self.hint_block:
@@ -53,7 +54,7 @@ class GameView:
         board_x = BOARD_X
 
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS or game.bot_type == BotType.ASTAR:
                 board_x = NBOARD_X
 
         board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
@@ -112,7 +113,7 @@ class GameView:
     def draw_selected_block(self, game):
         board_x = BOARD_X
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS or game.bot_type == BotType.ASTAR:
                 board_x = NBOARD_X
         mouse_x, mouse_y = pygame.mouse.get_pos()
         grid_x = (mouse_x - board_x) // GRID_SIZE
@@ -240,7 +241,7 @@ class GameView:
     def draw_hint(self, game):
         board_x = BOARD_X
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS or game.bot_type == BotType.ASTAR:
                 board_x = NBOARD_X
                 
         for row in range(len(self.hint_block.shape)):
