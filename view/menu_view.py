@@ -100,9 +100,10 @@ class MenuView:
 
             text = self.font.render(item.text, True, color)
 
-            if menu.state == MenuState.ACTIVE and i < 2:
+            if menu.state == MenuState.ACTIVE and i < 7:
                 if (i == 0 and menu.get_player_type() == PlayerType.HUMAN) or \
-                   (i == 1 and menu.get_player_type() == PlayerType.BOT):
+                   (i == 1 and menu.get_player_type() == PlayerType.BOT)or \
+                   (i == 6 and menu.get_player_type() == PlayerType.TEST):
                     marker = self.font.render("✓", True, (0, 150, 0))
                     self.screen.blit(marker, (SCREEN_WIDTH // 2 - 180, menu_y))
 

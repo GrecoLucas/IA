@@ -46,13 +46,13 @@ class Menu:
                 MenuItem("Como Jogar", self.rules, None),
                 MenuItem("Modo Automático: " + ("ON" if self.fully_automatic else "OFF"),
                        self.set_fully_automatic, None),
-                MenuItem("Testar Algoritmos", self.test_all_bots, None),
+                MenuItem("Testar Algoritmos", self.test_all_bots, PlayerType.TEST),
                 MenuItem("Sair", self.exit_game, None),
             ]
         elif self.state == MenuState.CHOOSE_ALGORITHM:
             self.items = [
                 MenuItem("Bot Random", self.set_bot_algorithm_random, BotType.RANDOM),
-                MenuItem("Bot Otimizado", self.set_bot_algorithm_optimal, BotType.OPTIMAL),
+                MenuItem("Bot Monte Carlo Tree Search", self.set_bot_algorithm_optimal, BotType.MCTS),
                 MenuItem("Bot Greedy", self.set_bot_algorithm_greedy, BotType.GREEDY),
                 MenuItem("Bot BFS", self.set_bot_algorithm_bfa, BotType.BFA),
                 MenuItem("Bot DFS", self.set_bot_algorithm_dfs, BotType.DFS),
@@ -74,6 +74,7 @@ class Menu:
     def test_all_bots(self):
         self.player_type = PlayerType.TEST
         self.fully_automatic = True
+        self.initialize_menu_items() 
         return False
 
     def set_player_human(self):
@@ -96,7 +97,7 @@ class Menu:
         return False
 
     def set_bot_algorithm_optimal(self):
-        self.bot_type = BotType.OPTIMAL
+        self.bot_type = BotType.MCTS
         self.state = MenuState.ACTIVE
         self.initialize_menu_items() 
         return False

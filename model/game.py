@@ -53,13 +53,22 @@ class Game:
                 sequence=level_data.sequence,
                 name=getattr(level_data, 'name', None)
             )
-
-            self.board = [[None for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
-            self.board_types = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+            
+            # Update grid dimensions based on level's grid
+            import constants
+            if level_data.grid and len(level_data.grid) > 0:
+                constants.variable_H = len(level_data.grid)
+                constants.variable_W = len(level_data.grid[0])
+                constants.GRID_HEIGHT = constants.variable_H
+                constants.GRID_WIDTH = constants.variable_W
+                
+            # Recreate the board with the new dimensions
+            self.board = [[None for _ in range(constants.GRID_WIDTH)] for _ in range(constants.GRID_HEIGHT)]
+            self.board_types = [[0 for _ in range(constants.GRID_WIDTH)] for _ in range(constants.GRID_HEIGHT)]
 
             # Load the level grid configuration
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(constants.GRID_HEIGHT):
+                for x in range(constants.GRID_WIDTH):
                     if y < len(level_data.grid) and x < len(level_data.grid[y]):
                         cell_type = level_data.grid[y][x]
                         self.board_types[y][x] = cell_type
@@ -78,18 +87,14 @@ class Game:
             self.green_stones_to_collect = level_data.green_goal
             self.red_stones_to_collect = level_data.red_goal
             
-            # Create the first blocks from the sequence
             self.available_blocks = self.get_next_blocks_from_sequence()
             
-            # Reset the move counter when loading a new level
             self.number_of_moves = 0
         else:
-            # If level doesn't exist, check if we finished all levels
             max_level = max(level.level_num for level in LEVELS)
             if level_num > max_level:
                 self.game_won = True
             else:
-                # Try loading level 0 as fallback
                 if level_num != 0:
                     print(f"Level {level_num} not found. Loading level 0.")
                     self.load_level(0)
@@ -127,8 +132,12 @@ class Game:
             col, row = cell
             board_x, board_y = x + col, y + row
             
+            # Get current grid dimensions
+            grid_height = len(self.board)
+            grid_width = len(self.board[0]) if grid_height > 0 else 0
+            
             # Check if inside board limits
-            if board_y >= GRID_HEIGHT or board_x >= GRID_WIDTH:
+            if board_y >= grid_height or board_x >= grid_width:
                 return False
             # Check if cell is already occupied
             if self.board[board_y][board_x]:
@@ -169,14 +178,18 @@ class Game:
         rows_to_clear = []
         cols_to_clear = []
         
+        # Get current grid dimensions
+        grid_height = len(self.board)
+        grid_width = len(self.board[0]) if grid_height > 0 else 0
+        
         # Identify rows to clear
-        for y in range(GRID_HEIGHT):
-            if all(self.board[y][x] is not None for x in range(GRID_WIDTH)):
+        for y in range(grid_height):
+            if all(self.board[y][x] is not None for x in range(grid_width)):
                 rows_to_clear.append(y)
         
         # Identify columns to clear
-        for x in range(GRID_WIDTH):
-            if all(self.board[y][x] is not None for y in range(GRID_HEIGHT)):
+        for x in range(grid_width):
+            if all(self.board[y][x] is not None for y in range(grid_height)):
                 cols_to_clear.append(x)
         
         # Create a set of cells to clear (avoiding duplicates at intersections)
@@ -184,12 +197,12 @@ class Game:
         
         # Add all cells from rows that need clearing
         for y in rows_to_clear:
-            for x in range(GRID_WIDTH):
+            for x in range(grid_width):
                 cells_to_clear.add((x, y))
         
         # Add all cells from columns that need clearing
         for x in cols_to_clear:
-            for y in range(GRID_HEIGHT):
+            for y in range(grid_height):
                 cells_to_clear.add((x, y))
         
         # Clear cells and collect stones
@@ -205,6 +218,10 @@ class Game:
         return len(rows_to_clear), len(cols_to_clear)
     
     def check_game_over(self):
+        # Get current grid dimensions
+        grid_height = len(self.board)
+        grid_width = len(self.board[0]) if grid_height > 0 else 0
+        
         # Check if any available block can be placed on the board
         can_place_any = False
         for block in self.available_blocks:
@@ -212,8 +229,8 @@ class Game:
                 continue
                 
             can_place = False
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(grid_height):
+                for x in range(grid_width):
                     if self.is_valid_position(block, x, y):
                         can_place = True
                         can_place_any = True
@@ -356,4 +373,3 @@ class Game:
     def set_fully_automatic(self, value):
         if value:
             self.is_fully_automatic = True
-    

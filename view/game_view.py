@@ -1,5 +1,6 @@
 import pygame
 from constants import *
+from model.menu import PlayerType
 from view.block_view import BlockView
 from model.bot import Bot
 import copy
@@ -20,7 +21,7 @@ class GameView:
         self.draw_title(game)
         self.draw_board(game)
         self.draw_available_blocks(game)
-        if game.selected_block:
+        if game.selected_block and game.player_type == PlayerType.HUMAN:
             self.draw_selected_block(game)
             
         if self.hint_active and self.hint_block:
@@ -53,33 +54,38 @@ class GameView:
         board_x = BOARD_X
 
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS or game.bot_type == BotType.ASTAR:
                 board_x = NBOARD_X
 
-        board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * GRID_WIDTH, GRID_SIZE * GRID_HEIGHT)
+        # Get actual board dimensions from the game instance
+        grid_height = len(game.board)
+        grid_width = len(game.board[0]) if grid_height > 0 else 0
+
+        board_rect = pygame.Rect(board_x, BOARD_Y, GRID_SIZE * grid_width, GRID_SIZE * grid_height)
         pygame.draw.rect(self.screen, WHITE, board_rect)
         pygame.draw.rect(self.screen, WOOD_DARK, board_rect, 2)
 
         # Draw grid lines
-        for i in range(GRID_WIDTH + 1):
+        for i in range(grid_width + 1):
             pygame.draw.line(
                 self.screen, GRID_COLOR, 
                 (board_x + i * GRID_SIZE, BOARD_Y), 
-                (board_x + i * GRID_SIZE, BOARD_Y + GRID_HEIGHT * GRID_SIZE),
+                (board_x + i * GRID_SIZE, BOARD_Y + grid_height * GRID_SIZE),
                 1
             )
-        for i in range(GRID_HEIGHT + 1):
+        for i in range(grid_height + 1):
             pygame.draw.line(
                 self.screen, GRID_COLOR, 
                 (board_x, BOARD_Y + i * GRID_SIZE), 
-                (board_x + GRID_WIDTH * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
+                (board_x + grid_width * GRID_SIZE, BOARD_Y + i * GRID_SIZE),
                 1
             )
 
         # Draw blocks placed on the board
-        for y in range(GRID_HEIGHT):
-            for x in range(GRID_WIDTH):
-                if game.board[y][x]:
+        for y in range(grid_height):
+            for x in range(grid_width):
+                # Add defensive check to prevent index errors
+                if y < len(game.board) and x < len(game.board[y]) and game.board[y][x]:
                     color = game.board[y][x]
                     rect = pygame.Rect(
                         board_x + x * GRID_SIZE, 
@@ -112,7 +118,7 @@ class GameView:
     def draw_selected_block(self, game):
         board_x = BOARD_X
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS or game.bot_type == BotType.ASTAR:
                 board_x = NBOARD_X
         mouse_x, mouse_y = pygame.mouse.get_pos()
         grid_x = (mouse_x - board_x) // GRID_SIZE
@@ -240,7 +246,7 @@ class GameView:
     def draw_hint(self, game):
         board_x = BOARD_X
         if hasattr(game, 'bot_type') and game.bot_type:
-            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS:
+            if game.bot_type == BotType.BFA or game.bot_type == BotType.DFS or game.bot_type == BotType.ASTAR:
                 board_x = NBOARD_X
                 
         for row in range(len(self.hint_block.shape)):

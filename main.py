@@ -22,7 +22,6 @@ def main():
 
     # Main application loop to allow returning to menu
     running = True
-    frame_counter = 0
     while running:
         # Set up menu system
         menu_model = Menu()
@@ -62,8 +61,7 @@ def main():
                 game.load_level(0)
                 clock = pygame.time.Clock()
                 game_running = True
-                fully_automatic = menu_model.get_fully_automatic()
-                game.set_fully_automatic(fully_automatic)
+                game.set_fully_automatic(True)
                 print(f"Running bot {bot_type}")
                 while game_running:
                     # Process all events
@@ -72,7 +70,7 @@ def main():
                             pygame.quit()
                             sys.exit()
                         
-                    controller.handle_bot(None, fully_automatic)
+                    controller.handle_bot(None, True)
 
                     # Check if we need to return to menu
                     if controller.return_to_menu:
@@ -129,8 +127,6 @@ def main():
                 
             view.render(game)
             pygame.display.flip()
-
-            #controller.update()
 
             clock.tick(60)
             if game.game_over or game.game_won:

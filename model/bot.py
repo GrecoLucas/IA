@@ -7,6 +7,8 @@ from collections import deque
 class Bot:
     def __init__(self, game, algorithm):
         self.game = game
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
         self.selected_block_index = None
         self.target_x = None
         self.target_y = None
@@ -36,14 +38,16 @@ class Bot:
         return score
     
     def find_best_greedy(self):
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
         possible_moves = []
         
         # Coletar todos os movimentos possíveis
         for block_index, block in enumerate(self.game.available_blocks):
             if block is None:
                 continue
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(self.grid_height):
+                for x in range(self.grid_width):
                     if self.game.is_valid_position(block, x, y):
                         possible_moves.append((block_index, x, y))
         
@@ -124,14 +128,16 @@ class Bot:
         self.state = "deciding"
         
     def find_best_move(self):
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
         possible_moves = []
     
         # Coletar todos os movimentos possíveis
         for block_index, block in enumerate(self.game.available_blocks):
             if block is None:
                 continue
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(self.grid_height):
+                for x in range(self.grid_width):
                     if self.game.is_valid_position(block, x, y):
                         possible_moves.append((block_index, x, y))
     
@@ -212,8 +218,8 @@ class Bot:
                     for sim_block_index, sim_block in enumerate(game_copy.available_blocks):
                         if sim_block is None:
                             continue
-                        for sim_y in range(GRID_HEIGHT):
-                            for sim_x in range(GRID_WIDTH):
+                        for sim_y in range(self.grid_height):
+                            for sim_x in range(self.grid_width):
                                 if game_copy.is_valid_position(sim_block, sim_x, sim_y):
                                     sim_possible_moves.append((sim_block_index, sim_x, sim_y))
                     
@@ -290,6 +296,8 @@ class Bot:
 
     ### BOT  BFA ------------------------------
     def find_best_bfa(self):
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
         # Cache de soluções para evitar recomputação
         if not hasattr(self.__class__, 'bfa_cache'):
             self.__class__.bfa_cache = {}
@@ -307,8 +315,8 @@ class Bot:
         for block_index, block in enumerate(self.game.available_blocks):
             if block is None:
                 continue
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(self.grid_height):
+                for x in range(self.grid_width):
                     if self.game.is_valid_position(block, x, y):
                         possible_moves.append((block_index, x, y))
 
@@ -373,8 +381,8 @@ class Bot:
             for block_index, block in enumerate(current_game.available_blocks):
                 if block is None:
                     continue
-                for y in range(GRID_HEIGHT):
-                    for x in range(GRID_WIDTH):
+                for y in range(self.grid_height):
+                    for x in range(self.grid_width):
                         if current_game.is_valid_position(block, x, y):
                             possible_moves.append((block_index, x, y))
 
@@ -435,6 +443,8 @@ class Bot:
         return best_move
 
     def find_best_dfs(self):
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
         # Cache de soluções para evitar recomputação
         if not hasattr(self.__class__, 'dfs_cache'):
             self.__class__.dfs_cache = {}
@@ -452,8 +462,8 @@ class Bot:
         for block_index, block in enumerate(self.game.available_blocks):
             if block is None:
                 continue
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(self.grid_height):
+                for x in range(self.grid_width):
                     if self.game.is_valid_position(block, x, y):
                         possible_moves.append((block_index, x, y))
         
@@ -514,8 +524,8 @@ class Bot:
             for block_index, block in enumerate(current_game.available_blocks):
                 if block is None:
                     continue
-                for y in range(GRID_HEIGHT):
-                    for x in range(GRID_WIDTH):
+                for y in range(self.grid_height):
+                    for x in range(self.grid_width):
                         if current_game.is_valid_position(block, x, y):
                             possible_moves.append((block_index, x, y))
             
@@ -532,29 +542,17 @@ class Bot:
                 game_copy = copy.deepcopy(current_game)
                 block = game_copy.available_blocks[block_index]
                 
-                #green_before = game_copy.green_stones_collected
-                #red_before = game_copy.red_stones_collected
-                #level_before = game_copy.level_num
-                
                 game_copy.place_block(block, x, y)
                 game_copy.available_blocks[block_index] = None
-                
-                #progress_made = (
-                #    game_copy.green_stones_collected > green_before or
-                #    game_copy.red_stones_collected > red_before or
-                #    game_copy.level_num > level_before or
-                #    game_copy.check_level_complete()
-                #)
+
                 
                 if game_copy.all_blocks_used():
                     game_copy.available_blocks = game_copy.get_next_blocks_from_sequence()
                 
                 new_path = path + [(block_index, x, y)]
                 
-                #if progress_made:
                 stack.append((game_copy, new_path))  # DFS adiciona ao topo da pilha
-                #else:
-                #    stack.insert(0, (game_copy, new_path))
+
     
         best_move = None
         if winning_paths:
@@ -600,8 +598,8 @@ class Bot:
         valid = False
         tries = MAX_TRIES # Define o número máximo de tentativas para encontrar uma posição válida
         while not valid and tries > 0:
-            x = random.randint(0,GRID_WIDTH-1)
-            y = random.randint(0,GRID_HEIGHT-1)
+            x = random.randint(0,self.grid_width-1)
+            y = random.randint(0,self.grid_height-1)
             valid = self.game.is_valid_position(block, x, y)
             tries -= 1
         if not valid:
@@ -611,6 +609,7 @@ class Bot:
     
     # Escolha de uma peça random dentro das peças disponíveis
     def choose_random_block(self):
+
         blocks = [b for b in self.game.available_blocks]
         if not blocks:
             return False
@@ -636,8 +635,8 @@ class Bot:
         for block_index, block in enumerate(game.available_blocks):
             if block is None:
                 continue
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(self.grid_height):
+                for x in range(self.grid_width):
                     if game.is_valid_position(block, x, y):
                         possible_moves.append((block_index, x, y))
         # Não foi encontrado nenhum movimento possível
@@ -652,8 +651,8 @@ class Bot:
         for block_index, block in enumerate(game.available_blocks):
             if block is None:
                 continue
-            for y in range(GRID_HEIGHT):
-                for x in range(GRID_WIDTH):
+            for y in range(self.grid_height):
+                for x in range(self.grid_width):
                     if game.is_valid_position(block, x, y):
                         possible_moves.appendleft((block_index, x, y))
         # Não foi encontrado nenhum movimento possível
@@ -663,18 +662,19 @@ class Bot:
         return possible_moves
 
     # Iterative deepening search para encontrar o melhor movimento
-    def iterative_deepening_search(self, max_depth):
+    def iterative_deepening_search(self, min_depth, max_depth):
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
+        for depth in range(min_depth, max_depth+1):
 
-        for depth in range(4, max_depth+1):
-
-            solution = self.depth_limited_search(depth, max_depth)
+            solution = self.depth_limited_search(depth)
             if solution is not None:
                 return solution
         return None     #Não foi encontrada nenhuma solução para a depth máxima dada
     
 
     # DFS com profundidade limitada
-    def depth_limited_search(self, depth, max_depth):
+    def depth_limited_search(self, depth):
         #  #print(f"depth: {depth}, cache: {self.visited_iterative_states}")
         #  for (initial_state, curr_move_sequence) in self.visited_iterative_states:
         #     #initial_state, curr_move_sequence = self.visited_iterative_states.pop()
@@ -737,7 +737,7 @@ class Bot:
             biggest_seq_complete_new = 0
             curr = 0
             curr_old = 0
-            for x in range(GRID_WIDTH):
+            for x in range(self.grid_width):
                 if game_state.board[y][x]:
                     curr += 1
                     biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
@@ -754,7 +754,7 @@ class Bot:
             biggest_seq_complete_new = 0
             curr = 0
             curr_old = 0
-            for y in range(GRID_HEIGHT):
+            for y in range(self.grid_height):
                 if game_state.board[y][x]:
                     curr += 1
                     biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
@@ -768,8 +768,8 @@ class Bot:
     def check_near_completion(self, old_game_state, game_state):
         rows = []
         cols = []
-        for y in range( GRID_HEIGHT):
-            for x in range( GRID_WIDTH):
+        for y in range( self.grid_height):
+            for x in range( self.grid_width):
                 if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
                     if y not in rows:
                         rows.append(y)
@@ -787,8 +787,8 @@ class Bot:
 
     def check_board_gems_pos(self, old_game_state, game_state):
         fill_reward = 0
-        for y in range( GRID_HEIGHT):
-            for x in range (GRID_WIDTH):
+        for y in range( self.grid_height):
+            for x in range (self.grid_width):
                 # Check if there's a green gem at position
                 # Check if there's a red gem at position
                 if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
@@ -797,7 +797,7 @@ class Bot:
                     old_same_col_count = 0
                     current_same_col_count = 0
                     # Check if row is more filled
-                    for x_ in range (GRID_WIDTH):
+                    for x_ in range (self.grid_width):
                         old_pos = old_game_state.board_types[y][x_]
                         if old_game_state.board[y][x_] != None and old_pos != 2 and old_pos != 3:
                             old_same_row_count += 1
@@ -805,7 +805,7 @@ class Bot:
                         if game_state.board[y][x_] != None and curr_pos != 2 and curr_pos != 3:
                             current_same_row_count += 1
                     # Check if column is more filled
-                    for y_ in range (GRID_HEIGHT):
+                    for y_ in range (self.grid_height):
                         old_pos = old_game_state.board_types[y_][x]
                         if old_game_state.board[y_][x] != None and old_pos != 2 and old_pos != 3:
                             old_same_col_count += 1
@@ -828,8 +828,8 @@ class Bot:
         adjacent_reward = 0
         gem_positions = []
         # Get the positions of every gem on the board
-        for y in range( GRID_HEIGHT):
-            for x in range (GRID_WIDTH):
+        for y in range( self.grid_height):
+            for x in range (self.grid_width):
                 # Check if there's a green gem at position
                 # Check if there's a red gem at position
                 if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
@@ -839,7 +839,7 @@ class Bot:
         for (gem_y, gem_x) in gem_positions:
             check_positions = [(gem_y, gem_x-1), (gem_y, gem_x+1), (gem_y-1, gem_x), (gem_y+1, gem_x)]
             for (y,x) in check_positions:
-                if y < GRID_HEIGHT and y >= 0 and x < GRID_WIDTH and x >= 0:
+                if y < self.grid_height and y >= 0 and x < self.grid_width and x >= 0:
                     adjacent.append((y,x))
         # Check if piece was placed in empty pos
         for (y,x) in adjacent:
@@ -878,6 +878,8 @@ class Bot:
 
     
     def a_star_search(self):
+        self.grid_height = len(self.game.board)
+        self.grid_width = len(self.game.board[0]) if self.grid_height > 0 else 0
         """A* Algorithm to solve the level"""
         initial_state = (copy.deepcopy(self.game),  [])  # (Game, Moves)
         queue = [(0, id(initial_state[0]), initial_state)] # deque([(0, id(initial_state[0]), initial_state)])# Priority Queue sorted by f = g + h

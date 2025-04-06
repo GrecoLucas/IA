@@ -1,0 +1,209 @@
+[LEVEL 0]
+name=0 Super ez
+green_goal=2
+red_goal=2
+difficulty=1
+sequence=single,2x2,3x2
+grid=
+00000
+00000
+03200
+02300
+00000
+===
+[LEVEL 1]
+name=1 Tutorial parte 1
+green_goal=0
+red_goal=3
+difficulty=1
+sequence=single,single,1x2,1x2
+grid=
+00000000
+03003003
+===
+[LEVEL 2]
+name=2 Tutorial parte 2
+green_goal=2
+red_goal=0
+difficulty=1
+sequence=L,J,I,J
+grid=
+02000
+02000
+00000
+00000
+00000
+===
+[LEVEL 3]
+name=12 Mestre
+green_goal=1
+red_goal=1
+difficulty=1
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L
+grid=
+20000
+00000
+00000
+00000
+00003
+===
+[LEVEL 4]
+name=3 Novato
+green_goal=2
+red_goal=0
+difficulty=1
+sequence=L,J,I,J
+grid=
+01000001
+01000001
+02000002
+01000001
+01000001
+00000000
+00000000
+00000000
+===
+[LEVEL 5]
+name=4 Iniciante
+green_goal=2
+red_goal=0
+difficulty=1
+sequence=I,L,I_H,single,single,L,J
+grid=
+20000002
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+===
+[LEVEL 6]
+name=5 Iniciante avançado
+green_goal=5
+red_goal=0
+difficulty=1
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+00000000
+02111120
+01000010
+01022010
+01022010
+01000010
+02111120
+00000000
+===
+[LEVEL 7]
+name=6 Aprendiz
+green_goal=2
+red_goal=2
+difficulty=1
+sequence=double,single,single,triple,3x2,I_H
+grid=
+00000000
+11111100
+22000000
+33000000
+00000000
+00000000
+00000000
+00000000
+===
+[LEVEL 8]
+name=7 Aprendiz avançado
+green_goal=5
+red_goal=3
+difficulty=1
+sequence=Z,|-,right_up_corner,single,single,L,J,L,J,I,T_INVERTIDO
+grid=
+22222000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000333
+===
+[LEVEL 9]
+name=8 Experiente
+green_goal=2
+red_goal=2
+difficulty=2
+sequence=S,Z,T,T_INVERTIDO,single,right_up_corner,left_up_corner,I,T_INVERTIDO
+grid=
+20000011
+02000110
+00000000
+00000000
+00000000
+00000000
+01100030
+11000003
+===
+[LEVEL 10]
+name=9 Experiente avançado
+green_goal=5
+red_goal=2
+difficulty=3
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+22000011
+20000001
+00000000
+00033000
+00033000
+00000000
+10000002
+11000022
+===
+
+[LEVEL 11]
+name=10 Especialista
+green_goal=5
+red_goal=5
+difficulty=3
+sequence=D,I,O,G,O,right_down_corner,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+00003000
+20003000
+20003000
+20000000
+20003000
+20030011
+20000000
+00000000
+===
+[LEVEL 12]
+name=11 Especialista experiente
+green_goal=2
+red_goal=4
+difficulty=1
+sequence=left_down_corner,right_down_corner,left_up_corner,right_up_corner,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+00003000
+20003000
+01000000
+01000001
+01030001
+00030001
+20000000
+===
+
+[LEVEL 13]
+name=13 Pro
+green_goal=4
+red_goal=5
+difficulty=1
+sequence=I,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+0000000
+0000000
+0000003
+0000003
+0200003
+0200003
+0200003
+0200000
