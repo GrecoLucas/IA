@@ -66,7 +66,7 @@ class GameController:
         
         if self.bot:
             self.input_locked = True
-            #print(f"[DEBUG] Handling bot event, fully_automatic={fully_automatic}")
+            print(f"[DEBUG] Handling bot event, fully_automatic={fully_automatic}")
             self.handle_bot(event, fully_automatic)
             # Clear key queue to avoid spam
             pygame.event.clear(pygame.KEYDOWN)
