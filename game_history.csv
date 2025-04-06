@@ -1,14 +1,2 @@
 timestamp,time_spent,player_type,bot_type,level,moves,green_collected,red_collected,total_moves,level_complete,game_over,game_won,Is_fully_automatic
-2025-04-06 05:42:50,00:00:00,BOT,BotType.RANDOM,0,2,0,0,2,False,True,False,True
-2025-04-06 05:43:22,00:00:31,BOT,BotType.MCTS,10,11,3,2,82,False,True,False,True
-2025-04-06 05:43:22,00:00:31,BOT,BotType.GREEDY,0,5,1,1,5,False,True,False,True
-2025-04-06 05:43:50,00:00:59,BOT,BotType.BFA,13,6,4,5,118,True,False,True,True
-2025-04-06 05:44:06,00:01:16,BOT,BotType.DFS,13,6,4,5,138,True,False,True,True
-2025-04-06 05:44:22,00:01:32,BOT,BotType.ASTAR,13,22,4,5,149,True,False,True,True
-2025-04-06 05:49:11,00:00:07,BOT,BotType.RANDOM,1,238,0,2,243,False,True,False,True
-2025-04-06 05:49:24,00:00:00,BOT,BotType.RANDOM,0,7,0,0,7,False,True,False,True
-2025-04-06 05:51:33,00:00:00,BOT,BotType.RANDOM,0,7,1,1,7,False,True,False,True
-2025-04-06 05:52:05,00:00:32,BOT,BotType.MCTS,11,11,6,4,82,False,True,False,True
-2025-04-06 05:52:05,00:00:32,BOT,BotType.GREEDY,0,5,1,1,5,False,True,False,True
-2025-04-06 05:52:33,00:01:00,BOT,BotType.BFA,13,6,4,5,118,True,False,True,True
-2025-04-06 05:53:17,00:00:15,BOT,BotType.ASTAR,13,12,4,5,105,True,False,True,True
+
