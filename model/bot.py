@@ -675,16 +675,6 @@ class Bot:
 
     # DFS com profundidade limitada
     def depth_limited_search(self, depth):
-        #  #print(f"depth: {depth}, cache: {self.visited_iterative_states}")
-        #  for (initial_state, curr_move_sequence) in self.visited_iterative_states:
-        #     #initial_state, curr_move_sequence = self.visited_iterative_states.pop()
-        #     temp = set()
-        #     move_sequence = self.recursive_depth_limited_search(initial_state,depth - len(curr_move_sequence), list(curr_move_sequence), temp )
-        #     if move_sequence is not None:
-        #         return move_sequence
-        #     else:
-        #         self.visited_iterative_states = temp
-        
         game_copy = copy.deepcopy(self.game)
         move_sequence = self.recursive_depth_limited_search(game_copy, depth, [])
         return move_sequence
@@ -709,7 +699,6 @@ class Bot:
             # Criar uma cópia do estado atual do jogo passado
             game_copy = copy.deepcopy(game)
             block_index, x, y = move
-            #print(f"index: {block_index}, x: {x}, y: {y}")
             block = game_copy.available_blocks[block_index]
             # Executar o movimento
             game_copy.place_block(block, x, y)
@@ -730,53 +719,6 @@ class Bot:
         return None
         
 
-
-    def rows_near_completion(self, old_game_state, game_state, rows):
-        for y in rows:
-            biggest_seq_complete_old = 0
-            biggest_seq_complete_new = 0
-            curr = 0
-            curr_old = 0
-            for x in range(self.grid_width):
-                if game_state.board[y][x]:
-                    curr += 1
-                    biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
-                if old_game_state.board[y][x]:
-                    curr_old += 1
-                    biggest_seq_complete_old = max(curr_old, biggest_seq_complete_old)
-        if biggest_seq_complete_new > biggest_seq_complete_old:
-            return biggest_seq_complete_new - biggest_seq_complete_old
-        return 0
-
-    def cols_near_completion(self, old_game_state, game_state, cols):
-        for x in cols:
-            biggest_seq_complete_old = 0
-            biggest_seq_complete_new = 0
-            curr = 0
-            curr_old = 0
-            for y in range(self.grid_height):
-                if game_state.board[y][x]:
-                    curr += 1
-                    biggest_seq_complete_new = max( curr, biggest_seq_complete_new)
-                if old_game_state.board[y][x]:
-                    curr_old += 1
-                    biggest_seq_complete_old = max(curr_old, biggest_seq_complete_old)
-        if biggest_seq_complete_new > biggest_seq_complete_old:
-            return biggest_seq_complete_new - biggest_seq_complete_old
-        return 0
-
-    def check_near_completion(self, old_game_state, game_state):
-        rows = []
-        cols = []
-        for y in range( self.grid_height):
-            for x in range( self.grid_width):
-                if game_state.board_types[y][x] == 2 or game_state.board_types[y][x] == 3:
-                    if y not in rows:
-                        rows.append(y)
-                    if x not in cols:
-                        cols.append(x)
-        return self.rows_near_completion( old_game_state, game_state, rows) + self.cols_near_completion(old_game_state, game_state, cols)
-        
 
 
 
@@ -812,15 +754,12 @@ class Bot:
                         curr_pos = game_state.board_types[y_][x]
                         if game_state.board[y_][x] != None and curr_pos != 2 and curr_pos != 3:
                             current_same_col_count += 1
-                            #print("FACK")
                     row_diff = current_same_row_count - old_same_row_count
                     col_diff = current_same_col_count - old_same_col_count
                     if row_diff > 0:
                         fill_reward +=  row_diff
                     if col_diff > 0:
                         fill_reward += col_diff
-        #print(f"fill: {fill_reward} old_same_col_count: {old_same_col_count}, current_same_col_count: {current_same_col_count}, col_diff: {col_diff}")
-        #print(f"current_same_row_count: {current_same_row_count}, old_same_row_count: {old_same_row_count}, row_diff: {row_diff} ")
         return fill_reward
     
     # Check if there were pieces placed right next to gems
@@ -862,7 +801,7 @@ class Bot:
         else:
             if cleared: 
                 reward += 1*0.3 
-        fill = self.check_board_gems_pos(old_game_state, game_state) # self.check_near_completion(old_game_state, game_state)
+        fill = self.check_board_gems_pos(old_game_state, game_state)
         fill_reward = max(0, fill)
         reward += fill_reward * 0.2
         adjacent_reward = self.check_board_gems_adjacent_pos(old_game_state, game_state) 
