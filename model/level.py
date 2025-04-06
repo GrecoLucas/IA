@@ -8,7 +8,7 @@ class Level:
         self.red_goal = red_goal            
         self.grid = grid
         self.sequence = sequence
-        self.name = name or f"Nível {level_num}"
+        self.name = name or f"Level {level_num}"
         self.difficulty = difficulty
         self.current_block_index = 0
 

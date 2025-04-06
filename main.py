@@ -83,7 +83,6 @@ def main():
 
                     clock.tick(60)
                     if game.game_over or game.game_won:
-                        print("game OBER")
                         controller.update()
                         game_running = False
                         game.reset()

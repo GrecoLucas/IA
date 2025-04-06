@@ -48,15 +48,13 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 
 RULES_TEXT = [
-            "Modo Jogador:",
-            "• Arraste e solte blocos de madeira no tabuleiro.",
-            "• Para passar de fase é necessário pegar as peças ",
-            "verdes ou vermelhas indicadas no canto inferior esquerdo",
-            "completando a linha ou coluna.",
-            "• Se não houver mais espaço no tabuleiro, o jogo acaba.",
-            "• Tente chegar no ultimo nivel com o menor ",
-            "numero de movimentos possíveis.",
-            "Modo Bot:",
-            "• Aperte a tecla 'P' para o bot fazer o movimento.",
-            "Para voltar ao menu aperte a tecla 'ESC' ou clique no botão.",
+            "Human Player Mode:",
+            "• Grab and release the wood blocks in the board.",
+            "• To pass each level, its necessary to colect the red or green rocks",
+            "  indicated on the left inferior corner completing a line or column.",
+            "• If there is no more space in the board, the game is over.",
+            "• Try to win the last level in the least amount of moves.",
+            "Bot Mode:",
+            "• Press 'P' for the bot to make the next move.",
+            "To return to menu, press 'ESC'.",
 ]

@@ -21,11 +21,7 @@ class GameController:
     
     def handle_bot_press_play(self, event):
         self.bot.play(self.view)
-        #if move_made:
-            #print("[DEBUG] Bot successfully made a move!")
-            #self.view.set_hint(suggested_block, x, y)
-            #self.view.render(self.game)
-            #pygame.display.flip()
+
         
     def handle_bot(self, event, fully_automatic=False):
         if event is None:

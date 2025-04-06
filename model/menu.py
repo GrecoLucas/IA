@@ -39,15 +39,15 @@ class Menu:
     def initialize_menu_items(self):
         if self.state == MenuState.ACTIVE:
             self.items = [
-                MenuItem("Jogador Humano", self.set_player_human, PlayerType.HUMAN),
-                MenuItem("Bot Automático", self.set_player_bot, PlayerType.BOT),
-                MenuItem("Iniciar Jogo", self.start_game, None),
-                MenuItem("Escolher Nivel", self.select_level, None),
-                MenuItem("Como Jogar", self.rules, None),
-                MenuItem("Modo Automático: " + ("ON" if self.fully_automatic else "OFF"),
+                MenuItem("Human Player", self.set_player_human, PlayerType.HUMAN),
+                MenuItem("Bot", self.set_player_bot, PlayerType.BOT),
+                MenuItem("Start Game", self.start_game, None),
+                MenuItem("Choose Level", self.select_level, None),
+                MenuItem("How to Play", self.rules, None),
+                MenuItem("Automatic bot: " + ("ON" if self.fully_automatic else "OFF"),
                        self.set_fully_automatic, None),
-                MenuItem("Testar Algoritmos", self.test_all_bots, PlayerType.TEST),
-                MenuItem("Sair", self.exit_game, None),
+                MenuItem("Test Algorithms", self.test_all_bots, PlayerType.TEST),
+                MenuItem("Exit", self.exit_game, None),
             ]
         elif self.state == MenuState.CHOOSE_ALGORITHM:
             self.items = [
@@ -56,16 +56,16 @@ class Menu:
                 MenuItem("Bot Greedy", self.set_bot_algorithm_greedy, BotType.GREEDY),
                 MenuItem("Bot BFS", self.set_bot_algorithm_bfa, BotType.BFA),
                 MenuItem("Bot DFS", self.set_bot_algorithm_dfs, BotType.DFS),
-                MenuItem("Bot Iterativo", self.set_bot_algorithm_iterative, BotType.ITERATIVE),
+                MenuItem("Bot Iterative Deepening", self.set_bot_algorithm_iterative, BotType.ITERATIVE),
                 MenuItem("Bot A*", self.set_bot_algorithm_a_star, BotType.ASTAR),
-                MenuItem("Voltar", self.back_to_main_menu, None), 
+                MenuItem("Back", self.back_to_main_menu, None), 
             ]
         elif self.state == MenuState.CHOOSE_LEVEL:
             self.items = []
             for level in LEVELS:
                 level_name = f"{level.name}" 
                 self.items.append(MenuItem(level_name, self.set_level, level.level_num))
-            self.items.append(MenuItem("Voltar", self.back_to_main_menu, None))
+            self.items.append(MenuItem("Back", self.back_to_main_menu, None))
             
         self.selected_index = 0  
         if self.items: 

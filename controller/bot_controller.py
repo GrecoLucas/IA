@@ -47,7 +47,6 @@ class BotController:
             move = self.bot.choose_random_block()
             if move:
                 self.bot.game.selected_block, self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = move
-                #self.preview_start_time = pygame.time.get_ticks()
                 view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
@@ -143,10 +142,10 @@ class BotController:
             self.bot.bfa_solution_path = self._find_complete_solution_path()
             
             if self.bot.bfa_solution_path:
-                log_message(self.bot, f"[BFA] Solução encontrada! {len(self.bot.bfa_solution_path)} movimentos necessários.")
+                log_message(self.bot, f"[BFA] Solution found! {len(self.bot.bfa_solution_path)} moves necessary.")
                 self.bot.bfa_current_move = 0
             else:
-                log_message(self.bot, "[BFA] Não foi possível encontrar uma solução.")
+                log_message(self.bot, "[BFA] No solution found.")
                 # Mark game as over when no solution found
                 self.bot.game.game_over = True
                 # Save stats when game is over due to no solution
@@ -173,16 +172,16 @@ class BotController:
                 self.bot.bfa_current_move += 1
                 moves_remaining = len(self.bot.bfa_solution_path)
                 if moves_remaining > 0:
-                    log_message(self.bot, f"[BFA] Executando movimento {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
+                    log_message(self.bot, f"[BFA] Executing move {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
                 else:
-                    log_message(self.bot, f"[BFA] Executando movimento {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
-                    log_message(self.bot, "Aperte 'P' para procurar a solução.")
+                    log_message(self.bot, f"[BFA] Executing move {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
+                    log_message(self.bot, "Press 'P' to find the solution.")
             else:
                 if not hasattr(self.bot, 'bfa_total_moves'):
                     self.bot.bfa_total_moves = len(self.bot.bfa_solution_path) + 1  # +1 para o movimento atual
                 if not hasattr(self.bot, 'bfa_current_move'):
                     self.bot.bfa_current_move = 1
-                log_message(self.bot, f"[BFA] Executando movimento {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
+                log_message(self.bot, f"[BFA] Executing move {self.bot.bfa_current_move}/{self.bot.bfa_total_moves}.")
             
             if best_move:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
@@ -192,7 +191,7 @@ class BotController:
                 view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
-                log_message(self.bot, "[BFA] Movimento inválido encontrado.")
+                log_message(self.bot, "[BFA] Invalid move found.")
                 self.bot.game.game_over = True
                 # Save stats when game is over due to invalid move
                 if self.print_once == False:
@@ -233,11 +232,11 @@ class BotController:
             
             # Se BFA falhar, tente com greedy
             if not next_move:
-                log_message(self.bot, "[BFA] BFA falhou, tentando greedy...")
+                log_message(self.bot, "[BFA] BFA failed, trying greedy...")
                 next_move = temp_bot.find_best_greedy()
                 
             if not next_move:
-                log_message(self.bot, "[BFA] Buscando qualquer movimento válido...")
+                log_message(self.bot, "[BFA] Finding a valid move...")
                 has_valid_moves = False
                 for block_index, block in enumerate(game_copy.available_blocks):
                     if block is None:
@@ -254,7 +253,7 @@ class BotController:
                         break
                         
                 if not has_valid_moves:
-                    log_message(self.bot, "[BFA] Realmente não há movimentos válidos.")
+                    log_message(self.bot, "[BFA] There are no valid moves.")
                     return None
             
             # Add this move to our solution path
@@ -266,7 +265,7 @@ class BotController:
             # Apply the move to our simulation
             move_success = game_copy.make_move(block_index, x, y)
             if not move_success:
-                log_message(self.bot, f"[BFA] Erro: movimento {moves_made+1} falhou!")
+                log_message(self.bot, f"[BFA] Error: move {moves_made+1} failed!")
                 return None
             
             # Get new blocks if needed
@@ -282,11 +281,11 @@ class BotController:
 
         
         if moves_made >= max_moves:
-            log_message(self.bot, f"[BFA] Falha: Limite de {max_moves} movimentos excedido")
+            log_message(self.bot, f"[BFA] Failure: Exceeded the max amount of moves {max_moves}")
             return None
         
         if game_copy.game_over:
-            log_message(self.bot, "[BFA] Falha: Game over na simulação")
+            log_message(self.bot, "[BFA] Failure: Game over in simulation")
             return None
         
         return solution_path
@@ -313,10 +312,10 @@ class BotController:
             self.bot.dfs_solution_path = self._find_complete_solution_path_dfs()
             
             if self.bot.dfs_solution_path:
-                log_message(self.bot, f"[DFS] Solução encontrada! {len(self.bot.dfs_solution_path)} movimentos necessários.")
+                log_message(self.bot, f"[DFS] Solution found! {len(self.bot.dfs_solution_path)} moves necessary.")
                 self.bot.dfs_current_move = 0
             else:
-                log_message(self.bot, "[DFS] Não foi possível encontrar uma solução.")
+                log_message(self.bot, "[DFS] No solution found.")
                 # Mark game as over when no solution found
                 self.bot.game.game_over = True
                 # Save stats when game is over due to no solution
@@ -343,16 +342,16 @@ class BotController:
                 self.bot.dfs_current_move += 1
                 moves_remaining = len(self.bot.dfs_solution_path)
                 if moves_remaining > 0:
-                    log_message(self.bot, f"[DFS] Executando movimento {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
+                    log_message(self.bot, f"[DFS] Executing move {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
                 else:
-                    log_message(self.bot, f"[DFS] Executando movimento {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
-                    log_message(self.bot, "Aperte 'P' para procurar a solução.")
+                    log_message(self.bot, f"[DFS] Executing move {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
+                    log_message(self.bot, "Press 'P' to find the solution.")
             else:
                 if not hasattr(self.bot, 'dfs_total_moves'):
                     self.bot.dfs_total_moves = len(self.bot.dfs_solution_path) + 1  # +1 para o movimento atual
                 if not hasattr(self.bot, 'dfs_current_move'):
                     self.bot.dfs_current_move = 1
-                log_message(self.bot, f"[DFS] Executando movimento {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
+                log_message(self.bot, f"[DFS] Executing move {self.bot.dfs_current_move}/{self.bot.dfs_total_moves}.")
             
             if best_move:
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y = best_move
@@ -361,7 +360,7 @@ class BotController:
                 view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                 self.bot.state = "executing"
             else:
-                log_message(self.bot, "[DFS] Movimento inválido encontrado.")
+                log_message(self.bot, "[DFS] Invalid move found.")
                 self.bot.game.game_over = True
                 # Save stats when game is over due to invalid move
                 if self.print_once == False:
@@ -402,11 +401,11 @@ class BotController:
             
             # Se BFA falhar, tente com greedy
             if not next_move:
-                log_message(self.bot, "[DFS] DFS falhou, tentando greedy...")
+                log_message(self.bot, "[DFS] DFS failed, trying greedy...")
                 next_move = temp_bot.find_best_greedy()
                 
             if not next_move:
-                log_message(self.bot, "[DFS] Buscando qualquer movimento válido...")
+                log_message(self.bot, "[DFS] Finding a valid move...")
                 has_valid_moves = False
                 for block_index, block in enumerate(game_copy.available_blocks):
                     if block is None:
@@ -423,7 +422,7 @@ class BotController:
                         break
                         
                 if not has_valid_moves:
-                    log_message(self.bot, "[DFS] Realmente não há movimentos válidos.")
+                    log_message(self.bot, "[DFS] There are no valid moves.")
                     return None
             
             # Add this move to our solution path
@@ -435,7 +434,7 @@ class BotController:
             # Apply the move to our simulation
             move_success = game_copy.make_move(block_index, x, y)
             if not move_success:
-                log_message(self.bot, f"[DFS] Erro: movimento {moves_made+1} falhou!")
+                log_message(self.bot, f"[DFS] Error: move {moves_made+1} failed!")
                 return None
             
             # Get new blocks if needed
@@ -451,11 +450,11 @@ class BotController:
 
         
         if moves_made >= max_moves:
-            log_message(self.bot, f"[DFS] Falha: Limite de {max_moves} movimentos excedido")
+            log_message(self.bot, f"[DFS] Failure: Exceeded max amount of moves {max_moves} ")
             return None
         
         if game_copy.game_over:
-            log_message(self.bot, "[DFS] Falha: Game over na simulação")
+            log_message(self.bot, "[DFS] Failure: Game over in simulation")
             return None
         
         return solution_path
@@ -482,17 +481,15 @@ class BotController:
             if move_sequence is not None:
                 
                 self.bot_move_seq = move_sequence
-                log_message(self.bot, f"[A STAR] Solução encontrada! {len(move_sequence)} movimentos necessários.")
-                #print(f"move_seq: {self.bot_move_seq}")
+                log_message(self.bot, f"[A STAR] Solution found! {len(move_sequence)} moves necessary.")
                 self.bot.state = "executing"
                 move = self.bot_move_seq[self.move_seq_idx]
                 self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
                 self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]
                 view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
-                #self.play_a_star(view)
                 
             else:
-                log_message(self.bot, "[A STAR] Não foi possível encontrar uma solução.")
+                log_message(self.bot, "[A STAR] No solution found.")
                 self.bot.game.game_over = True
                 # Save stats when game is over due to no solution
                 if self.print_once == False:
@@ -504,23 +501,13 @@ class BotController:
                 # garante que nunca é feito um acesso fora do array
                 if self.move_seq_idx < len(self.bot_move_seq):
                     view.clear_hint()
-                    """move = self.bot_move_seq[self.move_seq_idx]
-                    self.bot.selected_block_index, self.bot.target_x, self.bot.target_y  = move
-                    self.bot.game.selected_block = self.bot.game.available_blocks[self.bot.selected_block_index]"""
-                    
-                    
-                    log_message(self.bot, f"[A STAR] Executando movimento {self.move_seq_idx + 1}.")
-                    """"self.preview_start_time = pygame.time.get_ticks()
-                    current_time = pygame.time.get_ticks()
-                    while (current_time - self.preview_start_time) < 3000:
-                        current_time = pygame.time.get_ticks()"""
-                    
+                    log_message(self.bot, f"[A STAR] Executing move {self.move_seq_idx + 1}.")
 
                     self.execute_move()
                     
                     # Para o último movimento, o estado deve voltar a "deciding" para o bot calcular a próxima sequencia de movimentos no nível seguinte
                     if  self.move_seq_idx < len(self.bot_move_seq) - 1:
-                        log_message(self.bot, "Aperte 'P' para ver a próxima jogada.")
+                        log_message(self.bot, "Press 'P' to see the next move.")
                         self.bot.state = "executing"
                         self.move_seq_idx += 1 # Atualiza o bloco em que está
                         # get next move's info and display the preview
@@ -530,7 +517,7 @@ class BotController:
                         view.set_hint(self.bot.game.selected_block, self.bot.target_x, self.bot.target_y)
                         
                     elif self.move_seq_idx == len(self.bot_move_seq) - 1:
-                        log_message(self.bot, "Aperte 'P' para procurar a solução.")
+                        log_message(self.bot, "Press 'P' to find a solution.")
                         self.move_seq_idx = 0
 
                     if (self.bot.game.game_over or self.bot.game.game_won) and self.print_once == False:
@@ -561,7 +548,6 @@ class BotController:
                 self.play_dfs(view)
 
             case BotType.ASTAR:
-                print(" STAR CHOSEN")
                 self.play_a_star(view)
             
             case _:

@@ -43,7 +43,7 @@ class GameView:
         self.screen.fill(BACKGROUND_COLOR)
     
     def draw_title(self, game):
-        title_text = f"Wood Block Puzzle - Nível {game.level_num}"
+        title_text = f"Wood Block Puzzle - Level {game.level_num}"
         if game.current_level and game.current_level.name:
             title_text = f"Wood Block Puzzle - {game.current_level.name}"
             
@@ -150,13 +150,13 @@ class GameView:
         self.screen.blit(objective_text, (55, SCREEN_HEIGHT - 36))
         
         moves_text = self.font.render(
-            f"Movimentos: {game.number_of_moves}", 
+            f"Moves: {game.number_of_moves}", 
             True, WOOD_DARK
         )
         self.screen.blit(moves_text, (400, SCREEN_HEIGHT - 30))
 
         total_moves_text = self.font.render(
-            f"Total de movimentos: {game.total_moves}", 
+            f"Total moves: {game.total_moves}", 
             True, WOOD_DARK
         )
         self.screen.blit(total_moves_text, (399, SCREEN_HEIGHT - 50))
@@ -167,9 +167,9 @@ class GameView:
         self.screen.blit(overlay, (0, 0))
         
         gameover_text = self.title_font.render("GAME OVER", True, WHITE)
-        restart_text = self.font.render("Pressione R para jogar novamente o último nível", True, WHITE)
-        restart_text_from_level_0 = self.font.render("Pressione 0 para jogar do início", True, WHITE)
-        menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
+        restart_text = self.font.render("Press R to replay the last level", True, WHITE)
+        restart_text_from_level_0 = self.font.render("Press 0 to replay from the beggining", True, WHITE)
+        menu_text = self.font.render("Press ESC to return to menu", True, WHITE)
         
         self.screen.blit(gameover_text, (SCREEN_WIDTH // 2 - gameover_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))
@@ -182,10 +182,10 @@ class GameView:
         overlay.fill((0, 0, 0, 180))
         self.screen.blit(overlay, (0, 0))
         
-        win_text = self.title_font.render("PARABÉNS! VOCÊ VENCEU!", True, WHITE)
-        restart_text = self.font.render("Pressione R para jogar novamente o último nível", True, WHITE)
-        restart_text_from_level_0 = self.font.render("Pressione 0 para jogar do início", True, WHITE)
-        menu_text = self.font.render("Pressione ESC para voltar ao menu", True, WHITE)
+        win_text = self.title_font.render("CONGRATULATIONS! YOU WON!", True, WHITE)
+        restart_text = self.font.render("Press R to replay the last level", True, WHITE)
+        restart_text_from_level_0 = self.font.render("Press 0 to replay from the beggining", True, WHITE)
+        menu_text = self.font.render("Press ESC to return to menu", True, WHITE)
 
         
         self.screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
@@ -194,7 +194,7 @@ class GameView:
         self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
     
     def draw_help_button(self):
-        help_text = self.font.render("Ajuda", True, WOOD_DARK)
+        help_text = self.font.render("Hint", True, WOOD_DARK)
         help_rect = pygame.Rect(SCREEN_WIDTH - 100, 40, 80, 30)
         pygame.draw.rect(self.screen, WOOD_MEDIUM, help_rect)
         pygame.draw.rect(self.screen, WOOD_DARK, help_rect, 2)
@@ -262,7 +262,7 @@ class GameView:
                     self.screen.blit(hint_surface, hint_rect)
                     pygame.draw.rect(self.screen, (0, 128, 128), hint_rect, 2)  
     def draw_comeback_to_menu(self):
-        comeback_text = self.font.render("Pressione ESC para voltar ao menu", True, WOOD_DARK)
+        comeback_text = self.font.render("Press ESC to return to menu", True, WOOD_DARK)
         self.screen.blit(comeback_text, (SCREEN_WIDTH - 250, SCREEN_HEIGHT - 30))
 
     def set_hint(self, block, x, y):

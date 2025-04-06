@@ -9,7 +9,7 @@ class LevelData:
         self.sequence = sequence  # Block sequence, repeated if sequence ends, leave empty for random
         self.grid = grid  # Board layout
         self.difficulty = difficulty # Level difficulty
-        self.name = name or f"Nível {level_num}"  # Name of the level
+        self.name = name or f"Level {level_num}"  # Name of the level
 
 # Carrega os níveis do arquivo de texto
 LEVELS_FILE = "levels.txt"

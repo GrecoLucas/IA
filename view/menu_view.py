@@ -19,7 +19,7 @@ class MenuView:
     def load_gif(self, path):
         """Carrega o GIF e redimensiona cada frame para o tamanho da tela."""
         if not os.path.exists(path):
-            print(f"Aviso: Arquivo GIF não encontrado em {path}")
+            print(f"Warning: GIF file not found in {path}")
             return
 
         try:
@@ -35,9 +35,9 @@ class MenuView:
                 pygame_image = pygame.transform.scale(pygame_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
                 self.frames.append(pygame_image)
 
-            print(f"Carregados {len(self.frames)} frames do GIF")
+            print(f"Loaded {len(self.frames)} frames from GIF")
         except Exception as e:
-            print(f"Erro ao carregar GIF: {e}")
+            print(f"Error loading GIF: {e}")
 
     def update_animation(self, dt):
         """Atualiza a animação do GIF."""
@@ -68,11 +68,11 @@ class MenuView:
         title = self.title_font.render("Wood Block Puzzle", True, WOOD_DARK)
         self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 80))
 
-        subtitle = self.font.render("Menu Principal", True, WOOD_DARK)
+        subtitle = self.font.render("Menu", True, WOOD_DARK)
         if menu.state == MenuState.CHOOSE_LEVEL:
-            subtitle = self.font.render("Selecione o Nível", True, WOOD_DARK)
+            subtitle = self.font.render("Select Level", True, WOOD_DARK)
         elif menu.state == MenuState.CHOOSE_ALGORITHM:
-            subtitle = self.font.render("Selecione o Algoritmo", True, WOOD_DARK)
+            subtitle = self.font.render("Select Algorithm", True, WOOD_DARK)
         self.screen.blit(subtitle, (SCREEN_WIDTH // 2 - subtitle.get_width() // 2, 130))
 
         visible_items = 8  
@@ -113,15 +113,15 @@ class MenuView:
         # Show scroll indicators if needed
         if menu.state == MenuState.CHOOSE_LEVEL and len(menu.items) > visible_items:
             if scroll_offset > 0:
-                up_arrow = self.font.render("▲ Mais níveis", True, WOOD_MEDIUM)
+                up_arrow = self.font.render("▲ More levels", True, WOOD_MEDIUM)
                 self.screen.blit(up_arrow, (SCREEN_WIDTH // 2 - up_arrow.get_width() // 2, 165))
             
             if scroll_offset + visible_count < len(menu.items):
-                down_arrow = self.font.render("▼ Mais níveis", True, WOOD_MEDIUM)
+                down_arrow = self.font.render("▼ More levels", True, WOOD_MEDIUM)
                 self.screen.blit(down_arrow, (SCREEN_WIDTH // 2 - down_arrow.get_width() // 2, menu_y))
 
         # Display instructions and selected info
-        instructions = self.font.render("Setas: Mover   Enter: Selecionar", True, WOOD_MEDIUM)
+        instructions = self.font.render("Arrows: Move   Enter: Select", True, WOOD_MEDIUM)
         self.screen.blit(instructions, (SCREEN_WIDTH // 2 - instructions.get_width() // 2, SCREEN_HEIGHT - 50))
 
         if selected_bot_name:
@@ -130,7 +130,7 @@ class MenuView:
             
         # Display selected level if any
         if menu.get_selected_level() > 0:
-            level_text = self.font.render(f"Nível: {menu.get_selected_level()}", True, WOOD_DARK)
+            level_text = self.font.render(f"Level: {menu.get_selected_level()}", True, WOOD_DARK)
             self.screen.blit(level_text, (SCREEN_WIDTH - level_text.get_width() - 50, 50))
 
     def draw_rules(self):
@@ -138,7 +138,7 @@ class MenuView:
         
 
         # Title
-        title = self.title_font.render("Regras do Jogo", True, WOOD_DARK)
+        title = self.title_font.render("Game Rules", True, WOOD_DARK)
         self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 20))
         
         
@@ -150,13 +150,13 @@ class MenuView:
         y_position = 100
         small_font = pygame.font.SysFont('Arial', 25)  
         for rule in rules_texts:
-            if "verdes" in rule or "vermelhas" in rule:
+            if "red" in rule or "green" in rule:
                 parts = rule.split(" ")
                 x_position = 80
                 for part in parts:
-                    if part == "verdes":
+                    if part == "green":
                         text = small_font.render(part, True, GREEN)  
-                    elif part == "vermelhas":
+                    elif part == "red":
                         text = small_font.render(part, True, RED)  
                     else:
                         text = small_font.render(part, True, RULES_COLOR)
@@ -170,7 +170,7 @@ class MenuView:
                 y_position += 35
 
         # Back button - highlighted rectangle
-        back_text = self.font.render("Voltar ao Menu", True, WOOD_DARK)
+        back_text = self.font.render("Return to Menu", True, WOOD_DARK)
         back_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 100, 200, 50)
         pygame.draw.rect(self.screen, (240, 240, 220), back_rect, border_radius=5)
         pygame.draw.rect(self.screen, WOOD_MEDIUM, back_rect, 2, border_radius=5)
@@ -181,5 +181,5 @@ class MenuView:
         self.screen.blit(back_text, (text_x, text_y))
         
         # Navigation hint
-        hint = self.font.render("Clique para voltar ou pressione ESC", True, WOOD_MEDIUM)
+        hint = self.font.render("Click to return or press ESC", True, WOOD_MEDIUM)
         self.screen.blit(hint, (SCREEN_WIDTH // 2 - hint.get_width() // 2, SCREEN_HEIGHT - 40))

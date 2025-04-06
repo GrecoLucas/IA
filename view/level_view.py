@@ -66,19 +66,19 @@ class LevelView:
     
     def draw_objectives(self, game):
         objective_text = self.font.render(
-            f"Pedras verdes coletadas: {game.green_stones_collected}/{game.green_stones_to_collect}", 
+            f"Green rocks colected: {game.green_stones_collected}/{game.green_stones_to_collect}", 
             True, WOOD_DARK
         )
         self.screen.blit(objective_text, (20, SCREEN_HEIGHT - 50))
         
         objective_text = self.font.render(
-            f"Pedras vermelhas coletadas: {game.red_stones_collected}/{game.red_stones_to_collect}", 
+            f"Red rocks colected: {game.red_stones_collected}/{game.red_stones_to_collect}", 
             True, WOOD_DARK
         )
         self.screen.blit(objective_text, (20, SCREEN_HEIGHT - 30))
     
     def draw_level_title(self, game):
-        title_text = f"Wood Block Puzzle - Nível {game.level_num}"
+        title_text = f"Wood Block Puzzle - Level {game.level_num}"
         if game.current_level and game.current_level.name:
             title_text = f"Wood Block Puzzle - {game.current_level.name}"
             
