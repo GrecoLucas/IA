@@ -1,5 +1,5 @@
 [LEVEL 0]
-name=0 Super ez
+name=0 Tutorial
 green_goal=2
 red_goal=2
 difficulty=1
@@ -12,7 +12,7 @@ grid=
 00000
 ===
 [LEVEL 1]
-name=1 Tutorial parte 1
+name=1 Tutorial
 green_goal=0
 red_goal=3
 difficulty=1
@@ -22,7 +22,7 @@ grid=
 03003003
 ===
 [LEVEL 2]
-name=2 Tutorial parte 2
+name=2 Tutorial
 green_goal=2
 red_goal=0
 difficulty=1
@@ -35,7 +35,7 @@ grid=
 00000
 ===
 [LEVEL 3]
-name=12 Mestre
+name=3 Iniciante
 green_goal=1
 red_goal=1
 difficulty=1
@@ -48,7 +48,7 @@ grid=
 00003
 ===
 [LEVEL 4]
-name=3 Novato
+name=4 Iniciante
 green_goal=2
 red_goal=0
 difficulty=1
@@ -64,7 +64,7 @@ grid=
 00000000
 ===
 [LEVEL 5]
-name=4 Iniciante
+name=5 Iniciante
 green_goal=2
 red_goal=0
 difficulty=1
@@ -80,7 +80,7 @@ grid=
 00000000
 ===
 [LEVEL 6]
-name=5 Iniciante avançado
+name=6 Experiente
 green_goal=5
 red_goal=0
 difficulty=1
@@ -96,7 +96,7 @@ grid=
 00000000
 ===
 [LEVEL 7]
-name=6 Aprendiz
+name=7 Experiente
 green_goal=2
 red_goal=2
 difficulty=1
@@ -112,7 +112,7 @@ grid=
 00000000
 ===
 [LEVEL 8]
-name=7 Aprendiz avançado
+name=8 Experiente
 green_goal=5
 red_goal=3
 difficulty=1
@@ -128,7 +128,23 @@ grid=
 00000333
 ===
 [LEVEL 9]
-name=8 Experiente
+name=9 Mestre
+green_goal=4
+red_goal=5
+difficulty=1
+sequence=I,I,I_H,L,J,L,J,I,T_INVERTIDO
+grid=
+0000000
+0000000
+0000003
+0000003
+0200003
+0200003
+0200003
+0200000
+===
+[LEVEL 10]
+name=10 Mestre
 green_goal=2
 red_goal=2
 difficulty=2
@@ -143,8 +159,8 @@ grid=
 01100030
 11000003
 ===
-[LEVEL 10]
-name=9 Experiente avançado
+[LEVEL 11]
+name=11 Pro
 green_goal=5
 red_goal=2
 difficulty=3
@@ -159,9 +175,8 @@ grid=
 10000002
 11000022
 ===
-
-[LEVEL 11]
-name=10 Especialista
+[LEVEL 12]
+name=12 Pro
 green_goal=5
 red_goal=5
 difficulty=3
@@ -176,8 +191,8 @@ grid=
 20000000
 00000000
 ===
-[LEVEL 12]
-name=11 Especialista experiente
+[LEVEL 13]
+name=13 Pro
 green_goal=2
 red_goal=4
 difficulty=1
@@ -191,19 +206,3 @@ grid=
 00030001
 20000000
 ===
-
-[LEVEL 13]
-name=13 Pro
-green_goal=4
-red_goal=5
-difficulty=1
-sequence=I,I,I_H,L,J,L,J,I,T_INVERTIDO
-grid=
-0000000
-0000000
-0000003
-0000003
-0200003
-0200003
-0200003
-0200000
