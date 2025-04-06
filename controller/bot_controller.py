@@ -73,7 +73,7 @@ class BotController:
         
     def play_iterative(self):
         if self.bot.state == "deciding":
-            move_sequence = self.bot.iterative_deepening_search(1,7)
+            move_sequence = self.bot.iterative_deepening_search(1,10* self.bot.game.current_level.difficulty)
             if move_sequence is not None:
                 self.bot_move_seq = move_sequence
                 print(f"move_seq: {self.bot_move_seq}")

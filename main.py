@@ -22,7 +22,6 @@ def main():
 
     # Main application loop to allow returning to menu
     running = True
-    frame_counter = 0
     while running:
         # Set up menu system
         menu_model = Menu()
@@ -129,8 +128,6 @@ def main():
                 
             view.render(game)
             pygame.display.flip()
-
-            #controller.update()
 
             clock.tick(60)
             if game.game_over or game.game_won:
